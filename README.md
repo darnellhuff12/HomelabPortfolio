@@ -57,7 +57,8 @@ The lab is segmented into multiple VLANs to separate home devices, attacker syst
 
 ## Network Diagram
 
-![Homelab Network Diagram]()
+![Homelab Network Diagram](<img width="5333" height="3444" alt="home_network_diagram_white_background_fresh_20260502_164842" src="https://github.com/user-attachments/assets/1d28dc75-4c27-4109-8adb-8d029b5c5c7d" />
+)
 
 ## Attack Scenarios
 
