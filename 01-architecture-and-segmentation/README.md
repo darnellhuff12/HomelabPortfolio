@@ -244,54 +244,6 @@ The lab should provide visibility into the following activity:
 | Blocked cross-VLAN access | pfSense firewall logs |
 | Administrative access attempts | pfSense logs, service logs, endpoint logs |
 
-## Monitoring and Visibility Design
-
-Security Onion provides the primary monitoring and detection capability for the lab. Its purpose is to collect and analyze network security telemetry generated during controlled purple-team exercises.
-
-The monitoring design is intended to answer the following questions:
-
-- What traffic crossed the network?
-- Which systems communicated?
-- Which ports, protocols, and services were involved?
-- Did any activity trigger Suricata alerts?
-- Can Zeek logs help reconstruct the activity?
-- Are there visibility gaps that require endpoint telemetry?
-
-### Security Onion Role
-
-| Function | Purpose |
-|---|---|
-| Zeek Logs | Provides detailed protocol and connection metadata |
-| Suricata Alerts | Detects suspicious or known-bad network activity |
-| PCAP | Allows packet-level review of selected traffic |
-| Hunt Interface | Supports searching by IP, port, protocol, timestamp, and event type |
-| Dashboards | Provides visual summaries of alerts, traffic, and network activity |
-
-### Monitoring Placement
-
-Security Onion is placed in the lab to monitor traffic from controlled test scenarios. The Security Onion VM uses a management interface for administration and a monitoring interface for mirrored/SPAN traffic from the managed switch.
-
-| Interface Type | Purpose |
-|---|---|
-| Management Interface | Used to access the Security Onion web UI and manage the platform |
-| Monitoring Interface | Receives mirrored traffic from the switch for analysis |
-| SIEM VLAN Placement | Keeps Security Onion logically separated from attacker and victim systems |
-
-### Expected Visibility
-
-The lab should provide visibility into the following activity:
-
-| Activity Type | Expected Visibility Source |
-|---|---|
-| Ping/ICMP tests | Zeek connection logs, possible packet captures |
-| DNS lookups | Zeek DNS logs |
-| HTTP requests | Zeek HTTP logs, possible Suricata alerts |
-| HTTPS connections | Zeek SSL/TLS metadata, connection logs |
-| Nmap scans | Zeek connection logs, Suricata alerts, traffic bursts |
-| SSH attempts | Zeek connection logs, victim authentication logs, pfSense logs |
-| Blocked cross-VLAN access | pfSense firewall logs |
-| Administrative access attempts | pfSense logs, service logs, endpoint logs |
-
 ### Endpoint Telemetry Integration
 
 In addition to network visibility from Security Onion, the victim system is being configured with endpoint telemetry tools. This provides host-level evidence that network monitoring alone may not capture.
