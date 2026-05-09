@@ -50,24 +50,24 @@ The diagram below shows the current homelab architecture, including pfSense, VLA
 | # | Project | Focus | Status |
 |---:|---|---|---|
 | 01 | [Architecture and Segmentation](01-architecture-and-segmentation/) | Lab design, VLANs, device inventory, monitoring architecture | In Progress |
-| 02 | VLAN Firewall Validation | Allowed/blocked traffic testing across VLANs | Planned |
-| 03 | Proxmox Virtualization Build | VM hosting, VLAN tagging, snapshots, and workload design | Planned |
-| 04 | Security Onion Visibility Baseline | Zeek, Suricata, Hunt, PCAP, and basic traffic validation | Planned |
-| 05 | Network Reconnaissance Detection | Nmap, ping sweeps, service discovery, and SIEM visibility | Planned |
-| 06 | Service Enumeration and Exposure Review | Banner grabbing, exposed services, and hardening recommendations | Planned |
-| 07 | SSH Brute-Force Detection | Controlled SSH login attempts and incident-style investigation | Planned |
-| 08 | Web App Scanning with ZAP and Juice Shop | Web scanning visibility and OWASP mapping | Planned |
-| 09 | Vulnerability Scanning and Reporting | Nmap/Nessus scanning and remediation reporting | Planned |
-| 10 | Linux Endpoint Telemetry | Elastic Agent, Sysmon, auth logs, and suspicious command detection | Planned |
-| 11 | Attack Path Validation | Testing lateral movement restrictions across VLANs | Planned |
-| 12 | pfSense Firewall Hardening | Management access restrictions and blocked access validation | Planned |
-| 13 | Bastion and Tailscale Access | Secure remote access through Raspberry Pi 5 | Planned |
-| 14 | MITRE ATT&CK Emulation | Threat-informed technique testing and telemetry validation | Planned |
-| 15 | Detection-as-Code | Sigma-style rules and reusable detection logic | Planned |
-| 16 | Security Onion Rule Tuning | False positive review and alert tuning decisions | Planned |
-| 17 | Multi-Source Log Correlation | Firewall, SIEM, endpoint, and system log timeline building | Planned |
-| 18 | Incident Response Capstone | Full attack simulation, detection, triage, and reporting | Planned |
-| 19 | Enterprise Purple Team Capstone | Final polished portfolio summary | Planned |
+| 02 | [VLAN Firewall Validation](02-vlan-firewall-validation/) | Allowed/blocked traffic testing across VLANs | Planned |
+| 03 | [Proxmox Virtualization Build](03-proxmox-virtualization-build/) | VM hosting, VLAN tagging, snapshots, and workload design | Planned |
+| 04 | [Security Onion Visibility Baseline](04-security-onion-visibility-baseline/) | Zeek, Suricata, Hunt, PCAP, and basic traffic validation | Planned |
+| 05 | [Network Reconnaissance Detection](05-network-reconaissance-detection/) | Nmap, ping sweeps, service discovery, and SIEM visibility | Planned |
+| 06 | [Service Enumeration and Exposure Review](06-service-enumeration-and-exposure-review/) | Banner grabbing, exposed services, and hardening recommendations | Planned |
+| 07 | [SSH Brute-Force Detection](07-ssh-brute-force-detection/) | Controlled SSH login attempts and incident-style investigation | Planned |
+| 08 | [Web App Scanning with ZAP and Juice Shop](08-web-app-scanning-with-zap-and-juice-shop/) | Web scanning visibility and OWASP mapping | Planned |
+| 09 | [Vulnerability Scanning and Reporting](09-vulnerability-scanning-and-reporting/) | Nmap/Nessus scanning and remediation reporting | Planned |
+| 10 | [Linux Endpoint Telemetry](10-linux-endpoint-telemetry/) | Elastic Agent, Sysmon, auth logs, and suspicious command detection | Planned |
+| 11 | [Attack Path Validation](11-attack-path-validation/) | Testing lateral movement restrictions across VLANs | Planned |
+| 12 | [pfSense Firewall Hardening](12-pfsense-firewall-hardening/) | Management access restrictions and blocked access validation | Planned |
+| 13 | [Bastion and Tailscale Access](13-bastion-and-tailscale-access/) | Secure remote access through Raspberry Pi 5 | Planned |
+| 14 | [MITRE ATT&CK Emulation](14-mitre-att&ck-emulation/) | Threat-informed technique testing and telemetry validation | Planned |
+| 15 | [Detection-as-Code](15-detection-as-code/) | Sigma-style rules and reusable detection logic | Planned |
+| 16 | [Security Onion Rule Tuning](16-security-onion-rule-tuning/) | False positive review and alert tuning decisions | Planned |
+| 17 | [Multi-Source Log Correlation](17-multi-source-log-correlation/) | Firewall, SIEM, endpoint, and system log timeline building | Planned |
+| 18 | [Incident Response Capstone](18-incident-response-capstone/) | Full attack simulation, detection, triage, and reporting | Planned |
+| 19 | [Enterprise Purple Team Capstone](19-enterprise-purple-team-capstone/) | Final polished portfolio summary | Planned |
 
 ## Documentation Standard
 
