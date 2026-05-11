@@ -465,6 +465,36 @@ At the time of evidence capture, the victim port was configured for mirroring bu
 
 ![Switch PVID Configuration](screenshots/switch-pvid-configuration.png)
 
+## Evidence: Proxmox Virtualization and VM Placement
+
+Proxmox VE is running on the Dell PowerEdge R730xd and hosts the core lab workloads used for controlled purple-team testing. The Kali Linux VM is assigned to the attacker VLAN, while the Security Onion VM uses separate interfaces for management and monitoring.
+
+### Proxmox Evidence Summary
+
+| Evidence | Screenshot | What It Shows |
+|---|---|---|
+| Proxmox VM list | [proxmox-vm-list.png](screenshots/proxmox-vm-list.png) | Shows the core lab VMs, including Kali Linux and Security Onion |
+| Proxmox node summary | [proxmox-node-summary.png](screenshots/proxmox-node-summary.png) | Shows the Proxmox host running as the virtualization platform for the lab |
+| Proxmox network configuration | [proxmox-network-config.png](screenshots/proxmox-network-config.png) | Shows the host bridge/NIC configuration used for VM networking |
+| Kali VM hardware | [kali-vm-hardware-vlan20.png](screenshots/kali-vm-hardware-vlan20.png) | Shows the Kali VM assigned to VLAN 20 for controlled attacker traffic |
+| Security Onion VM hardware | [security-onion-vm-hardware.png](screenshots/security-onion-vm-hardware.png) | Shows Security Onion resources and its separate management and monitoring interfaces |
+
+### Proxmox Configuration Notes
+
+Proxmox is used as the virtualization platform for the lab’s security workloads. The Kali Linux VM is assigned to VLAN 20, which places it in the attacker network for controlled offensive testing.
+
+Security Onion is configured with two network interfaces. The first interface is assigned to VLAN 30 for SIEM management access. The second interface is connected to the monitoring bridge and is used to receive mirrored/SPAN traffic from the managed switch. This separation allows Security Onion to be managed through one interface while passively inspecting copied network traffic through another.
+
+### Key Proxmox Screenshots
+
+**Kali VM VLAN 20 Placement**
+
+![Kali VM Hardware VLAN 20](screenshots/kali-vm-hardware-vlan20.png)
+
+**Security Onion VM Interfaces**
+
+![Security Onion VM Hardware](screenshots/security-onion-vm-hardware.png)
+
 ## Lessons Learned
 
 This project established the baseline architecture for a segmented purple-team homelab. The design separates home, attacker, victim, SIEM, and administrative systems into dedicated VLANs, allowing controlled testing while reducing unnecessary exposure.
