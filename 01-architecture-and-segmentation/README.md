@@ -282,28 +282,6 @@ Together, these sources allow future projects to answer three important analyst 
 2. What happened on the endpoint?
 3. How do the network and endpoint events correlate in a timeline?
 
-## Baseline Evidence to Capture
-
-The following screenshots and notes should be captured for this project before moving into active testing:
-
-| Evidence | Purpose |
-|---|---|
-| pfSense VLAN interfaces | Proves VLAN gateways and segmentation are configured |
-| pfSense firewall rules | Shows traffic control between networks |
-| Managed switch VLAN membership | Shows access/trunk port assignments |
-| Managed switch mirror/SPAN configuration | Shows how traffic is forwarded to Security Onion |
-| Proxmox VM list | Shows virtual lab workloads |
-| Kali VM network settings | Shows attacker VLAN placement |
-| Security Onion VM network settings | Shows management and monitoring interface design |
-| Security Onion login/dashboard | Proves the monitoring platform is reachable |
-| Raspberry Pi 5 network settings | Shows admin/bastion VLAN placement |
-| Network topology diagram | Explains the full architecture visually |
-| Elastic Agent status on victim | Shows endpoint telemetry collection is installed and active |
-| Sysmon/Sysmon for Linux status on victim | Shows host-level activity logging is configured |
-| Sample victim endpoint logs | Proves endpoint activity can be reviewed during investigations |
-
-Screenshots should be sanitized before publishing. Passwords, public IP addresses, serial numbers, private keys, tokens, and unrelated personal or employer information should not be included.
-
 ## Administrative Access Model
 
 Administrative services are intentionally separated from normal attacker, victim, and home network activity. The goal is to protect the lab management plane while still allowing approved access for administration, monitoring, and documentation.
@@ -418,11 +396,11 @@ The following screenshots and evidence should be captured for this project befor
 | Network topology diagram | Shows the full lab architecture | Complete |
 | pfSense VLAN interfaces | Proves VLAN gateways are configured | Pending |
 | pfSense firewall rules | Shows segmentation and access control | Pending |
-| Managed switch VLAN membership | Shows trunk/access VLAN assignments | Pending |
-| Managed switch mirror/SPAN settings | Shows traffic mirroring to Security Onion | Pending |
-| Proxmox VM list | Shows hosted lab workloads | Pending |
-| Kali VM VLAN/network settings | Shows attacker placement | Pending |
-| Security Onion VM interfaces | Shows management and monitor interfaces | Pending |
+| Managed switch VLAN membership | Shows trunk/access VLAN assignments | Complete |
+| Managed switch mirror/SPAN settings | Shows traffic mirroring to Security Onion | Complete |
+| Proxmox VM list | Shows hosted lab workloads | Complete |
+| Kali VM VLAN/network settings | Shows attacker placement | Complete |
+| Security Onion VM interfaces | Shows management and monitor interfaces | Complete |
 | Security Onion dashboard/login | Shows SIEM access is functional | Pending |
 | Raspberry Pi 5 network settings | Shows Admin/Bastion VLAN placement | Pending |
 | Elastic Agent/Sysmon status on victim | Shows endpoint telemetry setup | Pending |
