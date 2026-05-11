@@ -429,6 +429,42 @@ The following screenshots and evidence should be captured for this project befor
 
 Screenshots will be sanitized before publishing. Sensitive information such as public IP addresses, passwords, serial numbers, tokens, and unrelated personal or employer information will not be included.
 
+## Evidence: Managed Switch VLAN and Mirror/SPAN Configuration
+
+The managed switch is responsible for carrying VLAN-tagged traffic between pfSense, Proxmox, the victim network, home devices, and the Admin/Bastion network. It also provides the mirror/SPAN feed used by Security Onion for passive network monitoring.
+
+### Switch Evidence Summary
+
+| Evidence | Screenshot | What It Shows |
+|---|---|---|
+| Port mirroring configuration | [switch-port-mirroring.png](screenshots/switch-port-mirroring.png) | Shows the Security Onion monitoring interface configured as the probe/destination port and selected attacker/victim ports configured as mirrored sources |
+| VLAN 1 membership | [switch-vlan-membership-vlan1.png](screenshots/switch-vlan-membership-vlan1.png) | Shows default VLAN membership and remaining untagged/default port behavior |
+| VLAN 10 membership | [switch-vlan-membership-vlan10.png](screenshots/switch-vlan-membership-vlan10.png) | Shows Home VLAN membership for normal home network devices and access point connectivity |
+| VLAN 20 membership | [switch-vlan-membership-vlan20.png](screenshots/switch-vlan-membership-vlan20.png) | Shows Attacker VLAN membership used for Kali/offensive testing traffic |
+| VLAN 30 membership | [switch-vlan-membership-vlan30.png](screenshots/switch-vlan-membership-vlan30.png) | Shows SIEM VLAN membership for Security Onion management traffic |
+| VLAN 40 membership | [switch-vlan-membership-vlan40.png](screenshots/switch-vlan-membership-vlan40.png) | Shows Victim VLAN membership for the Ubuntu victim MacBook and approved target systems |
+| VLAN 50 membership | [switch-vlan-membership-vlan50.png](screenshots/switch-vlan-membership-vlan50.png) | Shows Admin/Bastion VLAN membership for Raspberry Pi 5 and management access |
+| PVID configuration | [switch-pvid-configuration.png](screenshots/switch-pvid-configuration.png) | Shows how untagged traffic is assigned to the correct VLAN on access ports |
+| Port configuration | [switch-port-configuration.png](screenshots/switch-port-configuration.png) | Shows port link status, port role, speed, duplex, and mirror/probe designation |
+
+### Switch Configuration Notes
+
+The switch uses VLAN membership and PVID settings to separate traffic by role. Trunk/tagged ports carry multiple VLANs where needed, while access ports place untagged endpoint traffic into the appropriate VLAN.
+
+The mirror/SPAN configuration sends selected traffic to the Security Onion monitoring interface. The monitoring interface is configured as the probe/destination port and does not require an IP address because it passively receives copied traffic for inspection.
+
+At the time of evidence capture, the victim port was configured for mirroring but may appear as link down if the victim MacBook was not physically connected. This does not invalidate the configuration; it simply reflects the port state during the screenshot.
+
+### Key Switch Screenshots
+
+**Mirror/SPAN Configuration**
+
+![Switch Port Mirroring](screenshots/switch-port-mirroring.png)
+
+**PVID Configuration**
+
+![Switch PVID Configuration](screenshots/switch-pvid-configuration.png)
+
 ## Lessons Learned
 
 This project established the baseline architecture for a segmented purple-team homelab. The design separates home, attacker, victim, SIEM, and administrative systems into dedicated VLANs, allowing controlled testing while reducing unnecessary exposure.
