@@ -93,6 +93,26 @@ This structure allows the lab to support both red-team and blue-team workflows:
 - pfSense can enforce access control and provide firewall log evidence.
 - The Raspberry Pi 5 can support secure administrative access through Tailscale and SSH.
 
+## Network Diagram
+
+The network diagram below illustrates the segmented homelab architecture used for controlled purple-team exercises. The lab is built around pfSense for routing and firewall enforcement, a managed switch for VLAN transport and traffic mirroring, Proxmox for virtualized security workloads, and Security Onion for network security monitoring.
+
+![Segmented Homelab Network Diagram](../Diagrams/network-topology.png)
+
+The diagram highlights the five primary VLAN zones:
+
+| VLAN | Name | Purpose |
+|---:|---|---|
+| 10 | Home | Trusted personal devices and normal home network traffic |
+| 20 | Attacker | Kali Linux and controlled offensive testing |
+| 30 | SIEM | Security Onion management and monitoring |
+| 40 | Victim | Approved target systems and vulnerable lab hosts |
+| 50 | Admin/Bastion | Raspberry Pi 5, Tailscale, Omada Controller, and management access |
+
+The design separates attacker, victim, monitoring, home, and administrative systems to reduce risk and support realistic security monitoring. Kali generates controlled test traffic from the attacker VLAN, victim systems receive approved testing activity, and Security Onion receives mirrored traffic for analysis.
+
+Administrative access is restricted through VLAN 50 and approved workstation firewall rules. The M2 MacBook Air may access specific management interfaces from its reserved Home VLAN IP, while other home devices remain blocked from lab management services.
+
 ## High-Level Traffic Flow
 
 At a high level, traffic moves through the lab in the following way:
@@ -350,26 +370,6 @@ The preferred design is:
 
 This design demonstrates secure remote administration without exposing sensitive lab services directly to the internet.
 
-## Network Diagram
-
-The network diagram below illustrates the segmented homelab architecture used for controlled purple-team exercises. The lab is built around pfSense for routing and firewall enforcement, a managed switch for VLAN transport and traffic mirroring, Proxmox for virtualized security workloads, and Security Onion for network security monitoring.
-
-![Segmented Homelab Network Diagram](../Diagrams/network-topology.png)
-
-The diagram highlights the five primary VLAN zones:
-
-| VLAN | Name | Purpose |
-|---:|---|---|
-| 10 | Home | Trusted personal devices and normal home network traffic |
-| 20 | Attacker | Kali Linux and controlled offensive testing |
-| 30 | SIEM | Security Onion management and monitoring |
-| 40 | Victim | Approved target systems and vulnerable lab hosts |
-| 50 | Admin/Bastion | Raspberry Pi 5, Tailscale, Omada Controller, and management access |
-
-The design separates attacker, victim, monitoring, home, and administrative systems to reduce risk and support realistic security monitoring. Kali generates controlled test traffic from the attacker VLAN, victim systems receive approved testing activity, and Security Onion receives mirrored traffic for analysis.
-
-Administrative access is restricted through VLAN 50 and approved workstation firewall rules. The M2 MacBook Air may access specific management interfaces from its reserved Home VLAN IP, while other home devices remain blocked from lab management services.
-
 ## Firewall Boundary Summary
 
 pfSense is the primary enforcement point between VLANs. Each VLAN has a dedicated purpose, and traffic between VLANs should be allowed only when there is a clear administrative or lab requirement.
@@ -472,6 +472,8 @@ Security Onion is configured with two network interfaces. The first interface is
 **Security Onion VM Interfaces**
 
 ![Security Onion VM Hardware](screenshots/security-onion-vm-hardware.png)
+
+
 
 ## Lessons Learned
 
