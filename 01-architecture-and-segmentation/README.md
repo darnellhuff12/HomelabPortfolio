@@ -91,7 +91,7 @@ This structure allows the lab to support both red-team and blue-team workflows:
 - Victim systems can be safely tested without exposing home devices.
 - Security Onion can monitor traffic and provide defender visibility.
 - pfSense can enforce access control and provide firewall log evidence.
-- The Raspberry Pi 5 can support secure administrative access through Tailscale and SSH.
+- The Raspberry Pi 5 supports secure administrative access through Tailscale and SSH tunneling.
 
 ## Network Diagram
 
@@ -394,15 +394,16 @@ The following screenshots and evidence should be captured for this project befor
 | Evidence | Purpose | Status |
 |---|---|---|
 | Network topology diagram | Shows the full lab architecture | Complete |
-| pfSense VLAN interfaces | Proves VLAN gateways are configured | Pending |
-| pfSense firewall rules | Shows segmentation and access control | Pending |
+| pfSense VLAN interfaces | Proves VLAN gateways are configured | Complete |
+| pfSense firewall rules | Shows segmentation and access control | Complete |
 | Managed switch VLAN membership | Shows trunk/access VLAN assignments | Complete |
 | Managed switch mirror/SPAN settings | Shows traffic mirroring to Security Onion | Complete |
 | Proxmox VM list | Shows hosted lab workloads | Complete |
 | Kali VM VLAN/network settings | Shows attacker placement | Complete |
 | Security Onion VM interfaces | Shows management and monitor interfaces | Complete |
-| Security Onion dashboard/login | Shows SIEM access is functional | Pending |
-| Raspberry Pi 5 network settings | Shows Admin/Bastion VLAN placement | Pending |
+| Security Onion dashboard/login | Shows SIEM access is functional | Complete |
+| Security Onion Hunt/Alerts pages | Shows monitoring and investigation interfaces | Complete |
+| Raspberry Pi 5 network settings | Shows Admin/Bastion VLAN placement and Tailscale reachability | Complete |
 | Elastic Agent/Sysmon status on victim | Shows endpoint telemetry setup | Pending |
 
 Screenshots will be sanitized before publishing. Sensitive information such as public IP addresses, passwords, serial numbers, tokens, and unrelated personal or employer information will not be included.
@@ -473,7 +474,118 @@ Security Onion is configured with two network interfaces. The first interface is
 
 ![Security Onion VM Hardware](screenshots/security-onion-vm-hardware.png)
 
+## Evidence: Raspberry Pi 5 Admin/Bastion and Tailscale Access
 
+The Raspberry Pi 5 is used as an administrative system on the Admin/Bastion VLAN. It provides a controlled access point for management tasks and supports Tailscale-based remote access without exposing lab management interfaces directly to the internet.
+
+### Raspberry Pi Evidence Summary
+
+| Evidence | Screenshot | What It Shows |
+|---|---|---|
+| Tailscale status | [pi-tailscale-status.png](screenshots/pi-tailscale-status.png) | Shows the Raspberry Pi 5 and approved MacBook active on the Tailscale network |
+| VLAN 50 IP address | [pi-vlan50-ip-address.png](screenshots/pi-vlan50-ip-address.png) | Shows the Raspberry Pi connected by Ethernet on the Admin/Bastion VLAN |
+| Routing table | [pi-routing-table.png](screenshots/pi-routing-table.png) | Shows the Pi using the Admin/Bastion VLAN gateway for normal network routing |
+
+### Admin/Bastion Access Notes
+
+The Raspberry Pi 5 is positioned on VLAN 50 as an administrative access point. Tailscale provides encrypted remote access to the Pi, while SSH tunneling is used to reach selected internal management interfaces such as Proxmox, pfSense, Security Onion, and the managed switch.
+
+This design keeps sensitive management services private and avoids direct WAN exposure. Instead of exposing Proxmox, pfSense, Security Onion, or the managed switch to the public internet, remote access is routed through a controlled bastion path.
+
+The current access model is:
+
+```text
+MacBook on external network
+↓
+Tailscale
+↓
+Raspberry Pi 5 on Admin/Bastion VLAN
+↓
+SSH tunnel
+↓
+Internal management interface
+```
+
+### Repeatable Remote Access Scripts
+
+To simplify remote administration, local shell scripts were created on the M2 MacBook Air to establish SSH tunnels through the Raspberry Pi 5 bastion. These scripts allow approved management interfaces to be reached without exposing pfSense, Proxmox, Security Onion, or the managed switch directly to the internet.
+
+| Script | Purpose |
+|---|---|
+| [proxmox-tunnel.sh](scripts/proxmox-tunnel.sh) | Opens an SSH tunnel to the Proxmox web interface |
+| [pfsense-tunnel.sh](scripts/pfsense-tunnel.sh) | Opens an SSH tunnel to the pfSense web interface |
+| [security-onion-tunnel.sh](scripts/security-onion-tunnel.sh) | Opens a Security Onion tunnel using a temporary loopback alias |
+| [switch-tunnel.sh](scripts/switch-tunnel.sh) | Opens a managed switch tunnel using a temporary loopback alias |
+| [homelab-tunnels.sh](scripts/homelab-tunnels.sh) | Opens all primary management tunnels together |
+
+Some internal web interfaces, such as Security Onion and the managed switch, expect to be accessed through their real management IP addresses. For those services, the tunnel scripts create temporary loopback aliases on the MacBook and remove them when the tunnel session ends.
+
+The scripts use placeholders in this public documentation to avoid exposing usernames, Tailscale IP addresses, and sensitive internal host details.
+
+### Security Onion Tunnel Redirect Note
+
+During remote access testing, the Security Onion web interface redirected from the local tunnel URL to its management IP address. Because the M2 MacBook was on the Home VLAN rather than the SIEM VLAN, the browser could not directly reach the Security Onion management IP after the redirect.
+
+To preserve the secure bastion model, Security Onion access was handled through the Raspberry Pi 5 using Tailscale and SSH tunneling. A temporary loopback alias was created on the MacBook so that the Security Onion management IP resolved locally and forwarded through the SSH tunnel to the real Security Onion management interface.
+
+This preserves VLAN segmentation while still allowing approved administrative access through the bastion path.
+
+### Managed Switch Tunnel Note
+
+During remote access testing, the managed switch web interface also worked more reliably when accessed through its real management IP address rather than through a `localhost` tunnel. A temporary loopback alias was used on the MacBook so that the switch management IP resolved locally and forwarded through the SSH tunnel to the real switch interface.
+
+This allowed the switch interface to remain private while still being reachable through the approved bastion workflow.
+
+### Access Model Summary
+
+This access model demonstrates a secure administrative workflow:
+
+- Management interfaces are not exposed directly to the public internet.
+- Tailscale provides encrypted access only to the Raspberry Pi 5 bastion.
+- SSH tunnels are used to reach specific internal services.
+- Loopback aliases are used only when an internal web interface expects its real management IP.
+- Temporary aliases are removed after tunnel sessions end.
+- Future firewall hardening will restrict the Raspberry Pi to only the specific internal management ports required for administration.
+
+## Evidence: Security Onion Baseline Access
+
+Security Onion is the primary network security monitoring platform in the lab. It provides access to dashboards, alerts, Hunt, event data, Zeek/Suricata telemetry, and investigation workflows.
+
+### Security Onion Evidence Summary
+
+| Evidence | Screenshot | What It Shows |
+|---|---|---|
+| Security Onion login page | [security-onion-login-page.png](screenshots/security-onion-login-page.png) | Shows that the Security Onion web interface is reachable through the approved access path |
+| Security Onion dashboard | [security-onion-dashboard.png](screenshots/security-onion-dashboard.png) | Shows the dashboard interface used for baseline monitoring and telemetry review |
+| Security Onion alerts page | [security-onion-alerts-page.png](screenshots/security-onion-alerts-page.png) | Shows the alert triage interface used to review detections and alert status |
+| Security Onion Hunt page | [security-onion-hunt-page.png](screenshots/security-onion-hunt-page.png) | Shows the investigation interface used to search and review event data |
+
+### Security Onion Access Notes
+
+Security Onion is managed through its VLAN 30 management interface and receives mirrored traffic through a separate monitoring interface. Remote access is performed through the Raspberry Pi 5 bastion using Tailscale and SSH tunneling rather than exposing the Security Onion web interface directly to the internet.
+
+The baseline screenshots confirm that the Security Onion SOC interface is accessible, dashboards are loading, alerts can be reviewed, and Hunt can be used to inspect collected event data.
+
+## Evidence: pfSense Firewall and VLAN Configuration
+
+pfSense is the central routing and enforcement point for the lab. It provides VLAN gateways, DHCP/DNS support, firewall policy enforcement, and traffic segmentation between lab networks.
+
+### pfSense Evidence Summary
+
+| Evidence | Screenshot | What It Shows |
+|---|---|---|
+| pfSense dashboard | [pfsense-dashboard.png](screenshots/pfsense-dashboard.png) | Shows pfSense running as the lab firewall/router with active VLAN interfaces |
+| Interface assignments | [pfsense-interface-assignments.png](screenshots/pfsense-interface-assignments.png) | Shows WAN, LAN, Home, Attacker, SIEM, Victim, and Admin interface assignments |
+| VLAN interfaces | [pfsense-vlan-interfaces.png](screenshots/pfsense-vlan-interfaces.png) | Shows VLAN 10, 20, 30, 40, and 50 configured on the LAN parent interface |
+| ADMIN firewall rules | [pfsense-firewall-rules-admin.png](screenshots/pfsense-firewall-rules-admin.png) | Shows the final Admin/Bastion firewall rules controlling access to management services |
+
+### pfSense Configuration Notes
+
+pfSense provides the gateway and firewall boundary for each VLAN in the lab. The configured VLANs separate home devices, attacker systems, SIEM infrastructure, victim systems, and administrative access.
+
+The Admin/Bastion VLAN is used for controlled management access through the Raspberry Pi 5. Specific allow rules are used to permit the Pi to reach required internal management services such as Proxmox, Security Onion, pfSense, and the managed switch.
+
+The final ADMIN firewall rule set allows the Raspberry Pi 5 bastion to reach only the required management services and supporting network services. The previous broad ADMIN access rule was removed after validating that the Proxmox, pfSense, Security Onion, and managed switch tunnels still functioned through the bastion workflow.
 
 ## Lessons Learned
 
@@ -485,6 +597,7 @@ Key lessons from this phase include:
 - pfSense acts as the central enforcement point for routing, firewall rules, DHCP, and logging.
 - Security Onion requires both management access and a dedicated monitoring path to inspect mirrored traffic.
 - Administrative interfaces should be restricted to approved sources instead of being reachable from every VLAN.
+- Broad administrative access rules should be replaced with specific, service-based allow rules once the required management paths are confirmed.
 - Documentation is a major part of building a professional cybersecurity portfolio, not just the technical configuration.
 
 ## Resume Bullet
