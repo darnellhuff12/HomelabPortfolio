@@ -16,7 +16,7 @@ All testing is performed only against systems and networks that I own and contro
 
 ## Network Topology
 
-The diagram below shows the current homelab architecture, including pfSense, VLAN segmentation, Proxmox, Security Onion, Kali Linux, the victim network, and the Raspberry Pi-based admin/bastion model.
+The diagram below shows the current homelab architecture, including pfSense, VLAN segmentation, Proxmox, Security Onion, Kali Linux, the victim network, and the Raspberry Pi 5-based admin/bastion model. The M2 MacBook remains on the Home VLAN for normal use and documentation, while lab management access is centralized through the Raspberry Pi 5 on the Admin/Bastion VLAN using Tailscale and SSH tunnels.
 
 ![Segmented Homelab Network Diagram](Diagrams/network-topology.png)
 
@@ -39,7 +39,7 @@ The diagram below shows the current homelab architecture, including pfSense, VLA
 
 | VLAN | Name | Purpose |
 |---:|---|---|
-| 10 | Home | Trusted personal devices and normal home network traffic |
+| 10 | Home | Trusted personal devices, normal home network traffic, and documentation workstation access |
 | 20 | Attacker | Kali Linux and controlled offensive testing |
 | 30 | SIEM | Security Onion management and monitoring |
 | 40 | Victim | Approved target systems and vulnerable lab hosts |
@@ -50,10 +50,10 @@ The diagram below shows the current homelab architecture, including pfSense, VLA
 | # | Project | Focus | Status |
 |---:|---|---|---|
 | 01 | [Architecture and Segmentation](01-architecture-and-segmentation/) | Lab design, VLANs, device inventory, monitoring architecture | In Progress |
-| 02 | [VLAN Firewall Validation](02-vlan-firewall-validation/) | Allowed/blocked traffic testing across VLANs | Planned |
-| 03 | [Proxmox Virtualization Build](03-proxmox-virtualization-build/) | VM hosting, VLAN tagging, snapshots, and workload design | Planned |
-| 04 | [Security Onion Visibility Baseline](04-security-onion-visibility-baseline/) | Zeek, Suricata, Hunt, PCAP, and basic traffic validation | Planned |
-| 05 | [Network Reconnaissance Detection](05-network-reconaissance-detection/) | Nmap, ping sweeps, service discovery, and SIEM visibility | Planned |
+| 02 | [VLAN Firewall Validation](02-vlan-firewall-validation/) | pfSense rules, allowed/blocked traffic policy, VLAN evidence, and switch validation | In Progress |
+| 03 | [Proxmox Virtualization Build](03-proxmox-virtualization-build/) | VM hosting, VLAN tagging, snapshots, and workload design | Evidence Collected |
+| 04 | [Security Onion Visibility Baseline](04-security-onion-visibility-baseline/) | Zeek, Suricata, Hunt, PCAP, and basic traffic validation | Evidence Collected |
+| 05 | [Network Reconnaissance Detection](05-network-reconnaissance-detection/) | Nmap, ping sweeps, service discovery, and SIEM visibility | Planned |
 | 06 | [Service Enumeration and Exposure Review](06-service-enumeration-and-exposure-review/) | Banner grabbing, exposed services, and hardening recommendations | Planned |
 | 07 | [SSH Brute-Force Detection](07-ssh-brute-force-detection/) | Controlled SSH login attempts and incident-style investigation | Planned |
 | 08 | [Web App Scanning with ZAP and Juice Shop](08-web-app-scanning-with-zap-and-juice-shop/) | Web scanning visibility and OWASP mapping | Planned |
@@ -69,16 +69,32 @@ The diagram below shows the current homelab architecture, including pfSense, VLA
 | 18 | [Incident Response Capstone](18-incident-response-capstone/) | Full attack simulation, detection, triage, and reporting | Planned |
 | 19 | [Enterprise Purple Team Capstone](19-enterprise-purple-team-capstone/) | Final polished portfolio summary | Planned |
 
+## Current Portfolio Progress
+
+| Area | Current State |
+|---|---|
+| Lab architecture | Documented in Project 1 |
+| VLAN segmentation | Implemented across pfSense and the managed switch |
+| Firewall hardening | Documented in Project 2 with final pfSense rule screenshots |
+| Admin access model | Centralized through Raspberry Pi 5 on VLAN 50 using Tailscale/SSH tunnels |
+| Proxmox virtualization | Core screenshots collected for Project 3 |
+| Security Onion visibility | UI, Hunt, dashboard, and alerts screenshots collected for Project 4 |
+| Endpoint telemetry | Pending Sysmon/Elastic Agent completion |
+| Live traffic validation | Pending final Kali, victim, and Security Onion testing |
+
+
 ## Documentation Standard
 
 Each project follows a consistent format:
 
 - Objective
 - Scope and Rules of Engagement
+- Architecture or configuration summary
 - Lab Environment
 - Red Team Activity
 - Blue Team Visibility
 - Findings
+- Evidence and screenshots
 - Detection and Tuning Opportunities
 - Recommendations
 - MITRE ATT&CK Mapping
@@ -106,7 +122,8 @@ Screenshots and logs are sanitized before publishing. Passwords, tokens, public 
 This portfolio is intended to demonstrate practical cybersecurity skills, including:
 
 - Designing a segmented lab environment
-- Building and documenting firewall boundaries
+- Centralizing administrative access through a bastion workflow
+- Building, hardening, and documenting firewall boundaries
 - Running controlled adversary simulations
 - Validating SIEM and network visibility
 - Collecting endpoint telemetry
@@ -118,4 +135,4 @@ This portfolio is intended to demonstrate practical cybersecurity skills, includ
 
 ## Highlight Resume Bullet
 
-Built and documented a segmented purple-team cybersecurity homelab using pfSense, Proxmox, Security Onion, Kali Linux, Linux endpoints, endpoint telemetry, and Raspberry Pi-based secure administration to support adversary simulation, SIEM monitoring, detection engineering, and incident response practice.
+Built and documented a segmented purple-team cybersecurity homelab using pfSense, Proxmox, Security Onion, Kali Linux, Linux endpoints, endpoint telemetry, and a Raspberry Pi 5 bastion workflow to support adversary simulation, SIEM monitoring, detection engineering, firewall validation, and incident response practice.

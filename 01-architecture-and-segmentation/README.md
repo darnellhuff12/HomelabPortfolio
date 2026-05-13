@@ -111,7 +111,7 @@ The diagram highlights the five primary VLAN zones:
 
 The design separates attacker, victim, monitoring, home, and administrative systems to reduce risk and support realistic security monitoring. Kali generates controlled test traffic from the attacker VLAN, victim systems receive approved testing activity, and Security Onion receives mirrored traffic for analysis.
 
-Administrative access is restricted through VLAN 50 and approved workstation firewall rules. The M2 MacBook Air may access specific management interfaces from its reserved Home VLAN IP, while other home devices remain blocked from lab management services.
+Administrative access is restricted through VLAN 50 and the Raspberry Pi 5 bastion workflow. The M2 MacBook Air remains on the Home VLAN for normal use and documentation, but lab management access is performed through the Raspberry Pi 5 on the Admin/Bastion VLAN using Tailscale and SSH tunnels. Home VLAN devices are blocked from directly managing lab infrastructure.
 
 ## High-Level Traffic Flow
 
@@ -183,11 +183,12 @@ Examples of management services include:
 
 | Service | Recommended Access |
 |---|---|
-| pfSense web UI | Admin VLAN or approved admin workstation only |
-| Proxmox web UI | Admin VLAN or approved bastion path only |
-| Security Onion web UI | Admin VLAN or approved admin workstation only |
-| Raspberry Pi SSH | Admin VLAN and/or Tailscale only |
-| Omada Controller | Admin VLAN or approved management source only |
+| pfSense web UI | Admin VLAN through the Raspberry Pi 5 bastion path |
+| Proxmox web UI | Admin VLAN through the Raspberry Pi 5 bastion path |
+| Security Onion web UI | Admin VLAN through the Raspberry Pi 5 bastion path |
+| Managed switch web UI | Admin VLAN through the Raspberry Pi 5 bastion path |
+| Raspberry Pi SSH | Tailscale and/or Admin VLAN only |
+| Omada Controller | Admin VLAN through the Raspberry Pi 5 management path |
 
 ### Segmentation Goal
 
@@ -344,18 +345,20 @@ The management model is designed around the following goals:
 | Raspberry Pi 5 on VLAN 50 | Proxmox Web UI | Allowed |
 | Raspberry Pi 5 on VLAN 50 | Security Onion Web UI | Allowed |
 | Raspberry Pi 5 on VLAN 50 | pfSense Web UI | Allowed |
-| M2 MacBook through approved admin path | Proxmox/Security Onion/pfSense | Allowed |
+| Raspberry Pi 5 on VLAN 50 | Managed switch Web UI | Allowed |
+| M2 MacBook through Raspberry Pi 5 bastion path | Proxmox/Security Onion/pfSense/switch | Allowed through approved tunnels |
+| M2 MacBook directly from VLAN 10 Home | Lab management services | Blocked |
 | Kali on VLAN 20 | Proxmox Web UI | Blocked |
 | Victim host on VLAN 40 | pfSense Web UI | Blocked |
-| Home devices on VLAN 10 | Lab management services | Blocked or restricted |
+| Home devices on VLAN 10 | Lab management services | Blocked |
 
-### Approved Workstation Exception
+### Workstation Access Model
 
-Although the primary administrative network is VLAN 50, the M2 MacBook Air may remain on the Home VLAN for normal use. To support secure administration without giving all home devices access to management services, the MacBook is assigned a DHCP reservation and treated as an approved administrative source.
+The M2 MacBook Air remains on the Home VLAN for normal use, documentation, GitHub updates, screenshots, and research. Direct access from the Home VLAN to lab management services is blocked as part of the segmentation model.
 
-Firewall rules allow the MacBook's reserved IP address to reach only specific management interfaces, such as pfSense, Proxmox, Security Onion, and the Raspberry Pi. Other Home VLAN devices remain blocked from accessing lab management services.
+Administrative access to pfSense, Proxmox, Security Onion, the managed switch, and other lab management interfaces is performed through the Raspberry Pi 5 on the Admin/Bastion VLAN. The MacBook connects to the Pi using Tailscale and SSH tunneling, and the Pi then reaches the approved internal management services.
 
-This design allows convenient administration from the primary workstation while still maintaining least-privilege access controls.
+This design keeps the workstation convenient to use while avoiding broad Home VLAN access into sensitive lab infrastructure. It also creates a more realistic enterprise-style model where management access is centralized through a dedicated administrative network and bastion host.
 
 ### Remote Access Design
 
@@ -382,10 +385,12 @@ pfSense is the primary enforcement point between VLANs. Each VLAN has a dedicate
 | VLAN 40 Victim | VLAN 50 Admin/Bastion | Blocked |
 | VLAN 40 Victim | VLAN 10 Home | Blocked |
 | VLAN 50 Admin/Bastion | Management interfaces | Allowed as needed |
-| Approved M2 MacBook IP | pfSense, Proxmox, Security Onion, Pi | Allowed to specific ports only |
-| Other VLAN 10 Home devices | Lab management services | Blocked or restricted |
+| M2 MacBook through Raspberry Pi 5 bastion path | pfSense, Proxmox, Security Onion, managed switch | Allowed through approved tunnels |
+| VLAN 10 Home devices | Lab management services | Blocked |
 
 The goal of these firewall boundaries is to reduce lateral movement risk, protect administrative services, and keep offensive testing isolated to approved lab systems.
+
+Detailed VLAN firewall rule hardening and validation evidence is documented in Project 2: VLAN Segmentation and Firewall Rule Validation. Project 1 establishes the baseline architecture, while Project 2 focuses on proving that pfSense rules and switch VLAN configuration enforce the intended segmentation model.
 
 ## Baseline Evidence Checklist
 
@@ -395,7 +400,7 @@ The following screenshots and evidence should be captured for this project befor
 |---|---|---|
 | Network topology diagram | Shows the full lab architecture | Complete |
 | pfSense VLAN interfaces | Proves VLAN gateways are configured | Complete |
-| pfSense firewall rules | Shows segmentation and access control | Complete |
+| pfSense firewall rules | Shows baseline segmentation and access control; detailed hardening evidence is documented in Project 2 | Complete |
 | Managed switch VLAN membership | Shows trunk/access VLAN assignments | Complete |
 | Managed switch mirror/SPAN settings | Shows traffic mirroring to Security Onion | Complete |
 | Proxmox VM list | Shows hosted lab workloads | Complete |
@@ -585,7 +590,7 @@ pfSense provides the gateway and firewall boundary for each VLAN in the lab. The
 
 The Admin/Bastion VLAN is used for controlled management access through the Raspberry Pi 5. Specific allow rules are used to permit the Pi to reach required internal management services such as Proxmox, Security Onion, pfSense, and the managed switch.
 
-The final ADMIN firewall rule set allows the Raspberry Pi 5 bastion to reach only the required management services and supporting network services. The previous broad ADMIN access rule was removed after validating that the Proxmox, pfSense, Security Onion, and managed switch tunnels still functioned through the bastion workflow.
+The final ADMIN firewall rule set allows the Raspberry Pi 5 bastion to reach only the required management services and supporting network services. The previous broad ADMIN access rule was removed after validating that the Proxmox, pfSense, Security Onion, and managed switch tunnels still functioned through the bastion workflow. The Home VLAN is no longer used as a direct management network; lab administration from the MacBook is performed through the Raspberry Pi 5 bastion path.
 
 ## Lessons Learned
 
@@ -596,10 +601,10 @@ Key lessons from this phase include:
 - VLAN segmentation improves control and limits unnecessary communication between systems.
 - pfSense acts as the central enforcement point for routing, firewall rules, DHCP, and logging.
 - Security Onion requires both management access and a dedicated monitoring path to inspect mirrored traffic.
-- Administrative interfaces should be restricted to approved sources instead of being reachable from every VLAN.
+- Administrative interfaces should be centralized through a dedicated Admin/Bastion VLAN instead of being reachable directly from the Home VLAN.
 - Broad administrative access rules should be replaced with specific, service-based allow rules once the required management paths are confirmed.
 - Documentation is a major part of building a professional cybersecurity portfolio, not just the technical configuration.
 
 ## Resume Bullet
 
-Designed and documented a segmented enterprise-style cybersecurity homelab using pfSense, Proxmox, Security Onion, Kali Linux, Linux endpoints, endpoint telemetry, and a Raspberry Pi-based administrative access model.
+Designed and documented a segmented enterprise-style cybersecurity homelab using pfSense, Proxmox, Security Onion, Kali Linux, Linux endpoints, endpoint telemetry, and a Raspberry Pi 5 bastion model for centralized administrative access.
