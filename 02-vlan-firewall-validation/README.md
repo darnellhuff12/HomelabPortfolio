@@ -4,7 +4,7 @@
 
 **Status:** In Progress  
 **Lab Execution:** Firewall rule hardening completed; live traffic validation pending  
-**Documentation:** Updated with final pfSense rule evidence  
+**Documentation:** Updated with pfSense firewall, VLAN, DHCP, and switch evidence  
 **Related Project:** Project 1 - Home Cybersecurity Lab Network Architecture
 
 This project validates the VLAN segmentation and firewall rule design used in my cybersecurity homelab. The goal is to prove that each network segment is isolated by default and that only explicitly approved traffic is allowed between VLANs. As part of this project, the pfSense rules were hardened to enforce a dedicated admin/bastion workflow through the Raspberry Pi 5 on VLAN 50.
@@ -120,11 +120,16 @@ This section will be updated as each test is completed.
 | T03 | VLAN 20 Kali | VLAN 50 Admin | ping / nmap | Blocked | Pending | Pending |
 | T04 | VLAN 20 Kali | pfSense management UI | Browser / curl | Blocked | Pending | Pending |
 | T05 | VLAN 40 Victim | VLAN 50 Admin | ping / ssh | Blocked | Pending | Pending |
-| T06 | VLAN 50 Admin | Proxmox Web UI | Browser | Allowed | Pending | Pending |
-| T07 | VLAN 50 Admin | Security Onion Web UI | Browser | Allowed | Pending | Pending |
-| T08 | VLAN 10 Workstation | Admin services | Browser / ssh | Allowed only where intended | Pending | Pending |
-| T09 | VLAN 30 Security Onion | Internet | ping / update check | Allowed as needed | Pending | Pending |
-| T10 | VLAN 20 Kali | Internet | ping / browser | Allowed or restricted based on lab policy | Pending | Pending |
+| T06 | VLAN 50 Admin | Proxmox Web UI | Browser / tunnel | Allowed | Pending | Pending |
+| T07 | VLAN 50 Admin | Security Onion Web UI | Browser / tunnel | Allowed | Pending | Pending |
+| T08 | VLAN 10 Workstation | VLAN 50 Admin | ping / browser | Blocked | Pending | Pending |
+| T09 | VLAN 10 Workstation | VLAN 30 SIEM | ping / browser | Blocked | Pending | Pending |
+| T10 | VLAN 10 Workstation | VLAN 40 Victim | ping | Blocked | Pending | Pending |
+| T11 | VLAN 50 Admin | Managed Switch Web UI | Browser / tunnel | Allowed | Pending | Pending |
+| T12 | VLAN 30 Security Onion | Internet | ping / update check | Allowed as needed | Pending | Pending |
+| T13 | VLAN 30 Security Onion | Private/internal networks | ping / browser | Blocked | Pending | Pending |
+| T14 | VLAN 20 Kali | Internet | ping / browser | Allowed | Pending | Pending |
+| T15 | VLAN 40 Victim | Internet | ping / browser / update check | Allowed | Pending | Pending |
 
 ### Current Firewall Rule Evidence
 
@@ -138,33 +143,65 @@ The pfSense firewall rules have been updated and documented for each VLAN. Final
 | VLAN 40 VICTIM | Victim internet/DNS access while preventing lateral movement | [rules-vlan40-victim-final.png](evidence/pfsense-rules/rules-vlan40-victim-final.png) |
 | VLAN 50 ADMIN | Raspberry Pi 5 bastion access to specific management services only | [rules-vlan50-admin-final.png](evidence/pfsense-rules/rules-vlan50-admin-final.png) |
 
+### pfSense VLAN and DHCP Evidence
+
+The following screenshots document the pfSense VLAN interface assignments, VLAN tags, DHCP scopes, and firewall aliases used to support the segmentation design.
+
+| Evidence | Description | Screenshot |
+|---|---|---|
+| Interface assignments | Shows WAN, LAN, HOME, ATTACK, SIEM, VICTIM, and ADMIN interface assignments | [pfsense-interface-assignments.png](evidence/pfsense-vlan-config/pfsense-interface-assignments.png) |
+| VLAN assignments | Shows VLAN 10, 20, 30, 40, and 50 configured on the pfSense LAN interface | [pfsense-vlan-assignments.png](evidence/pfsense-vlan-config/pfsense-vlan-assignments.png) |
+| RFC1918 alias | Shows the private/internal network alias used to block unauthorized lateral movement | [pfsense-firewall-aliases.png](evidence/pfsense-vlan-config/pfsense-firewall-aliases.png) |
+| HOME DHCP scope | Shows DHCP configuration for VLAN 10 HOME | [dhcp-vlan10-home-range.png](evidence/pfsense-vlan-config/dhcp-vlan10-home-range.png) |
+| ATTACK DHCP scope | Shows DHCP configuration for VLAN 20 ATTACK | [dhcp-vlan20-attack-range.png](evidence/pfsense-vlan-config/dhcp-vlan20-attack-range.png) |
+| SIEM DHCP scope | Shows DHCP configuration status for VLAN 30 SIEM | [dhcp-vlan30-siem-range.png](evidence/pfsense-vlan-config/dhcp-vlan30-siem-range.png) |
+| VICTIM DHCP scope | Shows DHCP configuration for VLAN 40 VICTIM | [dhcp-vlan40-victim-range.png](evidence/pfsense-vlan-config/dhcp-vlan40-victim-range.png) |
+| ADMIN DHCP scope | Shows DHCP configuration for VLAN 50 ADMIN | [dhcp-vlan50-admin-range.png](evidence/pfsense-vlan-config/dhcp-vlan50-admin-range.png) |
+
+### Managed Switch Evidence
+
+The following screenshots document the managed switch configuration supporting the VLAN design. These screenshots show VLAN membership, PVID assignments, port configuration, and port mirroring/SPAN configuration used for Security Onion visibility.
+
+| Evidence | Description | Screenshot |
+|---|---|---|
+| Switch port configuration | Shows physical switch port configuration and device placement | [switch-port-configuration.png](evidence/switch-vlan-config/switch-port-configuration.png) |
+| Switch port mirroring | Shows mirror/SPAN configuration for Security Onion monitoring | [switch-port-mirroring.png](evidence/switch-vlan-config/switch-port-mirroring.png) |
+| Switch PVID configuration | Shows untagged VLAN assignment behavior for access ports | [switch-pvid-configuration.png](evidence/switch-vlan-config/switch-pvid-configuration.png) |
+| VLAN 1 membership | Shows default/native VLAN membership state | [switch-vlan-membership-vlan1.png](evidence/switch-vlan-config/switch-vlan-membership-vlan1.png) |
+| VLAN 10 membership | Shows HOME VLAN membership | [switch-vlan-membership-vlan10.png](evidence/switch-vlan-config/switch-vlan-membership-vlan10.png) |
+| VLAN 20 membership | Shows ATTACK VLAN membership | [switch-vlan-membership-vlan20.png](evidence/switch-vlan-config/switch-vlan-membership-vlan20.png) |
+| VLAN 30 membership | Shows SIEM VLAN membership | [switch-vlan-membership-vlan30.png](evidence/switch-vlan-config/switch-vlan-membership-vlan30.png) |
+| VLAN 40 membership | Shows VICTIM VLAN membership | [switch-vlan-membership-vlan40.png](evidence/switch-vlan-config/switch-vlan-membership-vlan40.png) |
+| VLAN 50 membership | Shows ADMIN VLAN membership | [switch-vlan-membership-vlan50.png](evidence/switch-vlan-config/switch-vlan-membership-vlan50.png) |
+
 ---
 
-## Evidence To Collect
+## Evidence Collected and Remaining
 
-The following evidence will be collected once the lab is powered on and testing resumes.
+Some evidence has already been collected. Remaining evidence will be collected once the lab server, Kali VM, Security Onion VM, and victim endpoint are available for live testing.
 
-Some pfSense rule evidence has already been collected and stored in `evidence/pfsense-rules/`. Remaining evidence will focus on switch configuration, Proxmox VLAN tagging, Security Onion visibility, and live connectivity testing.
+pfSense firewall rule evidence, pfSense VLAN/DHCP evidence, and managed switch VLAN evidence have been collected and stored under the `evidence/` directory. Remaining evidence will focus on Proxmox VLAN tagging, Security Onion visibility, and live connectivity testing.
 
 ### pfSense Evidence
 
-- VLAN interface assignments
-- DHCP scopes for each VLAN
-- Firewall rule list for VLAN 10
-- Firewall rule list for VLAN 20
-- Firewall rule list for VLAN 30
-- Firewall rule list for VLAN 40
-- Firewall rule list for VLAN 50
-- Default block rule behavior
-- Any aliases used for admin hosts, management ports, or lab networks
+- VLAN interface assignments: collected
+- VLAN tag assignments: collected
+- DHCP scopes for each VLAN: collected
+- Firewall rule list for VLAN 10: collected
+- Firewall rule list for VLAN 20: collected
+- Firewall rule list for VLAN 30: collected
+- Firewall rule list for VLAN 40: collected
+- Firewall rule list for VLAN 50: collected
+- RFC1918 private network alias: collected
+- Default block rule behavior: documented through final explicit block rules
 
 ### Switch Evidence
 
-- VLAN membership table
-- Port PVID configuration
-- Trunk port configuration
-- Access port configuration
-- Mirror/SPAN configuration for Security Onion monitoring
+- VLAN membership table: collected
+- Port PVID configuration: collected
+- Trunk port configuration: collected
+- Access port configuration: collected
+- Mirror/SPAN configuration for Security Onion monitoring: collected
 
 ### Proxmox Evidence
 
@@ -274,6 +311,8 @@ At the time this README was drafted:
 - The Raspberry Pi 5 is being used for admin services, including Omada Controller and Tailscale/bastion access.
 - Project 1 is mostly complete, with endpoint telemetry still pending.
 - Final pfSense firewall rule screenshots have been collected for VLAN 10, VLAN 20, VLAN 30, VLAN 40, and VLAN 50.
+- pfSense interface assignment, VLAN assignment, DHCP scope, and alias screenshots have been collected.
+- Managed switch VLAN membership, PVID, port configuration, and port mirroring screenshots have been collected.
 - Live connectivity validation with Kali, the victim endpoint, Proxmox, and Security Onion is still pending.
 
 ### Firewall Rule Hardening Update
@@ -301,6 +340,7 @@ The current pfSense rules now support the intended segmentation model:
 - ATTACK is allowed to reach VICTIM for controlled lab testing, but is blocked from reaching pfSense services and unauthorized private/internal networks.
 - VICTIM is allowed DNS and internet access but is blocked from initiating lateral movement into private/internal networks.
 - SIEM is allowed DNS and internet access but is blocked from initiating unnecessary private/internal access.
+- pfSense and managed switch screenshots provide supporting evidence that VLAN interfaces, VLAN tags, DHCP scopes, switch membership, PVIDs, and port mirroring are configured to support the segmented design.
 - Final live testing is still needed to confirm allowed and blocked behavior using Kali, the victim endpoint, and Security Onion logs.
 
 ---
@@ -308,8 +348,6 @@ The current pfSense rules now support the intended segmentation model:
 ## Lessons Learned
 
 Initial lessons from the firewall hardening phase:
-
-Potential topics to document after testing:
 
 - How pfSense rule order affected traffic flow
 - Difference between VLAN tagging, untagged access ports, and PVID settings
@@ -328,6 +366,8 @@ Potential topics to document after testing:
 - VLAN design
 - pfSense firewall rule creation
 - Managed switch VLAN configuration
+- DHCP scope documentation
+- Firewall alias design
 - Trunk and access port planning
 - Proxmox VLAN tagging
 - Security Onion monitoring architecture
