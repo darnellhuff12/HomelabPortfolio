@@ -25,9 +25,10 @@ The following systems are considered in scope for this project:
 | Protectli running pfSense | Firewall, routing, DHCP, DNS, VLAN segmentation | In scope |
 | Managed switch | VLAN tagging, trunking, access ports, SPAN/mirror traffic | In scope |
 | Dell PowerEdge R730xd running Proxmox | Virtualization host for lab workloads | In scope |
+| Dell iDRAC | Out-of-band server management interface | In scope |
 | Kali Linux VM | Authorized attacker workstation | In scope |
 | Security Onion VM | SIEM/network security monitoring platform | In scope |
-| 2016 MacBook Air running Ubuntu | Victim host and VirtualBox target platform | In scope |
+| 2016 MacBook Air running Ubuntu | Victim host, VirtualBox target platform, and Windows victim VM host | In scope |
 | Raspberry Pi 5 | Admin device, Omada Controller, Tailscale/bastion host | In scope |
 | M2 MacBook Air | Primary administration and documentation workstation | In scope |
 
@@ -69,6 +70,7 @@ The homelab is designed as a small enterprise-style purple-team environment. It 
 | Protectli running pfSense | Firewall, router, DHCP/DNS, VLAN gateway | Enforces segmentation and logs allowed/blocked traffic |
 | Managed Switch | VLAN trunking, access ports, mirror/SPAN port | Connects physical devices and forwards mirrored traffic to Security Onion |
 | Dell PowerEdge R730xd | Proxmox virtualization host | Runs core lab VMs such as Kali and Security Onion |
+| Dell iDRAC | Out-of-band server management | Provides remote server power control, console access, and hardware management through the Admin/Bastion access path |
 | Raspberry Pi 5 | Admin/Bastion device, Omada Controller, Tailscale node | Provides controlled administrative access and network management |
 | TP-Link Omada AP | Wireless access point | Provides wireless connectivity for approved home/admin devices |
 
@@ -78,7 +80,7 @@ The homelab is designed as a small enterprise-style purple-team environment. It 
 |---|---|---|
 | Kali Linux VM | Authorized attacker workstation | Used for controlled scanning, enumeration, and adversary simulation |
 | Security Onion VM | SIEM/Network Security Monitoring platform | Provides Zeek, Suricata, alert triage, Hunt, and PCAP visibility |
-| 2016 MacBook Air running Ubuntu | Victim host / VirtualBox platform | Serves as an approved target system for lab testing |
+| 2016 MacBook Air running Ubuntu | Victim host / VirtualBox platform | Serves as an approved target system and hosts a Windows victim VM for lab testing |
 | M2 MacBook Air | Primary admin workstation | Used for documentation, SSH, screenshots, GitHub updates, and lab administration |
 
 ### Design Summary
@@ -121,7 +123,7 @@ At a high level, traffic moves through the lab in the following way:
 2. The managed switch connects to pfSense and carries VLAN-tagged traffic to lab devices and virtualized workloads.
 3. The Dell PowerEdge R730xd runs Proxmox and hosts virtual machines such as Kali Linux and Security Onion.
 4. Kali Linux generates controlled attacker traffic from the attacker VLAN.
-5. Victim systems receive approved test traffic on the victim VLAN.
+5. Victim systems, including the Ubuntu victim host and Windows victim VM, receive approved test traffic on the victim VLAN.
 6. Security Onion receives monitored traffic through its management and monitoring interfaces.
 7. The Raspberry Pi 5 supports administrative access, Omada Controller services, and Tailscale-based remote access.
 8. The M2 MacBook Air is used as the main workstation for administration, documentation, and evidence collection.
@@ -160,6 +162,7 @@ Most endpoint systems receive IP addresses from pfSense DHCP pools. Infrastructu
 | Security Onion management interface | 30 | Static | SIEM web UI and management should remain predictable |
 | Security Onion monitoring interface | Mirror/SPAN feed | No IP or monitoring-only | Used to observe mirrored traffic |
 | Ubuntu victim host | 40 | DHCP or reservation | Target IP should be documented before simulations |
+| Windows victim VM | 40 | DHCP or reservation | Windows endpoint target hosted in VirtualBox on the Ubuntu victim host |
 | Raspberry Pi 5 | 50 | Static or DHCP reservation | Admin/Bastion, Tailscale, and Omada Controller |
 | M2 MacBook Air | 10 or approved admin path | DHCP | Primary workstation for administration and documentation |
 
@@ -185,6 +188,7 @@ Examples of management services include:
 |---|---|
 | pfSense web UI | Admin VLAN through the Raspberry Pi 5 bastion path |
 | Proxmox web UI | Admin VLAN through the Raspberry Pi 5 bastion path |
+| Dell iDRAC web UI / remote console | Admin VLAN through the Raspberry Pi 5 bastion path |
 | Security Onion web UI | Admin VLAN through the Raspberry Pi 5 bastion path |
 | Managed switch web UI | Admin VLAN through the Raspberry Pi 5 bastion path |
 | Raspberry Pi SSH | Tailscale and/or Admin VLAN only |
@@ -203,9 +207,11 @@ The following table documents the major systems used in the homelab, their assig
 | Protectli Vault | Firewall/router | pfSense | All VLAN gateways | Static | Routes traffic, enforces firewall rules, provides DHCP/DNS, logs allowed and blocked flows |
 | Netgear Managed Switch | Switching/VLAN transport | Switch firmware | Multiple | Static/DHCP reservation | Provides VLAN tagging, access ports, trunks, and SPAN/mirror traffic for monitoring |
 | Dell PowerEdge R730xd | Virtualization host | Proxmox VE | Management/trunked VLANs | Static/DHCP reservation | Hosts lab VMs for attacker, SIEM, and future target systems |
+| Dell iDRAC | Out-of-band management interface | iDRAC firmware | 50 | Static/DHCP reservation | Provides remote console access, power control, and hardware management for the Dell server through the Admin/Bastion VLAN |
 | Kali Linux VM | Attacker workstation | Kali Linux | 20 | DHCP/reservation | Generates controlled offensive activity for detection and investigation practice |
 | Security Onion VM | SIEM/NSM platform | Security Onion | 30 + monitor interface | Static for management | Provides Zeek, Suricata, Hunt, alerts, PCAP, and network telemetry |
-| 2016 MacBook Air | Victim host with endpoint telemetry | Ubuntu Linux | 40 | DHCP/reservation | Approved lab target with Elastic Agent, Sysmon-style telemetry, authentication logs, and VirtualBox target platform |
+| 2016 MacBook Air | Victim host with endpoint telemetry | Ubuntu Linux | 40 | DHCP/reservation | Approved lab target with Elastic Agent, Sysmon-style telemetry, authentication logs, x11vnc access through SSH tunneling, and VirtualBox target platform |
+| Windows Victim VM | Windows endpoint target | Windows 10 VM on VirtualBox | 40 | DHCP/reservation | Approved Windows target used to validate attacker-to-victim connectivity, host firewall behavior, and future endpoint telemetry |
 | Raspberry Pi 5 | Admin/Bastion device | Raspberry Pi OS/Linux | 50 | Static/DHCP reservation | Runs Omada Controller, supports Tailscale, and can serve as a jump/bastion host |
 | M2 MacBook Air | Primary workstation | macOS | 10 or approved admin path | DHCP | Used for administration, SSH, screenshots, documentation, and GitHub updates |
 | TP-Link Omada AP | Wireless access point | Omada firmware | 10 / managed by controller | DHCP/reservation | Provides wireless connectivity and supports managed WLAN design |
@@ -215,7 +221,7 @@ The following table documents the major systems used in the homelab, their assig
 
 This inventory separates systems by function so that each device has a clear role in the lab. The attacker system, victim systems, SIEM platform, home devices, and administrative services are intentionally separated to support controlled testing and reduce unnecessary exposure.
 
-The device inventory will be updated as additional lab systems are added, such as Windows targets, vulnerable Linux VMs, Active Directory systems, honeypots, or additional endpoint logging agents.
+The device inventory will continue to be updated as additional lab systems are added, such as vulnerable Linux VMs, Active Directory systems, honeypots, or additional endpoint logging agents. A Windows victim VM has been added as the first Windows endpoint target on the Victim VLAN.
 
 ## Monitoring and Visibility Design
 
@@ -260,7 +266,7 @@ The lab should provide visibility into the following activity:
 | DNS lookups | Zeek DNS logs |
 | HTTP requests | Zeek HTTP logs, possible Suricata alerts |
 | HTTPS connections | Zeek SSL/TLS metadata, connection logs |
-| Nmap scans | Zeek connection logs, Suricata alerts, traffic bursts |
+| Nmap scans | Zeek connection logs, Suricata alerts, traffic bursts, host discovery evidence |
 | SSH attempts | Zeek connection logs, victim authentication logs, pfSense logs |
 | Blocked cross-VLAN access | pfSense firewall logs |
 | Administrative access attempts | pfSense logs, service logs, endpoint logs |
@@ -285,7 +291,7 @@ Network monitoring helps show communication between systems, but endpoint teleme
 
 | Activity | Network Visibility | Endpoint Visibility |
 |---|---|---|
-| Ping or scan traffic | Security Onion, Zeek, Suricata | May show related network connections |
+| Ping or scan traffic | Security Onion, Zeek, Suricata | Windows Firewall may block ICMP by default; endpoint firewall state explains why a host can be up while ping fails |
 | SSH connection attempt | Security Onion, pfSense logs | Auth logs, Elastic Agent, Sysmon |
 | Successful login | Limited network evidence | Strong endpoint evidence |
 | Command execution | Usually not visible on the network | Elastic Agent, Sysmon, shell/system logs |
@@ -313,6 +319,7 @@ Administrative services are intentionally separated from normal attacker, victim
 |---|---|---|---|
 | pfSense Web UI | Protectli firewall | Firewall and VLAN management | Admin VLAN or approved workstation path |
 | Proxmox Web UI | Dell R730xd | VM and host management | Admin VLAN or bastion path |
+| Dell iDRAC Web UI / Remote Console | Dell R730xd | Out-of-band server management, power control, and remote console access | Admin VLAN through the Raspberry Pi 5 bastion path with web and console ports tunneled |
 | Security Onion Web UI | Security Onion VM | SIEM alerts, Hunt, dashboards, PCAP | Admin VLAN or approved workstation path |
 | Raspberry Pi SSH | Raspberry Pi 5 | Bastion/admin access and service management | Admin VLAN and/or Tailscale |
 | Omada Controller | Raspberry Pi 5 | Wireless/AP management | Admin VLAN or approved management source |
@@ -343,6 +350,7 @@ The management model is designed around the following goals:
 | Source | Destination | Expected Result |
 |---|---|---|
 | Raspberry Pi 5 on VLAN 50 | Proxmox Web UI | Allowed |
+| Raspberry Pi 5 on VLAN 50 | Dell iDRAC Web UI / Remote Console ports | Allowed |
 | Raspberry Pi 5 on VLAN 50 | Security Onion Web UI | Allowed |
 | Raspberry Pi 5 on VLAN 50 | pfSense Web UI | Allowed |
 | Raspberry Pi 5 on VLAN 50 | Managed switch Web UI | Allowed |
@@ -356,7 +364,7 @@ The management model is designed around the following goals:
 
 The M2 MacBook Air remains on the Home VLAN for normal use, documentation, GitHub updates, screenshots, and research. Direct access from the Home VLAN to lab management services is blocked as part of the segmentation model.
 
-Administrative access to pfSense, Proxmox, Security Onion, the managed switch, and other lab management interfaces is performed through the Raspberry Pi 5 on the Admin/Bastion VLAN. The MacBook connects to the Pi using Tailscale and SSH tunneling, and the Pi then reaches the approved internal management services.
+Administrative access to pfSense, Proxmox, Security Onion, iDRAC, the managed switch, and other lab management interfaces is performed through the Raspberry Pi 5 on the Admin/Bastion VLAN. The MacBook connects to the Pi using Tailscale and SSH tunneling, and the Pi then reaches the approved internal management services. The iDRAC tunnel includes both the standard web interface and the virtual console service so that server power control and remote console access remain available through the approved bastion path.
 
 This design keeps the workstation convenient to use while avoiding broad Home VLAN access into sensitive lab infrastructure. It also creates a more realistic enterprise-style model where management access is centralized through a dedicated administrative network and bastion host.
 
@@ -385,7 +393,7 @@ pfSense is the primary enforcement point between VLANs. Each VLAN has a dedicate
 | VLAN 40 Victim | VLAN 50 Admin/Bastion | Blocked |
 | VLAN 40 Victim | VLAN 10 Home | Blocked |
 | VLAN 50 Admin/Bastion | Management interfaces | Allowed as needed |
-| M2 MacBook through Raspberry Pi 5 bastion path | pfSense, Proxmox, Security Onion, managed switch | Allowed through approved tunnels |
+| M2 MacBook through Raspberry Pi 5 bastion path | pfSense, Proxmox, Security Onion, iDRAC, managed switch | Allowed through approved tunnels |
 | VLAN 10 Home devices | Lab management services | Blocked |
 
 The goal of these firewall boundaries is to reduce lateral movement risk, protect administrative services, and keep offensive testing isolated to approved lab systems.
@@ -409,6 +417,7 @@ The following screenshots and evidence should be captured for this project befor
 | Security Onion dashboard/login | Shows SIEM access is functional | Complete |
 | Security Onion Hunt/Alerts pages | Shows monitoring and investigation interfaces | Complete |
 | Raspberry Pi 5 network settings | Shows Admin/Bastion VLAN placement and Tailscale reachability | Complete |
+| iDRAC Admin VLAN access | Shows out-of-band server management reachable only through the approved Admin/Bastion path | Complete |
 | Elastic Agent/Sysmon status on victim | Shows endpoint telemetry setup | Pending |
 
 Screenshots will be sanitized before publishing. Sensitive information such as public IP addresses, passwords, serial numbers, tokens, and unrelated personal or employer information will not be included.
@@ -493,7 +502,7 @@ The Raspberry Pi 5 is used as an administrative system on the Admin/Bastion VLAN
 
 ### Admin/Bastion Access Notes
 
-The Raspberry Pi 5 is positioned on VLAN 50 as an administrative access point. Tailscale provides encrypted remote access to the Pi, while SSH tunneling is used to reach selected internal management interfaces such as Proxmox, pfSense, Security Onion, and the managed switch.
+The Raspberry Pi 5 is positioned on VLAN 50 as an administrative access point. Tailscale provides encrypted remote access to the Pi, while SSH tunneling is used to reach selected internal management interfaces such as Proxmox, pfSense, Security Onion, iDRAC, and the managed switch.
 
 This design keeps sensitive management services private and avoids direct WAN exposure. Instead of exposing Proxmox, pfSense, Security Onion, or the managed switch to the public internet, remote access is routed through a controlled bastion path.
 
@@ -513,7 +522,7 @@ Internal management interface
 
 ### Repeatable Remote Access Scripts
 
-To simplify remote administration, local shell scripts were created on the M2 MacBook Air to establish SSH tunnels through the Raspberry Pi 5 bastion. These scripts allow approved management interfaces to be reached without exposing pfSense, Proxmox, Security Onion, or the managed switch directly to the internet.
+To simplify remote administration, local shell scripts were created on the M2 MacBook Air to establish SSH tunnels through the Raspberry Pi 5 bastion. These scripts allow approved management interfaces to be reached without exposing pfSense, Proxmox, Security Onion, iDRAC, or the managed switch directly to the internet.
 
 | Script | Purpose |
 |---|---|
@@ -521,9 +530,11 @@ To simplify remote administration, local shell scripts were created on the M2 Ma
 | [pfsense-tunnel.sh](scripts/pfsense-tunnel.sh) | Opens an SSH tunnel to the pfSense web interface |
 | [security-onion-tunnel.sh](scripts/security-onion-tunnel.sh) | Opens a Security Onion tunnel using a temporary loopback alias |
 | [switch-tunnel.sh](scripts/switch-tunnel.sh) | Opens a managed switch tunnel using a temporary loopback alias |
+| [idrac-tunnel.sh](scripts/idrac-tunnel.sh) | Opens SSH tunnels to the Dell iDRAC web interface and virtual console port |
+| [victim-vnc-tunnel.sh](scripts/victim-vnc-tunnel.sh) | Opens a VNC tunnel through the Raspberry Pi 5 jump host to the Ubuntu victim host |
 | [homelab-tunnels.sh](scripts/homelab-tunnels.sh) | Opens all primary management tunnels together |
 
-Some internal web interfaces, such as Security Onion and the managed switch, expect to be accessed through their real management IP addresses. For those services, the tunnel scripts create temporary loopback aliases on the MacBook and remove them when the tunnel session ends.
+Some internal web interfaces, such as Security Onion, the managed switch, and iDRAC, expect to be accessed through their real management IP addresses. For those services, the tunnel scripts create temporary loopback aliases on the MacBook and remove them when the tunnel session ends. Proxmox, pfSense, and victim VNC access use localhost-based forwards and do not require loopback aliases.
 
 The scripts use placeholders in this public documentation to avoid exposing usernames, Tailscale IP addresses, and sensitive internal host details.
 
@@ -541,6 +552,20 @@ During remote access testing, the managed switch web interface also worked more 
 
 This allowed the switch interface to remain private while still being reachable through the approved bastion workflow.
 
+### iDRAC Virtual Console Tunnel Note
+
+During remote access testing, the Dell iDRAC web interface was reachable through the bastion tunnel, but launching the virtual console attempted to open the iDRAC management IP on the console service port. Because the M2 MacBook was not directly on the Admin/Bastion VLAN, the browser could not reach the iDRAC console URL without an additional tunnel.
+
+The iDRAC tunnel was updated to forward both the standard iDRAC web interface and the virtual console service through the Raspberry Pi 5 bastion. A temporary loopback alias allows the browser to continue using the iDRAC management IP while the traffic is actually carried through the SSH tunnel.
+
+This preserves the secure access model while keeping out-of-band server management available remotely.
+
+### Victim VNC Tunnel Note
+
+The Ubuntu victim host runs x11vnc bound to localhost on the victim system. Because the VNC service listens on the victim host's loopback address rather than directly on the Victim VLAN interface, the working tunnel path uses the Raspberry Pi 5 as a jump host and then SSHes into the victim host before forwarding the victim's local VNC service.
+
+This is more secure than exposing VNC directly on the Victim VLAN because the VNC service remains bound to localhost and is only reachable through the approved SSH tunnel.
+
 ### Access Model Summary
 
 This access model demonstrates a secure administrative workflow:
@@ -548,8 +573,9 @@ This access model demonstrates a secure administrative workflow:
 - Management interfaces are not exposed directly to the public internet.
 - Tailscale provides encrypted access only to the Raspberry Pi 5 bastion.
 - SSH tunnels are used to reach specific internal services.
-- Loopback aliases are used only when an internal web interface expects its real management IP.
+- Loopback aliases are used only when an internal web interface expects its real management IP, such as Security Onion, the managed switch, and iDRAC.
 - Temporary aliases are removed after tunnel sessions end.
+- Victim VNC access is performed through an SSH jump tunnel and does not expose VNC directly on the Victim VLAN.
 - Future firewall hardening will restrict the Raspberry Pi to only the specific internal management ports required for administration.
 
 ## Evidence: Security Onion Baseline Access
