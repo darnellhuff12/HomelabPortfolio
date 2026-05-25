@@ -223,6 +223,26 @@ E06-security-onion-tcpdump-traffic.png
 E07-security-onion-hunt-results.png
 ```
 
+## Key Evidence
+
+### Switch Mirroring Configuration
+
+The managed switch was configured to mirror traffic from `g1`, `g2`, and `g4` to destination port `g3`, which connects to the Security Onion sniffing interface.
+
+![Switch mirror configuration](evidence/E04-switch-mirror-configuration.png)
+
+### Packet-Level Validation
+
+Security Onion confirmed packet-level visibility with `tcpdump`, showing mirrored VLAN traffic from the attacker and victim networks reaching the sensor interface.
+
+![Security Onion tcpdump validation](evidence/E06-security-onion-tcpdump-traffic.png)
+
+### Security Onion Hunt Results
+
+Security Onion Hunt displayed Suricata ICMP events for the controlled Kali-to-victim traffic, confirming that the observed packets were processed into searchable security telemetry.
+
+![Security Onion Hunt results](evidence/E07-security-onion-hunt-results.png)
+
 ## Findings
 
 The visibility baseline was successful. Security Onion was reachable through the approved management workflow, core Security Onion containers were running, and the VM had separate interfaces for management and monitoring.
