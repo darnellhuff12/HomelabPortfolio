@@ -52,7 +52,7 @@ The diagram below shows the current homelab architecture, including pfSense, VLA
 | 01 | [Architecture and Segmentation](01-architecture-and-segmentation/) | Lab design, VLANs, device inventory, monitoring architecture | Complete |
 | 02 | [VLAN Firewall Validation](02-vlan-firewall-validation/) | pfSense rules, allowed/blocked traffic policy, VLAN evidence, Security Onion visibility, and management-plane validation | Complete |
 | 03 | [Proxmox Virtualization Build](03-proxmox-virtualization-build/) | Proxmox host management, VLAN-aware bridges, VM placement, Security Onion sniffing interface, storage validation, and bastion-based access | Complete |
-| 04 | [Security Onion Visibility Baseline](04-security-onion-visibility-baseline/) | Zeek, Suricata, Hunt, PCAP, and basic traffic validation | Evidence Collected |
+| 04 | [Security Onion Visibility Baseline](04-security-onion-visibility-baseline/) | Security Onion sensor health, switch mirroring, tcpdump validation, Suricata ICMP events, and Hunt visibility | Complete |
 | 05 | [Network Reconnaissance Detection](05-network-reconnaissance-detection/) | Nmap, ping sweeps, service discovery, and SIEM visibility | Planned |
 | 06 | [Service Enumeration and Exposure Review](06-service-enumeration-and-exposure-review/) | Banner grabbing, exposed services, and hardening recommendations | Planned |
 | 07 | [SSH Brute-Force Detection](07-ssh-brute-force-detection/) | Controlled SSH login attempts and incident-style investigation | Planned |
@@ -78,9 +78,9 @@ The diagram below shows the current homelab architecture, including pfSense, VLA
 | Firewall hardening | Validated in Project 2 with allowed-path testing, blocked-path testing, and pfSense firewall log evidence |
 | Admin access model | Centralized through Raspberry Pi 5 on VLAN 50 using Tailscale/SSH tunnels; Proxmox, pfSense, iDRAC, and switch management are isolated behind the Admin/Bastion workflow |
 | Proxmox virtualization | Completed in Project 3; Proxmox runs on the Dell R730xd with host management isolated on Admin VLAN 50 using `vmbr0.50`, Kali placed on VLAN 20, Security Onion using VLAN 30 management plus a dedicated sniffing interface, storage validated, and management access confirmed through the Raspberry Pi 5 bastion workflow |
-| Security Onion visibility | Hunt, Suricata alert, and packet-level validation completed for Kali-to-victim traffic in Project 2; Security Onion VM placement and sniffing-interface separation documented in Project 3; broader baseline documentation continues in Project 4 |
+| Security Onion visibility | Completed in Project 4; Security Onion dashboard access, service health, management/sniffing interface separation, switch mirroring from `g1`, `g2`, and `g4` to `g3`, packet-level `tcpdump` validation, and Hunt-based Suricata ICMP event review were documented for controlled Kali-to-victim traffic |
 | Endpoint telemetry | Deferred to future detection and host-visibility projects |
-| Live traffic validation | Kali-to-victim traffic, Security Onion visibility, Kali-to-Admin blocking, Admin/Bastion access, and pfSense firewall logging validated in Project 2 |
+| Live traffic validation | Kali-to-victim traffic, Security Onion packet capture visibility, Security Onion Hunt results, Kali-to-Admin blocking, Admin/Bastion access, and pfSense firewall logging validated across Projects 2 and 4 |
 
 
 ## Documentation Standard
@@ -124,7 +124,7 @@ Screenshots and logs are sanitized before publishing. Passwords, tokens, public 
 - Centralizing administrative access through a bastion workflow
 - Building, hardening, validating, and documenting firewall boundaries
 - Running controlled adversary simulations
-- Validating SIEM and network visibility through Hunt alerts, packet capture, and firewall logs
+- Validating SIEM and network visibility through Security Onion dashboards, Hunt results, Suricata alerts, packet capture, switch mirroring, and firewall logs
 - Collecting endpoint telemetry
 - Mapping activity to MITRE ATT&CK
 - Writing detection logic
@@ -134,4 +134,4 @@ Screenshots and logs are sanitized before publishing. Passwords, tokens, public 
 
 ## Highlight Resume Bullet
 
-Built, documented, and validated a segmented purple-team cybersecurity homelab using pfSense, Proxmox, Security Onion, Kali Linux, Linux and Windows victim endpoints, VLAN isolation, iDRAC out-of-band management, Proxmox Admin VLAN isolation through `vmbr0.50`, VLAN-tagged lab workloads, a dedicated Security Onion sniffing interface, and a Raspberry Pi 5 bastion workflow to support adversary simulation, SIEM monitoring, firewall validation, detection engineering, and incident response practice.
+Built, documented, and validated a segmented purple-team cybersecurity homelab using pfSense, Proxmox, Security Onion, Kali Linux, Linux and Windows victim endpoints, VLAN isolation, iDRAC out-of-band management, Proxmox Admin VLAN isolation through `vmbr0.50`, VLAN-tagged lab workloads, a dedicated Security Onion sniffing interface, managed-switch port mirroring, Suricata/Hunt visibility validation, packet-level `tcpdump` analysis, and a Raspberry Pi 5 bastion workflow to support adversary simulation, SIEM monitoring, firewall validation, detection engineering, and incident response practice.
