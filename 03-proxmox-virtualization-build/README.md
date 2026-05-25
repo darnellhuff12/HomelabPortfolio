@@ -260,51 +260,51 @@ Use this checklist to confirm that the virtualization build is complete and port
 
 ### Proxmox Host Validation
 
-- [ ] Proxmox web UI is reachable through the Admin VLAN
-- [ ] Proxmox host management IP is `192.168.50.10`
-- [ ] Proxmox management uses `vmbr0.50`
-- [ ] Proxmox is not directly managed from attacker or victim VLANs
-- [ ] Hostname and node information are visible in the Proxmox dashboard
-- [ ] Storage is visible and healthy
-- [ ] CPU and memory resources are visible
+- [x] Proxmox web UI is reachable through the Admin VLAN
+- [x] Proxmox host management IP is `192.168.50.10`
+- [x] Proxmox management uses `vmbr0.50`
+- [x] Proxmox is not directly managed from attacker or victim VLANs
+- [x] Hostname and node information are visible in the Proxmox dashboard
+- [x] Storage is visible and healthy
+- [x] CPU and memory resources are visible
 
 ### Network Validation
 
-- [ ] `vmbr0` is configured as the primary bridge
-- [ ] VLAN-aware networking is enabled where needed
-- [ ] VLAN 20 is available for Kali
-- [ ] VLAN 30 is available for Security Onion management
-- [ ] VLAN 40 is reserved for victim systems
-- [ ] VLAN 50 is used for management services
-- [ ] Proxmox host can reach its gateway on VLAN 50
-- [ ] Admin workstation can access Proxmox through the Pi 5 tunnel
+- [x] `vmbr0` is configured as the primary bridge
+- [x] VLAN-aware networking is enabled where needed
+- [x] VLAN 20 is available for Kali
+- [x] VLAN 30 is available for Security Onion management
+- [x] VLAN 40 is reserved for victim systems
+- [x] VLAN 50 is used for management services
+- [x] Proxmox host can reach its gateway on VLAN 50
+- [x] Admin workstation can access Proxmox through the Pi 5 tunnel
 
 ### Kali VM Validation
 
-- [ ] Kali VM exists in Proxmox
-- [ ] Kali VM is assigned to VLAN 20
-- [ ] Kali receives the correct VLAN 20 IP address
-- [ ] Kali can reach allowed lab targets based on pfSense rules
-- [ ] Kali traffic can be used for Project 2 monitoring validation
+- [x] Kali VM exists in Proxmox
+- [x] Kali VM is assigned to VLAN 20
+- [x] Kali receives the correct VLAN 20 IP address
+- [x] Kali can reach allowed lab targets based on pfSense rules
+- [x] Kali traffic can be used for Project 2 monitoring validation
 
 ### Security Onion VM Validation
 
-- [ ] Security Onion VM exists in Proxmox
-- [ ] Security Onion management interface is assigned to VLAN 30
-- [ ] Security Onion has a dedicated sniffing interface
-- [ ] Sniffing interface is not used for management access
-- [ ] Security Onion receives mirrored traffic from the switch
-- [ ] Security Onion dashboards/logs can be accessed through the approved management path
+- [x] Security Onion VM exists in Proxmox
+- [x] Security Onion management interface is assigned to VLAN 30
+- [x] Security Onion has a dedicated sniffing interface
+- [x] Sniffing interface is not used for management access
+- [x] Security Onion receives mirrored traffic from the switch
+- [x] Security Onion dashboards/logs can be accessed through the approved management path
 
 ### Bastion Access Validation
 
-- [ ] Raspberry Pi 5 is on VLAN 50
-- [ ] SSH access to the Pi 5 works locally or through Tailscale
-- [ ] Proxmox tunnel works from the M2 MacBook Air
-- [ ] Security Onion tunnel works from the M2 MacBook Air
-- [ ] pfSense tunnel works from the M2 MacBook Air
-- [ ] iDRAC tunnel works from the M2 MacBook Air
-- [ ] Switch management tunnel works from the M2 MacBook Air
+- [x] Raspberry Pi 5 is on VLAN 50
+- [x] SSH access to the Pi 5 works locally or through Tailscale
+- [x] Proxmox tunnel works from the M2 MacBook Air
+- [x] Security Onion tunnel works from the M2 MacBook Air
+- [x] pfSense tunnel works from the M2 MacBook Air
+- [x] iDRAC tunnel works from the M2 MacBook Air
+- [x] Switch management tunnel works from the M2 MacBook Air
 
 ---
 
@@ -325,8 +325,7 @@ Recommended folder structure:
     ├── 05-kali-vlan20-ip-validation.png
     ├── 06-security-onion-vlan30-and-sniffing-hardware.png
     ├── 07-proxmox-storage-summary.png
-    ├── 08-pi-bastion-tunnel-validation.png
-    └── 09-admin-vlan-access-validation.png
+    └── 08-pi-bastion-tunnel-validation.png
 ```
 
 ### Required Screenshots
@@ -341,7 +340,6 @@ Recommended folder structure:
 | 06 | Security Onion VM hardware/network settings | Shows Security Onion management on `vmbr0` with VLAN tag 30 and a second interface on `vmbr1` for sniffing/monitoring |
 | 07 | Proxmox storage summary | Shows available virtualization storage capacity in `local-lvm` |
 | 08 | Pi bastion tunnel validation | Shows the homelab tunnel workflow used to access management interfaces through the Raspberry Pi 5 bastion |
-| 09 | Admin VLAN access validation | Shows Proxmox being accessed through `https://localhost:8006`, validating the tunneled management access path |
 
 ### Optional Screenshots
 
@@ -404,12 +402,7 @@ This screenshot shows the `local-lvm` storage pool and available virtualization 
 ![Pi Bastion Tunnel Validation](evidence/08-pi-bastion-tunnel-validation.png)
 
 This screenshot shows the homelab tunnel workflow used to access Proxmox, pfSense, Security Onion, the switch, and iDRAC through the Raspberry Pi 5 bastion host.
-
-### Admin VLAN Access Validation
-
-![Admin VLAN Access Validation](evidence/09-admin-vlan-access-validation.png)
-
-This screenshot shows Proxmox being accessed through `https://localhost:8006`, validating that the management interface is reached through the approved tunnel path rather than direct exposure to the general home network.
+This evidence also supports the Admin VLAN access model because Proxmox is accessed through the bastion tunnel rather than being exposed directly to the general home network.
 
 ## Suggested Commands for Evidence
 
