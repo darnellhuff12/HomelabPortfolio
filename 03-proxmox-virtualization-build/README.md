@@ -4,12 +4,11 @@
 
 ## Objective
 
-This project documents the virtualization layer of my cybersecurity homelab using **Proxmox VE** on a **Dell PowerEdge R730xd**. The goal of this project is to show how the lab compute environment was built to support segmented attacker, victim, monitoring, and management systems while maintaining secure administrative access through a Raspberry Pi 5 bastion host.
+This project documents the completed virtualization layer of my cybersecurity homelab using **Proxmox VE** on a **Dell PowerEdge R730xd**. The purpose of this project was to build a scalable compute platform capable of hosting segmented attacker, monitoring, victim, and management systems while keeping administrative access restricted through the Admin VLAN and Raspberry Pi 5 bastion host.
 
+Project 1 established the segmented network foundation by separating home, attacker, victim, SIEM, and management traffic into controlled VLANs. Project 2 validated that traffic from Kali and the victim network could be observed by Security Onion. Project 3 completes the next layer of the lab by documenting how Proxmox hosts and connects the virtual systems used for future red-team, blue-team, and detection-engineering projects.
 
-Project 1 established the segmented network foundation by separating home, attacker, victim, SIEM, and management traffic into controlled VLANs. Project 2 validated that traffic from Kali and the victim network could be observed by Security Onion. Project 3 builds on that foundation by documenting the Proxmox virtualization layer that hosts and connects the lab systems used for future red-team, blue-team, and detection-engineering projects.
-
-The completed build demonstrates:
+This completed build demonstrates:
 
 - Proxmox VE deployed on enterprise server hardware
 - Dedicated host management on **Admin VLAN 50**
@@ -23,7 +22,7 @@ The completed build demonstrates:
 ---
 ## Project Role in the Portfolio
 
-This project is the virtualization foundation for the rest of the homelab portfolio. The goal is not just to show that Proxmox was installed, but to show how the hypervisor supports the segmented security lab built in Projects 1 and 2.
+This project serves as the virtualization foundation for the rest of the homelab portfolio. The goal was not only to install Proxmox, but to document how the hypervisor supports the segmented security lab built in Projects 1 and 2.
 
 In the current lab design:
 
@@ -310,7 +309,7 @@ Use this checklist to confirm that the virtualization build is complete and port
 
 ## Evidence and Screenshot Checklist
 
-Create an `evidence/` folder inside this project directory and store screenshots there.
+The evidence for this project is stored in the `evidence/` folder. Each screenshot below is linked and embedded in the Evidence section so the build can be reviewed directly from the README.
 
 Recommended folder structure:
 
@@ -357,52 +356,66 @@ Recommended folder structure:
 
 ## Evidence
 
-### Proxmox Host Summary
+The screenshots below document the completed Proxmox virtualization build and provide clickable links to each evidence file.
+
+| ID | Evidence | Description |
+|---|---|---|
+| 01 | [Proxmox Node Summary](evidence/01-proxmox-node-summary.png) | Confirms the Dell R730xd is running Proxmox and shows node health, resource usage, uptime, and storage status. |
+| 02 | [Proxmox Network Configuration](evidence/02-proxmox-network-config.png) | Confirms `vmbr0`, `vmbr0.50`, the Admin VLAN 50 management address, the VLAN 50 gateway, VLAN-aware networking, and the dedicated `vmbr1` monitoring bridge. |
+| 03 | [Proxmox VM List](evidence/03-proxmox-vm-list.png) | Shows Kali Linux and Security Onion deployed as VMs on the Proxmox host. |
+| 04 | [Kali VLAN 20 Hardware](evidence/04-kali-vlan20-hardware.png) | Shows the Kali VM attached to `vmbr0` with VLAN tag 20 for the attacker network. |
+| 05 | [Kali VLAN 20 IP Validation](evidence/05-kali-vlan20-ip-validation.png) | Confirms Kali received `192.168.20.100/24` on the attacker VLAN. |
+| 06 | [Security Onion VLAN 30 and Sniffing Hardware](evidence/06-security-onion-vlan30-and-sniffing-hardware.png) | Shows Security Onion management on VLAN 30 and a second interface on `vmbr1` for sniffing/monitoring traffic. |
+| 07 | [Proxmox Storage Summary](evidence/07-proxmox-storage-summary.png) | Shows `local-lvm` storage capacity available for current and future lab workloads. |
+| 08 | [Pi Bastion Tunnel Validation](evidence/08-pi-bastion-tunnel-validation.png) | Shows the tunnel workflow used to access Proxmox, pfSense, Security Onion, the switch, and iDRAC through the Raspberry Pi 5 bastion. |
+
+### 01 - Proxmox Node Summary
 
 ![Proxmox Node Summary](evidence/01-proxmox-node-summary.png)
 
-This screenshot shows the Proxmox node dashboard, including host uptime, CPU usage, memory usage, storage usage, and overall node health. It also shows Proxmox being accessed from `localhost`, which aligns with the tunneled management access model.
+This screenshot confirms that the Dell R730xd is running Proxmox and provides a completed host-level view of CPU usage, memory usage, storage usage, uptime, and node health. The Proxmox web interface is accessed through the local tunneled management workflow, supporting the secure access model used throughout the lab.
 
-### Proxmox Network Configuration
+### 02 - Proxmox Network Configuration
 
 ![Proxmox Network Configuration](evidence/02-proxmox-network-config.png)
 
-This screenshot validates the host networking design. The Proxmox management interface is assigned to `vmbr0.50` with `192.168.50.10/24` and gateway `192.168.50.1`, placing management access on Admin VLAN 50. The screenshot also shows `vmbr0` as the VLAN-aware bridge and `vmbr1` as a separate bridge used for Security Onion monitoring traffic.
+This screenshot validates the Proxmox network design. The management interface is assigned to `vmbr0.50` with `192.168.50.10/24` and gateway `192.168.50.1`, placing Proxmox management on Admin VLAN 50. The screenshot also shows `vmbr0` as the VLAN-aware bridge and `vmbr1` as a separate bridge used for Security Onion monitoring traffic.
 
-### Virtual Machine Inventory
+### 03 - Virtual Machine Inventory
 
 ![Proxmox VM List](evidence/03-proxmox-vm-list.png)
 
-This screenshot shows the current VM inventory, including Kali Linux and Security Onion running on the Proxmox host.
+This screenshot confirms that the core lab VMs are deployed on the Proxmox host, including Kali Linux for attacker activity and Security Onion for monitoring and detection work.
 
-### Kali VLAN 20 Configuration
+### 04 - Kali VLAN 20 Hardware Configuration
 
 ![Kali VLAN 20 Hardware](evidence/04-kali-vlan20-hardware.png)
 
-This screenshot shows the Kali VM network device attached to `vmbr0` with VLAN tag 20, placing Kali on the attacker VLAN.
+This screenshot shows the Kali VM network device attached to `vmbr0` with VLAN tag 20. This places Kali on the attacker VLAN and supports controlled offensive testing against approved lab targets.
+
+### 05 - Kali VLAN 20 IP Validation
 
 ![Kali VLAN 20 IP Validation](evidence/05-kali-vlan20-ip-validation.png)
 
-This screenshot validates Kali's network placement by showing the VM receiving `192.168.20.100/24` on `eth0`.
+This screenshot confirms Kali's network placement by showing the VM receiving `192.168.20.100/24` on `eth0`. This validates that the Proxmox VLAN tag and pfSense DHCP configuration are working together correctly.
 
-### Security Onion Management and Sniffing Interfaces
+### 06 - Security Onion Management and Sniffing Interfaces
 
 ![Security Onion VLAN 30 and Sniffing Hardware](evidence/06-security-onion-vlan30-and-sniffing-hardware.png)
 
-This screenshot shows Security Onion configured with a management interface on `vmbr0` using VLAN tag 30 and a second interface on `vmbr1` for sniffing/monitoring. This separates Security Onion management traffic from monitored network traffic.
+This screenshot shows Security Onion configured with a management interface on `vmbr0` using VLAN tag 30 and a second interface on `vmbr1` for sniffing/monitoring. This confirms that management traffic and monitored traffic are separated.
 
-### Proxmox Storage
+### 07 - Proxmox Storage Summary
 
 ![Proxmox Storage Summary](evidence/07-proxmox-storage-summary.png)
 
-This screenshot shows the `local-lvm` storage pool and available virtualization capacity for current and future lab workloads.
+This screenshot documents the `local-lvm` storage pool and confirms that the Proxmox host has available virtualization capacity for current and future workloads.
 
-### Bastion Tunnel Validation
+### 08 - Pi Bastion Tunnel Validation
 
 ![Pi Bastion Tunnel Validation](evidence/08-pi-bastion-tunnel-validation.png)
 
-This screenshot shows the homelab tunnel workflow used to access Proxmox, pfSense, Security Onion, the switch, and iDRAC through the Raspberry Pi 5 bastion host.
-This evidence also supports the Admin VLAN access model because Proxmox is accessed through the bastion tunnel rather than being exposed directly to the general home network.
+This screenshot confirms the bastion-based access workflow. Proxmox, pfSense, Security Onion, the switch, and iDRAC are accessed through SSH tunnels using the Raspberry Pi 5 on Admin VLAN 50 instead of exposing management interfaces directly to the general home network.
 
 ## Suggested Commands for Evidence
 
@@ -492,7 +505,7 @@ These decisions reduce the chance that attacker or victim activity can directly 
 | Security Onion management on VLAN 30 | Complete |
 | Security Onion sniffing interface configured | Complete |
 | Evidence screenshots collected | Complete |
-| README finalized | Complete |
+| README finalized with linked and embedded evidence | Complete |
 
 ---
 
@@ -530,9 +543,9 @@ Recommended future projects:
 
 ## Portfolio Summary
 
-Project 3 demonstrates the virtualization layer that supports the broader cybersecurity homelab portfolio. With Proxmox running on the Dell R730xd, the lab now has a scalable foundation for future attacker, victim, monitoring, and enterprise-style infrastructure projects.
+Project 3 documents the completed virtualization layer that supports the broader cybersecurity homelab portfolio. With Proxmox running on the Dell R730xd, the lab now has a scalable foundation for attacker, victim, monitoring, and enterprise-style infrastructure projects.
 
-Combined with Project 1 and Project 2, this project shows a complete progression:
+Combined with Project 1 and Project 2, this project shows a clear progression from network design to visibility validation to virtualization:
 
 1. Build the segmented network
 2. Validate network visibility

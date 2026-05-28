@@ -153,14 +153,44 @@ Screenshots and output files were added to the `evidence/` folder to document at
 
 | Evidence ID | File Name | Description |
 | --- | --- | --- |
-| E01 | `kali-network-placement.png` | Shows Kali on the attacker VLAN with IP address 192.168.20.100, default route through 192.168.20.1, and successful ping to the victim host |
-| E02 | `host-discovery-scan.png` | Shows Nmap host discovery against 192.168.40.0/24 identifying three live hosts on the victim VLAN |
-| E03 | `service-enumeration-filtered-results.png` | Shows Nmap service enumeration against 192.168.40.102 with the host up and 1000 TCP ports filtered |
-| E04 | `security-onion-scan-visibility.png` | Shows Security Onion Hunt results confirming Zeek connection logs for activity from the Kali attacker VM |
-| E05 | `restricted-management-test.png` | Shows management systems returning ICMP failures and filtered management ports from the attacker VLAN |
-| E06 | `nmap-output-files.png` | Shows saved Nmap output files in `.nmap`, `.gnmap`, and `.xml` formats |
-| E07 | `rules-vlan20-attacker-final.png` | Shows ATTACK VLAN firewall rules allowing victim lab testing while blocking unauthorized private/internal network access |
-| E08 | `nmap-output/` | Contains saved service enumeration and full TCP scan output files for raw evidence retention |
+| E01 | [`kali-network-placement.png`](evidence/kali-network-placement.png) | Shows Kali on the attacker VLAN with IP address 192.168.20.100, default route through 192.168.20.1, and successful ping to the victim host |
+| E02 | [`host-discovery-scan.png`](evidence/host-discovery-scan.png) | Shows Nmap host discovery against 192.168.40.0/24 identifying three live hosts on the victim VLAN |
+| E03 | [`service-enumeration-filtered-results.png`](evidence/service-enumeration-filtered-results.png) | Shows Nmap service enumeration against 192.168.40.102 with the host up and 1000 TCP ports filtered |
+| E04 | [`security-onion-scan-visibility.png`](evidence/security-onion-scan-visibility.png) | Shows Security Onion Hunt results confirming Zeek connection logs for activity from the Kali attacker VM |
+| E05 | [`restricted-management-test.png`](evidence/restricted-management-test.png) | Shows management systems returning ICMP failures and filtered management ports from the attacker VLAN |
+| E06 | [`nmap-output-files.png`](evidence/nmap-output-files.png) | Shows saved Nmap output files in `.nmap`, `.gnmap`, and `.xml` formats |
+| E07 | [`rules-vlan20-attacker-final.png`](evidence/rules-vlan20-attacker-final.png) | Shows ATTACK VLAN firewall rules allowing victim lab testing while blocking unauthorized private/internal network access |
+| E08 | [`nmap-output/`](evidence/nmap-output/) | Contains saved service enumeration and full TCP scan output files for raw evidence retention |
+
+## Evidence Screenshots
+
+### E01 - Kali Network Placement
+
+![Kali network placement showing attacker VLAN IP, route, and victim reachability](evidence/kali-network-placement.png)
+
+### E02 - Host Discovery Scan
+
+![Nmap host discovery scan against the victim VLAN](evidence/host-discovery-scan.png)
+
+### E03 - Service Enumeration Filtered Results
+
+![Nmap service enumeration showing the victim host up with filtered TCP ports](evidence/service-enumeration-filtered-results.png)
+
+### E04 - Security Onion Scan Visibility
+
+![Security Onion Hunt results showing Zeek logs for Kali attacker activity](evidence/security-onion-scan-visibility.png)
+
+### E05 - Restricted Management Test
+
+![Nmap and ping tests showing management interfaces filtered or unreachable from the attacker VLAN](evidence/restricted-management-test.png)
+
+### E06 - Saved Nmap Output Files
+
+![Saved Nmap output files in the evidence directory](evidence/nmap-output-files.png)
+
+### E07 - ATTACK VLAN Firewall Rules
+
+![pfSense ATTACK VLAN firewall rules supporting controlled victim access and restricted management access](evidence/rules-vlan20-attacker-final.png)
 
 ## Security Onion Validation
 
