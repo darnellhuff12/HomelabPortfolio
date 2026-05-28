@@ -53,8 +53,8 @@ The diagram below shows the current homelab architecture, including pfSense, VLA
 | 02 | [VLAN Firewall Validation](02-vlan-firewall-validation/) | pfSense rules, allowed/blocked traffic policy, VLAN evidence, Security Onion visibility, and management-plane validation | Complete |
 | 03 | [Proxmox Virtualization Build](03-proxmox-virtualization-build/) | Proxmox host management, VLAN-aware bridges, VM placement, Security Onion sniffing interface, storage validation, and bastion-based access | Complete |
 | 04 | [Security Onion Visibility Baseline](04-security-onion-visibility-baseline/) | Security Onion sensor health, switch mirroring, tcpdump validation, Suricata ICMP events, and Hunt visibility | Complete |
-| 05 | [Network Reconnaissance Detection](05-network-reconnaissance-detection/) | Nmap, ping sweeps, service discovery, and SIEM visibility | Planned |
-| 06 | [Service Enumeration and Exposure Review](06-service-enumeration-and-exposure-review/) | Banner grabbing, exposed services, and hardening recommendations | Planned |
+| 05 | [Network Reconnaissance Detection](05-network-reconnaissance-detection/) | Kali-to-victim Nmap SYN scanning, Security Onion tcpdump validation, Zeek/Hunt log review, and Proxmox mirror-bridge troubleshooting | Complete |
+| 06 | [Service Enumeration and Exposure Review](06-service-enumeration-and-exposure-review/) | Kali-to-victim host discovery, service enumeration, management-plane filtering validation, saved Nmap output, Security Onion Hunt/Zeek visibility, and exposure review | Complete |
 | 07 | [SSH Brute-Force Detection](07-ssh-brute-force-detection/) | Controlled SSH login attempts and incident-style investigation | Planned |
 | 08 | [Web App Scanning with ZAP and Juice Shop](08-web-app-scanning-with-zap-and-juice-shop/) | Web scanning visibility and OWASP mapping | Planned |
 | 09 | [Vulnerability Scanning and Reporting](09-vulnerability-scanning-and-reporting/) | Nmap/Nessus scanning and remediation reporting | Planned |
@@ -78,9 +78,12 @@ The diagram below shows the current homelab architecture, including pfSense, VLA
 | Firewall hardening | Validated in Project 2 with allowed-path testing, blocked-path testing, and pfSense firewall log evidence |
 | Admin access model | Centralized through Raspberry Pi 5 on VLAN 50 using Tailscale/SSH tunnels; Proxmox, pfSense, iDRAC, and switch management are isolated behind the Admin/Bastion workflow |
 | Proxmox virtualization | Completed in Project 3; Proxmox runs on the Dell R730xd with host management isolated on Admin VLAN 50 using `vmbr0.50`, Kali placed on VLAN 20, Security Onion using VLAN 30 management plus a dedicated sniffing interface, storage validated, and management access confirmed through the Raspberry Pi 5 bastion workflow |
-| Security Onion visibility | Completed in Project 4; Security Onion dashboard access, service health, management/sniffing interface separation, switch mirroring from `g1`, `g2`, and `g4` to `g3`, packet-level `tcpdump` validation, and Hunt-based Suricata ICMP event review were documented for controlled Kali-to-victim traffic |
+| Security Onion visibility | Completed across Projects 4, 5, and 6; Security Onion dashboard access, service health, management/sniffing interface separation, switch mirroring from `g1`, `g2`, and `g4` to `g3`, packet-level `tcpdump` validation, Hunt-based Suricata ICMP event review, Zeek connection-log review, Nmap reconnaissance visibility, and service enumeration visibility were documented for controlled Kali-to-victim and attacker VLAN traffic |
 | Endpoint telemetry | Deferred to future detection and host-visibility projects |
-| Live traffic validation | Kali-to-victim traffic, Security Onion packet capture visibility, Security Onion Hunt results, Kali-to-Admin blocking, Admin/Bastion access, and pfSense firewall logging validated across Projects 2 and 4 |
+| Live traffic validation | Kali-to-victim traffic, Security Onion packet capture visibility, Security Onion Hunt results, Zeek connection logs, Nmap SYN scan visibility, service enumeration results, Kali-to-Admin blocking, Admin/Bastion access, filtered management-plane access, saved Nmap output, and pfSense firewall rule behavior validated across Projects 2, 4, 5, and 6 |
+
+| Monitoring bridge troubleshooting | Completed in Project 5; Proxmox `vmbr1` was validated as the dedicated Security Onion sniffing bridge, and `bridge-ageing 0` was applied so mirrored/SPAN traffic reaches the Security Onion monitor interface after reboot |
+| Service enumeration and exposure review | Completed in Project 6; Kali was used from the attacker VLAN to discover approved victim VLAN hosts, enumerate exposed services, validate filtered access to pfSense, Proxmox, iDRAC, and Security Onion management interfaces, preserve Nmap output, and confirm Security Onion Hunt/Zeek visibility into attacker VLAN activity |
 
 
 ## Documentation Standard
@@ -124,7 +127,7 @@ Screenshots and logs are sanitized before publishing. Passwords, tokens, public 
 - Centralizing administrative access through a bastion workflow
 - Building, hardening, validating, and documenting firewall boundaries
 - Running controlled adversary simulations
-- Validating SIEM and network visibility through Security Onion dashboards, Hunt results, Suricata alerts, packet capture, switch mirroring, and firewall logs
+- Validating SIEM and network visibility through Security Onion dashboards, Hunt results, Suricata alerts, Zeek connection logs, packet capture, switch mirroring, Proxmox sniffing-bridge validation, Nmap scan visibility, service enumeration visibility, and firewall logs
 - Collecting endpoint telemetry
 - Mapping activity to MITRE ATT&CK
 - Writing detection logic
@@ -134,4 +137,4 @@ Screenshots and logs are sanitized before publishing. Passwords, tokens, public 
 
 ## Highlight Resume Bullet
 
-Built, documented, and validated a segmented purple-team cybersecurity homelab using pfSense, Proxmox, Security Onion, Kali Linux, Linux and Windows victim endpoints, VLAN isolation, iDRAC out-of-band management, Proxmox Admin VLAN isolation through `vmbr0.50`, VLAN-tagged lab workloads, a dedicated Security Onion sniffing interface, managed-switch port mirroring, Suricata/Hunt visibility validation, packet-level `tcpdump` analysis, and a Raspberry Pi 5 bastion workflow to support adversary simulation, SIEM monitoring, firewall validation, detection engineering, and incident response practice.
+Built, documented, and validated a segmented purple-team cybersecurity homelab using pfSense, Proxmox, Security Onion, Kali Linux, Linux and Windows victim endpoints, VLAN isolation, iDRAC out-of-band management, Proxmox Admin VLAN isolation through `vmbr0.50`, VLAN-tagged lab workloads, a dedicated Security Onion sniffing bridge with `bridge-ageing 0`, managed-switch port mirroring, Suricata/Hunt visibility validation, Zeek connection-log review, Nmap reconnaissance and service enumeration detection, packet-level `tcpdump` analysis, filtered management-plane access validation, saved scan evidence, and a Raspberry Pi 5 bastion workflow to support adversary simulation, SIEM monitoring, firewall validation, exposure review, detection engineering, and incident response practice.
