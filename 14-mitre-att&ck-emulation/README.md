@@ -10,7 +10,7 @@ The goal of this project was to deploy MITRE Caldera inside the homelab, use it 
 
 This project demonstrates adversary-emulation fundamentals, segmented lab design, controlled firewall access, agent-based command execution, and blue-team visibility using Zeek telemetry in Security Onion. All testing was performed only against systems owned and controlled inside the homelab.
 
-## Why This Project Matters
+## Business and Security Value
 
 Previous projects focused on building the network foundation, segmenting VLANs, validating firewall rules, deploying Security Onion, confirming mirrored traffic visibility, detecting reconnaissance, detecting SSH brute-force activity, running web application testing, vulnerability scanning, hardening, and secure remote administration.
 
@@ -60,7 +60,18 @@ The Caldera agent used the direct lab address rather than the MacBook tunnel:
 http://192.168.20.102:8888
 ```
 
-## Security Boundaries
+## Validation Goals
+
+- Deploy MITRE Caldera inside the segmented homelab.
+- Access the Caldera web interface through the existing bastion and SSH tunnel workflow.
+- Configure a least-privilege firewall path from the victim VLAN to the Caldera server.
+- Deploy a Sandcat agent to an approved Ubuntu victim system.
+- Run a safe, non-destructive discovery operation.
+- Validate Caldera agent communication and command execution.
+- Confirm Security Onion visibility into victim-to-Caldera traffic.
+- Document the activity in a portfolio-ready format.
+
+## Scope and Rules of Engagement
 
 The following boundaries were used for this project:
 
@@ -74,7 +85,7 @@ The following boundaries were used for this project:
 
 ## Implementation Summary
 
-### 1. Caldera Server Deployment
+#### Caldera Server Deployment
 
 An Ubuntu Server VM named `caldera` was deployed on the attacker/testing VLAN with the IP address `192.168.20.102`. Required packages were installed, including Python, pip, Node/npm, Go, Git, and build tools. The Caldera repository was cloned under the user home directory and prepared for use.
 
@@ -84,7 +95,7 @@ Evidence:
 - [Caldera dependencies installed](evidence/02-caldera-dependencies-installed.png)
 - [Caldera repository cloned](evidence/03-caldera-repository-cloned.png)
 
-### 2. Caldera Startup Workflow
+#### Caldera Startup Workflow
 
 A reusable startup script was created on the Caldera server so the service can be started consistently without manually typing the full command sequence each time. The script enters the Caldera directory, activates the Python virtual environment, and starts the Caldera server.
 
@@ -93,7 +104,7 @@ Evidence:
 - [Caldera start script created](evidence/04-caldera-start-script-created.png)
 - [Caldera server running](evidence/05-caldera-server-running.png)
 
-### 3. Secure Web UI Access Through Tunnel
+#### Secure Web UI Access Through Tunnel
 
 The Caldera web interface was accessed from the MacBook using an SSH tunnel through the Raspberry Pi bastion. The tunnel forwards local port `8222` on the MacBook to TCP `8888` on the Caldera server. The SSH tunnel uses `-N -T` so it does not drop the user into an interactive Raspberry Pi shell.
 
@@ -102,7 +113,7 @@ Evidence:
 - [Caldera tunnel script created](evidence/06-caldera-tunnel-script-created.png)
 - [Caldera dashboard accessed through tunnel](evidence/07-caldera-dashboard.png)
 
-### 4. Victim System Preparation
+#### Victim System Preparation
 
 The Ubuntu victim was prepared as the approved target system. The victim was confirmed to be on the victim VLAN with IP address `192.168.40.103`, running as the `labuser` account.
 
@@ -110,7 +121,7 @@ Evidence:
 
 - [Victim system prepared](evidence/08-victim-system-prepared.png)
 
-### 5. Controlled Firewall Access
+#### Controlled Firewall Access
 
 A pfSense rule was created on the victim VLAN allowing the Ubuntu victim network to reach the Caldera server on TCP `8888`. This rule was placed above the broader RFC1918/private network block rule so the specific Caldera agent traffic would be allowed while other unauthorized internal access remained blocked.
 
@@ -121,7 +132,7 @@ Evidence:
 - [pfSense victim-to-Caldera rule](evidence/09-pfsense-victim-to-caldera-rule.png)
 - [Victim-to-Caldera connectivity test](evidence/10-victim-to-caldera-connectivity.png)
 
-### 6. Caldera Agent Deployment
+#### Caldera Agent Deployment
 
 The Sandcat agent was deployed from the Ubuntu victim using the Caldera server address `http://192.168.20.102:8888`. The agent was assigned to the `red` group and successfully established an HTTP beacon back to the Caldera server.
 
@@ -130,7 +141,7 @@ Evidence:
 - [Caldera agent command on victim](evidence/11-caldera-agent-command-on-victim.png)
 - [Caldera agent check-in](evidence/12-caldera-agent-check-in.png)
 
-### 7. Basic Non-Destructive Operation
+#### Basic Non-Destructive Operation
 
 A basic operation named `project14-basic-discovery` was created using manual commands, the `red` group, and plain-text obfuscation. The operation was intentionally limited to safe discovery activity such as hostname, user, kernel, and network/interface information.
 
@@ -142,7 +153,7 @@ Evidence:
 - [Basic operation completed](evidence/14-basic-operation-completed.png)
 - [Basic operation command output](evidence/15-basic-operation-command-output.png)
 
-### 8. Security Onion Visibility
+#### Security Onion Visibility
 
 Security Onion Hunt was used to validate that Caldera activity was visible in the monitoring stack. Searches for both the Caldera server IP and Ubuntu victim IP returned Zeek telemetry, including HTTP, connection, file, DNS, software, and weird logs.
 
@@ -154,48 +165,75 @@ Evidence:
 - [Security Onion victim IP hunt](evidence/17-security-onion-victim-ip-hunt.png)
 - [Security Onion flow detail evidence](evidence/18-security-onion-flow-or-pcap-evidence.png)
 
-## Evidence Checklist
+## Validation and Evidence
 
-- [x] Caldera host system created and placed on VLAN 20
-- [x] Caldera dependencies installed
-- [x] Caldera repository cloned
-- [x] Caldera start script created
-- [x] Caldera server started successfully
-- [x] Caldera web interface reachable through SSH tunnel
-- [x] Victim system prepared and documented
-- [x] pfSense rule created for controlled victim-to-Caldera access
-- [x] Victim-to-Caldera TCP `8888` connectivity validated
-- [x] Caldera agent deployed to the victim system
-- [x] Agent successfully checked in to Caldera
-- [x] Basic non-destructive operation configured
-- [x] Operation completed successfully
-- [x] Command output/facts collected from the victim
-- [x] Security Onion Hunt query showed Caldera-related traffic
-- [x] Security Onion Hunt query showed victim-related traffic
-- [x] Expanded Zeek event showed victim-to-Caldera traffic details
+MITRE Caldera emulation was validated through Caldera server deployment, dependency installation, repository setup, tunnel-based dashboard access, victim preparation, least-privilege firewall access, Sandcat agent check-in, non-destructive operation execution, and Security Onion visibility review.
 
-## Evidence Files
+| Validation Area | Result | Evidence |
+|---|---|---|
+| Caldera server placement | Passed - The Caldera Ubuntu server was deployed on VLAN 20 with IP `192.168.20.102` | [01-caldera-ubuntu-installed-vlan20.png](evidence/01-caldera-ubuntu-installed-vlan20.png) |
+| Dependency installation | Passed - Required Caldera dependencies were installed on the Ubuntu server | [02-caldera-dependencies-installed.png](evidence/02-caldera-dependencies-installed.png) |
+| Caldera repository setup | Passed - The Caldera repository was cloned and prepared for use | [03-caldera-repository-cloned.png](evidence/03-caldera-repository-cloned.png) |
+| Startup workflow | Passed - A reusable Caldera start script was created and the server started successfully | [04-caldera-start-script-created.png](evidence/04-caldera-start-script-created.png), [05-caldera-server-running.png](evidence/05-caldera-server-running.png) |
+| Tunnel-based dashboard access | Passed - Caldera was accessed from the MacBook through the Raspberry Pi bastion tunnel | [06-caldera-tunnel-script-created.png](evidence/06-caldera-tunnel-script-created.png), [07-caldera-dashboard.png](evidence/07-caldera-dashboard.png) |
+| Victim preparation | Passed - The Ubuntu victim was confirmed on the victim VLAN with IP `192.168.40.103` | [08-victim-system-prepared.png](evidence/08-victim-system-prepared.png) |
+| Controlled firewall access | Passed - pfSense allowed victim-to-Caldera TCP `8888` while ICMP remained blocked | [09-pfsense-victim-to-caldera-rule.png](evidence/09-pfsense-victim-to-caldera-rule.png), [10-victim-to-caldera-connectivity.png](evidence/10-victim-to-caldera-connectivity.png) |
+| Sandcat agent deployment | Passed - The Caldera Sandcat agent was launched from the Ubuntu victim and checked in successfully | [11-caldera-agent-command-on-victim.png](evidence/11-caldera-agent-command-on-victim.png), [12-caldera-agent-check-in.png](evidence/12-caldera-agent-check-in.png) |
+| Non-destructive operation | Passed - A safe discovery operation was configured, executed, and completed successfully | [13-basic-operation-configured.png](evidence/13-basic-operation-configured.png), [14-basic-operation-completed.png](evidence/14-basic-operation-completed.png), [15-basic-operation-command-output.png](evidence/15-basic-operation-command-output.png) |
+| Security Onion visibility | Passed - Security Onion Hunt showed Caldera and victim traffic, including Zeek telemetry for TCP `8888` HTTP communication | [16-security-onion-caldera-ip-hunt.png](evidence/16-security-onion-caldera-ip-hunt.png), [17-security-onion-victim-ip-hunt.png](evidence/17-security-onion-victim-ip-hunt.png), [18-security-onion-flow-or-pcap-evidence.png](evidence/18-security-onion-flow-or-pcap-evidence.png) |
 
-```text
-01-caldera-ubuntu-installed-vlan20.png
-02-caldera-dependencies-installed.png
-03-caldera-repository-cloned.png
-04-caldera-start-script-created.png
-05-caldera-server-running.png
-06-caldera-tunnel-script-created.png
-07-caldera-dashboard.png
-08-victim-system-prepared.png
-09-pfsense-victim-to-caldera-rule.png
-10-victim-to-caldera-connectivity.png
-11-caldera-agent-command-on-victim.png
-12-caldera-agent-check-in.png
-13-basic-operation-configured.png
-14-basic-operation-completed.png
-15-basic-operation-command-output.png
-16-security-onion-caldera-ip-hunt.png
-17-security-onion-victim-ip-hunt.png
-18-security-onion-flow-or-pcap-evidence.png
-```
+## Evidence Summary
+
+The following evidence documents the completed MITRE Caldera emulation workflow and provides clickable links to each evidence file.
+
+| ID | Evidence | What It Demonstrates |
+|---|---|---|
+| 01 | [01-caldera-ubuntu-installed-vlan20.png](evidence/01-caldera-ubuntu-installed-vlan20.png) | Shows the Caldera Ubuntu server deployed on VLAN 20 |
+| 02 | [02-caldera-dependencies-installed.png](evidence/02-caldera-dependencies-installed.png) | Shows required Caldera dependencies installed |
+| 03 | [03-caldera-repository-cloned.png](evidence/03-caldera-repository-cloned.png) | Shows the Caldera repository cloned locally |
+| 04 | [04-caldera-start-script-created.png](evidence/04-caldera-start-script-created.png) | Shows the reusable Caldera startup script |
+| 05 | [05-caldera-server-running.png](evidence/05-caldera-server-running.png) | Shows the Caldera server running successfully |
+| 06 | [06-caldera-tunnel-script-created.png](evidence/06-caldera-tunnel-script-created.png) | Shows the MacBook tunnel script used to access Caldera through the bastion |
+| 07 | [07-caldera-dashboard.png](evidence/07-caldera-dashboard.png) | Shows the Caldera web dashboard accessed through the local tunnel |
+| 08 | [08-victim-system-prepared.png](evidence/08-victim-system-prepared.png) | Shows the approved Ubuntu victim system prepared for the Caldera agent |
+| 09 | [09-pfsense-victim-to-caldera-rule.png](evidence/09-pfsense-victim-to-caldera-rule.png) | Shows the pfSense rule allowing controlled victim-to-Caldera TCP `8888` access |
+| 10 | [10-victim-to-caldera-connectivity.png](evidence/10-victim-to-caldera-connectivity.png) | Shows TCP `8888` connectivity from victim to Caldera while ICMP remains blocked |
+| 11 | [11-caldera-agent-command-on-victim.png](evidence/11-caldera-agent-command-on-victim.png) | Shows the Caldera Sandcat agent command executed on the Ubuntu victim |
+| 12 | [12-caldera-agent-check-in.png](evidence/12-caldera-agent-check-in.png) | Shows the Caldera agent successfully checked in to the server |
+| 13 | [13-basic-operation-configured.png](evidence/13-basic-operation-configured.png) | Shows the safe discovery operation configuration |
+| 14 | [14-basic-operation-completed.png](evidence/14-basic-operation-completed.png) | Shows the discovery operation completed successfully |
+| 15 | [15-basic-operation-command-output.png](evidence/15-basic-operation-command-output.png) | Shows command output and facts collected from the victim |
+| 16 | [16-security-onion-caldera-ip-hunt.png](evidence/16-security-onion-caldera-ip-hunt.png) | Shows Security Onion Hunt results for the Caldera server IP |
+| 17 | [17-security-onion-victim-ip-hunt.png](evidence/17-security-onion-victim-ip-hunt.png) | Shows Security Onion Hunt results for the Ubuntu victim IP |
+| 18 | [18-security-onion-flow-or-pcap-evidence.png](evidence/18-security-onion-flow-or-pcap-evidence.png) | Shows detailed victim-to-Caldera flow evidence in Security Onion |
+
+## Key Evidence
+
+The screenshots below highlight the most important MITRE Caldera emulation evidence while the table above preserves links to the full evidence set.
+
+**Caldera Dashboard Through Tunnel**
+
+![Caldera dashboard](evidence/07-caldera-dashboard.png)
+
+**Controlled Victim-to-Caldera Firewall Rule**
+
+![pfSense victim-to-Caldera rule](evidence/09-pfsense-victim-to-caldera-rule.png)
+
+**Caldera Agent Check-In**
+
+![Caldera agent check-in](evidence/12-caldera-agent-check-in.png)
+
+**Basic Discovery Operation Completed**
+
+![Basic operation completed](evidence/14-basic-operation-completed.png)
+
+**Operation Command Output**
+
+![Basic operation command output](evidence/15-basic-operation-command-output.png)
+
+**Security Onion Flow Evidence**
+
+![Security Onion flow evidence](evidence/18-security-onion-flow-or-pcap-evidence.png)
 
 ## Key Findings
 
@@ -247,13 +285,28 @@ This project creates the foundation for future detection engineering work. With 
 - Some Caldera abilities may not run cleanly on every platform, so the initial operation was kept to simple manual Linux discovery commands.
 - Security Onion provided useful visibility into the agent traffic through Zeek HTTP, connection, file, software, and weird logs.
 
-## Project Outcome
+## Portfolio Summary
 
 This project successfully introduced MITRE Caldera into the homelab and validated that it can support controlled adversary-emulation activity. A Sandcat agent was deployed to an approved Ubuntu victim, a safe discovery operation was executed, and Security Onion confirmed visibility into the resulting victim-to-Caldera traffic.
 
 The project also confirmed that the existing segmentation, firewall rule structure, bastion access model, and Security Onion monitoring design can support safe attack simulation and blue-team analysis.
 
-## Next Steps
+## Project Status
+
+| Area | Status |
+|---|---|
+| Caldera server deployed on VLAN 20 | Complete |
+| Dependencies installed and repository cloned | Complete |
+| Caldera startup workflow created | Complete |
+| Caldera dashboard accessed through bastion tunnel | Complete |
+| Ubuntu victim prepared and documented | Complete |
+| pfSense victim-to-Caldera rule validated | Complete |
+| Sandcat agent deployed and checked in | Complete |
+| Safe discovery operation completed | Complete |
+| Security Onion visibility validated | Complete |
+| Evidence screenshots captured and linked | Complete |
+
+## Future Enhancements
 
 Future projects can build on this by running specific ATT&CK-aligned techniques, documenting the telemetry generated by each technique, and creating custom detections inside Security Onion.
 

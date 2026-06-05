@@ -1,5 +1,3 @@
-
-
 # Project 11: Attack Path Validation
 
 ## Project Status
@@ -105,143 +103,75 @@ The completed attack path followed a controlled and realistic flow:
 
 ---
 
-## Completed Validation Steps
+## Validation and Evidence
 
-### Step 1: Confirm Lab Connectivity
+Attack path validation was completed by confirming endpoint placement, validating attacker-to-victim connectivity, performing controlled reconnaissance, validating the exposed SSH service, generating detectable SSH activity, reviewing Security Onion alerts, confirming Zeek connection visibility, reviewing pfSense segmentation context, and reconstructing the activity from a defender perspective.
 
-From the Kali attacker VM, connectivity to the Ubuntu victim system was confirmed. The Kali attacker used IP address `192.168.20.100`, and the Ubuntu victim used IP address `192.168.40.103`.
-
-Evidence captured:
-
-- [Victim IP address](evidence/01a-victim-ip-address.png)
-- [Attacker IP address](evidence/01b-attacker-ip-address.png)
-- [Attacker-to-victim connectivity test](evidence/02-attacker-to-victim-connectivity.png)
-
----
-
-### Step 2: Perform Controlled Reconnaissance
-
-A controlled Nmap service scan was run from Kali against the Ubuntu victim system.
-
-Example command:
-
-```bash
-nmap -sV -sC -oN project11-nmap-results.txt <victim-ip>
-```
-
-Actual result:
-
-- Target: `192.168.40.103`
-- Open port discovered: TCP/22
-- Service identified: SSH
-- Version identified: OpenSSH `9.6p1 Ubuntu 3ubuntu13.16`
-
-Evidence captured:
-
-- [Nmap service discovery](evidence/03-nmap-service-discovery.png)
-
----
-
-### Step 3: Validate a Service or Weakness
-
-SSH was selected as the exposed service for validation because it was the only open service identified during the Nmap scan. The validation remained controlled and limited to lab-owned systems.
-
-Evidence captured:
-
-- [SSH service validation](evidence/04-ssh-service-validation.png)
-
----
-
-### Step 4: Generate Detectable Activity
-
-Controlled activity was generated from Kali to create observable telemetry in Security Onion. This included focused SSH scanning and failed SSH authentication attempts against the victim host.
-
-Evidence captured:
-
-- [Controlled attack activity](evidence/05-controlled-attack-activity.png)
-
----
-
-### Step 5: Investigate in Security Onion
-
-Security Onion was used to review alerts tied to the attacker IP address `192.168.20.100`.
-
-Areas to review:
-
-- Alerts related to the attacker IP
-- SSH scan detections
-- ICMP activity
-- Related Suricata alert metadata
-
-Evidence captured:
-
-- [Security Onion alerts](evidence/06-security-onion-alerts.png)
-
----
-
-### Step 6: Confirm Zeek Connection Visibility
-
-Security Onion Hunt was used to search for traffic between the attacker and victim systems.
-
-Search context:
-
-- Source IP: `192.168.20.100`
-- Destination IP: `192.168.40.103`
-- Destination port: TCP/22
-- Relevant datasets: `zeek.conn` and `zeek.ssh`
-
-The results confirmed that Zeek captured attacker-to-victim SSH traffic and related connection events.
-
-Evidence captured:
-
-- [Zeek connection logs](evidence/07-zeek-connection-logs.png)
-
----
-
-### Step 7: Reconstruct the Attack Path
-
-The collected data was used to reconstruct the activity from beginning to end.
-
-The final reconstruction included:
-
-- Attacker system: Kali Linux VM at `192.168.20.100`
-- Victim system: Ubuntu Server victim at `192.168.40.103`
-- Initial connectivity validation
-- Nmap service discovery
-- SSH service validation
-- Security Onion alert review
-- Zeek connection log confirmation
-- Defensive takeaway
-
-Evidence captured:
-
-- [pfSense segmentation rule](evidence/08-pfsense-segmentation-rule.png)
-- [Attack path reconstruction](evidence/09-attack-path-reconstruction.png)
-
----
-
-## Evidence Checklist
-
-| Evidence Item | Description | Status |
+| Validation Area | Result | Evidence |
 |---|---|---|
-| [Victim IP address](evidence/01a-victim-ip-address.png) | Shows the Ubuntu victim system at `192.168.40.103` | Complete |
-| [Attacker IP address](evidence/01b-attacker-ip-address.png) | Shows the Kali attacker system at `192.168.20.100` | Complete |
-| [Attacker-to-victim connectivity](evidence/02-attacker-to-victim-connectivity.png) | Shows successful ICMP connectivity from Kali to the victim | Complete |
-| [Nmap service discovery](evidence/03-nmap-service-discovery.png) | Shows SSH exposed on TCP/22 with OpenSSH service details | Complete |
-| [SSH service validation](evidence/04-ssh-service-validation.png) | Shows failed SSH attempts and successful login using the lab account | Complete |
-| [Controlled attack activity](evidence/05-controlled-attack-activity.png) | Shows focused SSH scanning and failed authentication activity | Complete |
-| [Security Onion alerts](evidence/06-security-onion-alerts.png) | Shows alerts associated with the attacker source IP | Complete |
-| [Zeek connection logs](evidence/07-zeek-connection-logs.png) | Shows Zeek SSH and connection logs from attacker to victim over TCP/22 | Complete |
-| [pfSense segmentation rule](evidence/08-pfsense-segmentation-rule.png) | Shows VLAN20 attacker rules allowing lab victim traffic while blocking unauthorized internal access | Complete |
-| [Attack path reconstruction](evidence/09-attack-path-reconstruction.png) | Shows the final written attack path summary and defensive takeaway | Complete |
+| Victim placement | Passed - The Ubuntu victim system was confirmed at `192.168.40.103` on the victim VLAN | [01a-victim-ip-address.png](evidence/01a-victim-ip-address.png) |
+| Attacker placement | Passed - The Kali attacker VM was confirmed at `192.168.20.100` on the attacker VLAN | [01b-attacker-ip-address.png](evidence/01b-attacker-ip-address.png) |
+| Attacker-to-victim connectivity | Passed - ICMP connectivity from Kali to the Ubuntu victim succeeded | [02-attacker-to-victim-connectivity.png](evidence/02-attacker-to-victim-connectivity.png) |
+| Service discovery | Passed - Nmap identified SSH exposed on TCP/22 with OpenSSH service details | [03-nmap-service-discovery.png](evidence/03-nmap-service-discovery.png) |
+| SSH service validation | Passed - Controlled SSH validation showed failed attempts and an authorized successful login using the lab account | [04-ssh-service-validation.png](evidence/04-ssh-service-validation.png) |
+| Controlled attack activity | Passed - Focused SSH scanning and failed authentication activity were generated from the attacker system | [05-controlled-attack-activity.png](evidence/05-controlled-attack-activity.png) |
+| Security Onion alert review | Passed - Security Onion displayed alerts associated with the attacker source IP | [06-security-onion-alerts.png](evidence/06-security-onion-alerts.png) |
+| Zeek connection visibility | Passed - Security Onion Hunt confirmed Zeek SSH and connection logs from attacker to victim over TCP/22 | [07-zeek-connection-logs.png](evidence/07-zeek-connection-logs.png) |
+| pfSense segmentation context | Passed - pfSense rules showed VLAN20 attacker access to the victim lab path while broader unauthorized internal access remained blocked | [08-pfsense-segmentation-rule.png](evidence/08-pfsense-segmentation-rule.png) |
+| Attack path reconstruction | Passed - The activity was reconstructed from command output, SIEM evidence, Zeek logs, and firewall context | [09-attack-path-reconstruction.png](evidence/09-attack-path-reconstruction.png) |
+
+## Implementation Summary
+
+The attack path began with Kali attacker placement validation on VLAN 20 and Ubuntu victim placement validation on VLAN 40. After confirming attacker-to-victim connectivity, Nmap service discovery was performed against the victim and identified SSH exposed on TCP/22. The SSH service was then validated with controlled failed login attempts and an authorized successful login using the lab account. Security Onion was used to review alerts and Zeek logs tied to the attacker IP, while pfSense rule evidence provided segmentation context for the allowed lab path. The final evidence reconstructed the activity from both attacker and defender perspectives.
 
 ---
 
-## Findings
+## Evidence Summary
 
-The validation confirmed that the attacker-to-victim path was working as expected and that Security Onion had visibility into the activity.
+| ID | Evidence | What It Demonstrates |
+|---|---|---|
+| 01a | [01a-victim-ip-address.png](evidence/01a-victim-ip-address.png) | Shows the Ubuntu victim system at `192.168.40.103` |
+| 01b | [01b-attacker-ip-address.png](evidence/01b-attacker-ip-address.png) | Shows the Kali attacker system at `192.168.20.100` |
+| 02 | [02-attacker-to-victim-connectivity.png](evidence/02-attacker-to-victim-connectivity.png) | Shows successful ICMP connectivity from Kali to the victim |
+| 03 | [03-nmap-service-discovery.png](evidence/03-nmap-service-discovery.png) | Shows SSH exposed on TCP/22 with OpenSSH service details |
+| 04 | [04-ssh-service-validation.png](evidence/04-ssh-service-validation.png) | Shows failed SSH attempts and a successful login using the authorized lab account |
+| 05 | [05-controlled-attack-activity.png](evidence/05-controlled-attack-activity.png) | Shows focused SSH scanning and failed authentication activity |
+| 06 | [06-security-onion-alerts.png](evidence/06-security-onion-alerts.png) | Shows Security Onion alerts associated with the attacker source IP |
+| 07 | [07-zeek-connection-logs.png](evidence/07-zeek-connection-logs.png) | Shows Zeek SSH and connection logs from attacker to victim over TCP/22 |
+| 08 | [08-pfsense-segmentation-rule.png](evidence/08-pfsense-segmentation-rule.png) | Shows VLAN20 attacker rules allowing lab victim traffic while blocking unauthorized internal access |
+| 09 | [09-attack-path-reconstruction.png](evidence/09-attack-path-reconstruction.png) | Shows the final written attack path summary and defensive takeaway |
 
-Key findings:
+## Key Evidence
+
+The screenshots below highlight the most important attack path validation evidence while the table above preserves links to the full evidence set.
+
+**Attacker-to-Victim Connectivity**
+
+![Attacker-to-victim connectivity test](evidence/02-attacker-to-victim-connectivity.png)
+
+**Nmap Service Discovery**
+
+![Nmap service discovery](evidence/03-nmap-service-discovery.png)
+
+**SSH Service Validation**
+
+![SSH service validation](evidence/04-ssh-service-validation.png)
+
+**Security Onion Alerts**
+
+![Security Onion alerts](evidence/06-security-onion-alerts.png)
+
+**Zeek Connection Logs**
+
+![Zeek connection logs](evidence/07-zeek-connection-logs.png)
+
+**Attack Path Reconstruction**
+
+![Attack path reconstruction](evidence/09-attack-path-reconstruction.png)
+
+---
+
+## Key Findings
 
 - The Kali attacker VM used IP address `192.168.20.100` in VLAN 20.
 - The Ubuntu victim system used IP address `192.168.40.103` in VLAN 40.
@@ -287,20 +217,23 @@ Defensive observations:
 
 ---
 
-## Completion Criteria
+## Project Status
 
-This project will be considered complete when:
-
-- [x] A controlled attack path was performed from the attacker VLAN to the victim VLAN
-- [x] Reconnaissance and validation activity was documented
-- [x] Security Onion evidence confirmed visibility of the activity
-- [x] The attack path was reconstructed from logs and screenshots
-- [x] Defensive findings and recommendations were documented
-- [x] All evidence files are stored in the `evidence/` folder and linked from this README
+| Area | Status |
+|---|---|
+| Controlled attack path performed from attacker VLAN to victim VLAN | Complete |
+| Reconnaissance and validation activity documented | Complete |
+| SSH service path validated | Complete |
+| Security Onion alert evidence reviewed | Complete |
+| Zeek connection and SSH logs reviewed | Complete |
+| pfSense segmentation context documented | Complete |
+| Attack path reconstructed from logs and screenshots | Complete |
+| Defensive findings and recommendations documented | Complete |
+| Evidence files stored and linked from README | Complete |
 
 ---
 
-## Final Summary
+## Portfolio Summary
 
 Project 11 validated a controlled attack path from the Kali attacker VM in VLAN 20 to the Ubuntu victim system in VLAN 40. The attack path began with connectivity testing, continued through Nmap service discovery, and then moved into SSH service validation and controlled authentication attempts.
 

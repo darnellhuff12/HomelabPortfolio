@@ -69,48 +69,42 @@ The diagram below shows the current homelab architecture, including pfSense, VLA
 | 18 | [Incident Response Capstone](18-incident-response-capstone/) | Full attack simulation, detection, triage, and reporting | Planned |
 | 19 | [Enterprise Purple Team Capstone](19-enterprise-purple-team-capstone/) | Final polished portfolio summary | Planned |
 
-## Current Portfolio Progress
+## Portfolio Capability Summary
 
-| Area | Current State |
+| Capability Area | Demonstrated Through |
 |---|---|
-| Lab architecture | Documented in Project 1 |
-| VLAN segmentation | Implemented across pfSense and the managed switch |
-| Firewall hardening | Expanded in Project 12; pfSense aliases were documented for management hosts and RFC1918 private networks, HOME/ATTACK/SIEM/VICTIM/ADMIN VLAN rules were reviewed, the Raspberry Pi 5 bastion was validated as the trusted management source for pfSense, Proxmox, Security Onion, the managed switch, iDRAC, and victim SSH, Kali ATTACK VLAN access to Admin VLAN management targets was blocked, and pfSense firewall logs confirmed denied traffic from `192.168.20.100` to protected `192.168.50.x` resources |
-| Admin access model | Completed in Project 13; remote administration is centralized through the Raspberry Pi 5 bastion host on VLAN 50 using Tailscale and scripted SSH tunnels, with Proxmox, pfSense, Security Onion, iDRAC, managed switch access, and victim VNC access validated through the bastion workflow while pfSense NAT confirmed no public management port forwarding |
-| Proxmox virtualization | Completed in Project 3; Proxmox runs on the Dell R730xd with host management isolated on Admin VLAN 50 using `vmbr0.50`, Kali placed on VLAN 20, Security Onion using VLAN 30 management plus a dedicated sniffing interface, storage validated, and management access confirmed through the Raspberry Pi 5 bastion workflow |
-| Security Onion visibility | Completed across Projects 4, 5, and 6; Security Onion dashboard access, service health, management/sniffing interface separation, switch mirroring from `g1`, `g2`, and `g4` to `g3`, packet-level `tcpdump` validation, Hunt-based Suricata ICMP event review, Zeek connection-log review, Nmap reconnaissance visibility, and service enumeration visibility were documented for controlled Kali-to-victim and attacker VLAN traffic |
-| Endpoint telemetry | Expanded in Project 10; Ubuntu endpoint telemetry was validated through SSH service status checks, successful SSH login evidence, controlled failed login attempts from Kali, `/var/log/auth.log` review, source IP attribution to `192.168.20.100`, and a clean endpoint telemetry summary. Broader Elastic Agent and Sysmon telemetry remains planned for future host-visibility projects |
-| Live traffic validation | Kali-to-victim traffic, Security Onion packet capture visibility, Security Onion Hunt results, Zeek connection logs, Suricata alerts, Nmap SYN scan visibility, service enumeration results, SSH brute-force activity, Linux endpoint authentication telemetry, web application scan traffic, Nessus vulnerability scanning traffic, controlled attack path validation, Kali-to-Admin blocking, Admin/Bastion access, filtered management-plane access, saved scan output, firewall alias validation, Pi-bastion management access, pfSense denied-log evidence, Caldera Sandcat agent check-in traffic, victim-to-Caldera HTTP POST activity, and Security Onion Zeek telemetry for controlled adversary-emulation activity validated across Projects 2, 4, 5, 6, 7, 8, 9, 10, 11, 12, and 14 |
-| Monitoring bridge troubleshooting | Completed in Project 5; Proxmox `vmbr1` was validated as the dedicated Security Onion sniffing bridge, and `bridge-ageing 0` was applied so mirrored/SPAN traffic reaches the Security Onion monitor interface after reboot |
-| Service enumeration and exposure review | Completed in Project 6; Kali was used from the attacker VLAN to discover approved victim VLAN hosts, enumerate exposed services, validate filtered access to pfSense, Proxmox, iDRAC, and Security Onion management interfaces, preserve Nmap output, and confirm Security Onion Hunt/Zeek visibility into attacker VLAN activity |
-| SSH brute-force detection | Completed in Project 7; controlled failed SSH login activity was generated against an Ubuntu victim host, Linux authentication logs were reviewed, Security Onion visibility was validated, and the activity was documented in an incident-style workflow |
-| Web application scanning | Completed in Project 8; OWASP Juice Shop was deployed in Docker, Kali accessed the application from the attacker VLAN, OWASP ZAP captured proxied browser traffic, an automated scan identified web application findings, pfSense rule behavior was documented, and Security Onion detected related web attack traffic and alerts |
-| Vulnerability scanning and reporting | Completed in Project 9; Nessus Essentials was installed on Kali, a Basic Network Scan was scoped to the Ubuntu victim at `192.168.40.103`, one low-severity ICMP timestamp disclosure finding and informational SSH/SYN scanner findings were documented, remediation guidance was written directly in the README, and Security Onion Hunt results confirmed scanner-to-victim visibility |
-| Linux endpoint telemetry | Completed in Project 10; the Ubuntu victim at `192.168.40.103` was validated as a monitored endpoint, OpenSSH was confirmed running, Kali at `192.168.20.100` generated successful and failed SSH authentication activity, `/var/log/auth.log` was reviewed for accepted logins, failed passwords, invalid user attempts, timestamps, and source IPs, and a clean terminal summary documented host-level telemetry collection |
-| Attack path validation | Completed in Project 11; Kali at `192.168.20.100` validated a controlled path to the Ubuntu victim at `192.168.40.103`, confirmed ICMP connectivity, discovered SSH exposed on TCP/22 with OpenSSH `9.6p1 Ubuntu 3ubuntu13.16`, performed controlled SSH validation attempts, reviewed Security Onion alerts tied to the attacker source IP, confirmed Zeek `conn` and `ssh` logs between attacker and victim, and documented pfSense segmentation rules showing the attacker VLAN path to the victim lab while broader unauthorized internal access remained blocked |
-| pfSense firewall hardening | Completed in Project 12; pfSense aliases were created for Admin Pi, pfSense, Proxmox, iDRAC, managed switch, Security Onion, victim host, and RFC1918 private networks, VLAN rules were reviewed across HOME, ATTACK, SIEM, VICTIM, and ADMIN, ATTACK-to-VICTIM traffic remained allowed for controlled lab testing, ATTACK-to-Admin management access was blocked, the Raspberry Pi 5 bastion was validated as the trusted management source, and pfSense firewall logs confirmed denied traffic from Kali to protected Admin VLAN resources |
-| Bastion and Tailscale access | Completed in Project 13; the MacBook workstation connected to the Raspberry Pi 5 bastion over Tailscale, the bastion successfully reached internal management targets, reusable tunnel scripts provided access to Proxmox, pfSense, Security Onion, iDRAC, and the managed switch, a separate VNC tunnel reached the victim MacBook, and pfSense NAT showed no public management port forwarding |
-| MITRE ATT&CK emulation | Completed in Project 14; MITRE Caldera was deployed on the attacker/testing VLAN, accessed through a Raspberry Pi bastion SSH tunnel, connected to an approved Ubuntu victim through a Sandcat agent, executed a safe manual discovery operation, and generated victim-to-Caldera HTTP traffic that was validated in Security Onion through Zeek Hunt results and expanded event details |
+| Network architecture and segmentation | VLAN design, pfSense routing, managed-switch trunking, Proxmox VLAN-aware bridges, and documented lab topology |
+| Firewall administration and hardening | pfSense aliases, VLAN-specific rule review, management-plane restrictions, ATTACK-to-Admin blocking, and denied-log validation |
+| Virtualization and lab infrastructure | Proxmox on a Dell R730xd, Kali and Security Onion VM placement, Admin VLAN host management, storage validation, and dedicated sniffing bridge design |
+| SIEM and network visibility | Security Onion dashboards, Hunt, Zeek logs, Suricata alerts, tcpdump validation, mirrored/SPAN traffic, and packet-level visibility checks |
+| Reconnaissance and exposure review | Controlled Nmap host discovery, service enumeration, filtered management-plane testing, saved scan evidence, and Security Onion scan visibility |
+| Authentication attack detection | Controlled SSH brute-force activity, Linux authentication log review, failed-login evidence, tcpdump validation, and Security Onion SSH/Zeek visibility |
+| Endpoint telemetry | Ubuntu endpoint SSH service validation, successful and failed authentication activity, `/var/log/auth.log` review, and source IP attribution |
+| Web application security testing | OWASP Juice Shop deployment, OWASP ZAP proxy capture, automated scan results, web finding review, and Security Onion web scan visibility |
+| Vulnerability management | Nessus Essentials scanning, scoped target validation, severity review, finding documentation, remediation guidance, and SIEM visibility validation |
+| Attack path investigation | Kali-to-victim path validation, Nmap service discovery, SSH validation, Security Onion alert review, Zeek connection logs, and pfSense segmentation context |
+| Secure remote administration | Raspberry Pi 5 bastion host, Tailscale access, scripted SSH tunnels, loopback aliases, VNC tunneling, and no public management port forwarding |
+| Adversary emulation | MITRE Caldera deployment, Sandcat agent check-in, safe discovery operations, least-privilege firewall access, and Security Onion Zeek telemetry |
 
 ## Documentation Standard
 
-Each project follows a consistent format:
+Each completed project is written as a professional security case study rather than a step-by-step lab guide. The READMEs are standardized around the following structure:
 
 - Objective
+- Business and Security Value
 - Scope and Rules of Engagement
-- Architecture or configuration summary
-- Lab Environment
-- Red Team Activity
-- Blue Team Visibility
-- Findings
-- Evidence and screenshots
-- Detection and Tuning Opportunities
-- Recommendations
-- MITRE ATT&CK Mapping
+- Lab Environment or Architecture Summary
+- Implementation Summary
+- Validation and Evidence
+- Evidence Summary
+- Key Evidence
+- Key Findings
 - Lessons Learned
-- Resume Bullet
+- Remediation, Hardening, or Future Enhancements
+- Project Status
+- Portfolio Summary or Resume Bullet
 
-This format keeps each project organized and makes the portfolio easier to review during interviews.
+Evidence is presented in two layers: a table with clickable links to the full evidence set, followed by embedded key screenshots that highlight the most important validation results. This keeps each project complete, reviewable, and polished without reading like a tutorial.
 
 ## Rules of Engagement
 
@@ -128,19 +122,12 @@ Screenshots and logs are sanitized before publishing. Passwords, tokens, public 
 
 ## Portfolio Goals
 
-- Designing a segmented lab environment
-- Building a secure virtualization foundation using Proxmox, VLAN-aware bridges, and isolated hypervisor management
-- Centralizing administrative access through a Raspberry Pi 5 bastion workflow using Tailscale, scripted SSH tunnels, loopback aliases, and VNC tunneling
-- Building, hardening, validating, and documenting firewall boundaries using pfSense aliases, VLAN-specific rules, bastion-based management access, denied-log validation, and no public management port forwarding
-- Running controlled adversary simulations, including reconnaissance, service enumeration, SSH brute-force testing, web application scanning, vulnerability scanning, attacker-to-victim path validation, and MITRE Caldera-based adversary emulation with Sandcat agent check-in and safe discovery operations
-- Validating SIEM and network visibility through Security Onion dashboards, Hunt results, Suricata alerts, Zeek connection logs, packet capture, switch mirroring, Proxmox sniffing-bridge validation, Nmap scan visibility, service enumeration visibility, SSH brute-force visibility, web application scan visibility, Nessus scan visibility, attack path validation, Caldera agent traffic visibility, firewall logs, and pfSense denied-log evidence for blocked management access
-- Collecting endpoint telemetry from Linux authentication logs, SSH service activity, successful and failed login attempts, and future Elastic Agent/Sysmon integrations
-- Mapping activity to MITRE ATT&CK
-- Writing detection logic
-- Tuning alerts and reducing false positives
-- Creating professional incident reports
-- Explaining technical work in a clear, business-relevant way
+- Demonstrate practical security engineering skills through a segmented, personally owned homelab.
+- Validate both offensive activity and defensive visibility in a controlled purple-team environment.
+- Document firewall rules, SIEM telemetry, endpoint logs, scan results, and attack-path evidence in a professional format.
+- Build repeatable workflows for reconnaissance detection, service enumeration, SSH brute-force analysis, web application scanning, vulnerability management, adversary emulation, and incident-style investigation.
+- Show clear business value by connecting technical controls to risk reduction, visibility, hardening, and response readiness.
 
 ## Highlight Resume Bullet
 
-Built, documented, and validated a segmented purple-team cybersecurity homelab using pfSense, Proxmox, Security Onion, Kali Linux, Linux and Windows victim endpoints, OWASP ZAP, OWASP Juice Shop, Nessus Essentials, MITRE Caldera, VLAN isolation, pfSense firewall aliases, VLAN-specific firewall hardening, iDRAC out-of-band management, Proxmox Admin VLAN isolation through `vmbr0.50`, VLAN-tagged lab workloads, a dedicated Security Onion sniffing bridge with `bridge-ageing 0`, managed-switch port mirroring, Suricata/Hunt visibility validation, Zeek connection-log review, Nmap reconnaissance and service enumeration detection, controlled SSH brute-force detection, Linux endpoint authentication telemetry, web application scanning visibility, vulnerability scanning and remediation reporting, controlled attacker-to-victim path validation, Caldera Sandcat agent deployment, non-destructive adversary-emulation discovery operations, packet-level `tcpdump` analysis, filtered management-plane access validation, pfSense denied-log validation for blocked ATTACK-to-Admin traffic, saved scan evidence, no public management port forwarding, and a Raspberry Pi 5 bastion workflow using Tailscale, scripted SSH tunnels, loopback aliases, and VNC tunneling to support adversary simulation, SIEM monitoring, firewall validation, exposure review, endpoint telemetry collection, detection engineering, web application security testing, vulnerability management practice, attack path investigation, firewall hardening, secure remote administration, and incident response practice.
+Built and documented a segmented purple-team cybersecurity homelab using pfSense, Proxmox, Security Onion, Kali Linux, Ubuntu/Windows victims, OWASP ZAP, Nessus Essentials, MITRE Caldera, VLAN isolation, firewall hardening, Tailscale bastion access, and SIEM telemetry validation to support controlled adversary simulation, detection engineering, vulnerability management, endpoint telemetry review, secure remote administration, and incident-response-style investigations.

@@ -1,5 +1,3 @@
-
-
 # Project 7: SSH Brute-Force Detection
 
 ## Objective
@@ -8,7 +6,7 @@ This project demonstrates how a segmented cybersecurity homelab can be used to g
 
 This project builds on the earlier homelab portfolio projects by using the established VLAN architecture, mirrored switch traffic, pfSense firewall controls, and Security Onion monitoring stack to detect suspicious authentication behavior.
 
-## Business & Security Value
+## Business and Security Value
 
 SSH brute-force attacks are a common initial-access technique used against exposed Linux servers, network appliances, cloud workloads, and administrative interfaces. Even when an attack is unsuccessful, repeated login attempts may indicate scanning, credential stuffing, password guessing, or compromised internal systems.
 
@@ -46,7 +44,7 @@ This project uses the existing segmented homelab architecture.
 
 Traffic is intentionally generated between the attacker and victim networks. Security Onion visibility depends on the switch mirroring configuration and the monitoring interface receiving the relevant traffic path.
 
-## Scope & Rules of Engagement
+## Scope and Rules of Engagement
 
 This project was performed only within a private, isolated homelab environment. No public systems, third-party networks, or unauthorized hosts were targeted.
 
@@ -65,217 +63,96 @@ Out of scope:
 - Using valid credentials that do not belong to the lab owner
 - Running brute-force activity outside the lab environment
 
-## Project Workflow
+## Validation and Evidence
 
-### 1. Confirm Lab Connectivity
+SSH brute-force detection was validated through attacker placement checks, victim placement checks, SSH service validation, controlled authentication attempts, endpoint log review, packet capture, Security Onion investigation, and pfSense rule review.
 
-Before generating attack traffic, confirm that the attacker system can reach the victim system over the intended network path.
+| Validation Area | Result | Evidence |
+|---|---|---|
+| Kali attacker placement | Passed - Kali was confirmed on the attacker VLAN with IP `192.168.20.100` | [01-kali-attacker-ip.png](evidence/01-kali-attacker-ip.png) |
+| Ubuntu victim placement | Passed - The Ubuntu victim VM was confirmed on the victim VLAN with IP `192.168.40.103` | [02-ubuntu-victim-ip.png](evidence/02-ubuntu-victim-ip.png) |
+| SSH service validation | Passed - OpenSSH was enabled and listening on the Ubuntu victim | [03-victim-ssh-service-status.png](evidence/03-victim-ssh-service-status.png) |
+| Attacker-to-victim connectivity | Passed - Kali successfully reached the Ubuntu victim across the approved lab path | [04-kali-to-victim-connectivity-test.png](evidence/04-kali-to-victim-connectivity-test.png) |
+| SSH port validation | Passed - Nmap confirmed TCP/22 was open on the Ubuntu victim | [05-ssh-port-validation.png](evidence/05-ssh-port-validation.png) |
+| Controlled brute-force simulation | Passed - Hydra generated controlled failed SSH authentication attempts using a small local password list | [06-controlled-ssh-bruteforce-test.png](evidence/06-controlled-ssh-bruteforce-test.png) |
+| Victim authentication logs | Passed - Ubuntu authentication logs recorded repeated failed SSH login attempts from the Kali attacker IP | [07-victim-auth-log-failed-passwords.png](evidence/07-victim-auth-log-failed-passwords.png) |
+| Packet-level SSH visibility | Passed - tcpdump confirmed SSH traffic between the attacker and victim systems on TCP/22 | [08-tcpdump-ssh-traffic.png](evidence/08-tcpdump-ssh-traffic.png) |
+| Security Onion investigation | Passed - Security Onion Hunt showed Zeek SSH events, Zeek connection events, and Suricata SSH scan alerts | [09-security-onion-ssh-search-results.png](evidence/09-security-onion-ssh-search-results.png) |
+| pfSense rule review | Passed - pfSense allowed controlled lab traffic from VLAN 20 to the VICTIM subnet for the test | [10-pfsense-controlled-test-rule.png](evidence/10-pfsense-controlled-test-rule.png) |
 
-Example validation steps:
+## Implementation Summary
 
-```bash
-ping <victim-ip>
-```
+The test workflow began by confirming Kali attacker placement on VLAN 20 and Ubuntu victim placement on VLAN 40. The victim SSH service was validated locally, and TCP/22 exposure was confirmed from Kali. A controlled Hydra test was then performed using a small local password list to generate failed SSH authentication attempts without attempting unauthorized access. The activity was validated in Ubuntu authentication logs, packet capture output, Security Onion Hunt results, and pfSense firewall rule evidence.
 
-```bash
-nc -vz <victim-ip> 22
-```
+## Evidence Summary
 
-or:
+The following evidence documents the controlled SSH brute-force detection test and provides clickable links to each evidence file.
 
-```bash
-nmap -p 22 <victim-ip>
-```
+| ID | Evidence | What It Demonstrates |
+|---|---|---|
+| 01 | [01-kali-attacker-ip.png](evidence/01-kali-attacker-ip.png) | Shows Kali attacker VM IP address on the attacker VLAN (`192.168.20.100`) |
+| 02 | [02-ubuntu-victim-ip.png](evidence/02-ubuntu-victim-ip.png) | Shows Ubuntu victim VM IP address on the victim VLAN (`192.168.40.103`) |
+| 03 | [03-victim-ssh-service-status.png](evidence/03-victim-ssh-service-status.png) | Confirms SSH was enabled and actively listening on the Ubuntu victim |
+| 04 | [04-kali-to-victim-connectivity-test.png](evidence/04-kali-to-victim-connectivity-test.png) | Shows successful ICMP connectivity from Kali to the Ubuntu victim |
+| 05 | [05-ssh-port-validation.png](evidence/05-ssh-port-validation.png) | Shows Nmap validation confirming TCP/22 open on the Ubuntu victim |
+| 06 | [06-controlled-ssh-bruteforce-test.png](evidence/06-controlled-ssh-bruteforce-test.png) | Shows a controlled Hydra test using a small password list against the Ubuntu victim over SSH |
+| 07 | [07-victim-auth-log-failed-passwords.png](evidence/07-victim-auth-log-failed-passwords.png) | Shows Ubuntu authentication logs recording repeated failed SSH login attempts from the Kali attacker IP |
+| 08 | [08-tcpdump-ssh-traffic.png](evidence/08-tcpdump-ssh-traffic.png) | Shows tcpdump output confirming SSH traffic between the attacker and victim systems on TCP/22 |
+| 09 | [09-security-onion-ssh-search-results.png](evidence/09-security-onion-ssh-search-results.png) | Shows Security Onion Hunt results with Zeek SSH/connection events and Suricata SSH scan alerts |
+| 10 | [10-pfsense-controlled-test-rule.png](evidence/10-pfsense-controlled-test-rule.png) | Shows the pfSense ATTACK VLAN rule allowing controlled lab traffic from VLAN 20 to the VICTIM subnet |
 
-Expected result:
-
-- The victim is reachable from the attacker system
-- TCP port 22 is open or filtered according to the intended test design
-- The connection path matches the expected VLAN and firewall rules
-
-### 2. Confirm SSH Service on the Victim
-
-On the victim system, confirm that SSH is installed, enabled, and listening.
-
-```bash
-sudo systemctl status ssh
-```
-
-or:
-
-```bash
-sudo systemctl status sshd
-```
-
-Confirm that the service is listening on TCP port 22:
-
-```bash
-sudo ss -tulpn | grep :22
-```
-
-Expected result:
-
-- SSH service is active
-- The victim is listening on TCP/22
-- The victim IP address matches the target used from Kali
-
-### 3. Generate Controlled SSH Authentication Attempts
-
-From Kali, generate repeated SSH login attempts against the victim system. This can be done manually or with a controlled password-testing tool using a small test wordlist.
-
-For this project, the controlled test used Kali (`192.168.20.100`) against the Ubuntu victim VM (`192.168.40.103`) with a small local password list. The objective was not to gain access, but to generate clear failed-authentication telemetry for endpoint logs, packet capture, and Security Onion analysis.
-
-Manual example:
-
-```bash
-ssh testuser@<victim-ip>
-```
-
-Controlled brute-force example:
-
-```bash
-hydra -l testuser -P passwords.txt ssh://<victim-ip>
-```
-
-Recommended safety limits:
-
-- Use a small test wordlist
-- Use a lab-only username
-- Keep the test short and controlled
-- Stop once detection evidence is collected
-
-### 4. Validate Local Victim Logs
-
-On the victim system, review authentication logs for failed SSH login attempts.
-
-Ubuntu/Debian-based systems:
-
-```bash
-sudo grep "Failed password" /var/log/auth.log
-```
-
-Systemd journal option:
-
-```bash
-sudo journalctl -u ssh --since "10 minutes ago"
-```
-
-or:
-
-```bash
-sudo journalctl -u sshd --since "10 minutes ago"
-```
-
-Expected result:
-
-- Failed SSH login attempts appear in local authentication logs
-- Source IP matches the Kali attacker system
-- Timestamps match the test window
-
-### 5. Validate Network Visibility
-
-Use packet capture to confirm that the SSH traffic is visible on the expected interface or monitoring path.
-
-Example tcpdump command:
-
-```bash
-sudo tcpdump -i <interface> host <attacker-ip> and host <victim-ip> and port 22
-```
-
-Expected result:
-
-- TCP/22 traffic is visible between Kali and the victim
-- Traffic appears during the brute-force test window
-- Captured traffic supports the Security Onion investigation
-
-### 6. Investigate in Security Onion
-
-Use Security Onion to search for traffic and logs related to the SSH brute-force test.
-
-Recommended pivots:
-
-- Attacker IP address
-- Victim IP address
-- Destination port 22
-- SSH protocol activity
-- Failed authentication events, if endpoint logs are ingested
-- Zeek SSH logs, if network visibility is working
-- Suricata alerts, if any signatures trigger
-
-Expected result:
-
-- Security Onion shows evidence of SSH traffic between attacker and victim
-- The activity can be correlated with the test window
-- The source, destination, port, and protocol align with the lab scenario
-
-In the completed test, Security Onion Hunt displayed Zeek SSH events, Zeek connection events, and Suricata alerts including `ET SCAN Potential SSH Scan` activity for traffic from `192.168.20.100` to `192.168.40.103` on destination port `22`.
-
-## Evidence
-
-The following screenshots were captured during the controlled SSH brute-force detection test.
-
-| Evidence | Description |
-|---|---|
-| [01-kali-attacker-ip.png](evidence/01-kali-attacker-ip.png) | Kali attacker VM IP address on the attacker VLAN (`192.168.20.100`). |
-| [02-ubuntu-victim-ip.png](evidence/02-ubuntu-victim-ip.png) | Ubuntu victim VM IP address on the victim VLAN (`192.168.40.103`). |
-| [03-victim-ssh-service-status.png](evidence/03-victim-ssh-service-status.png) | SSH service enabled and actively listening on the Ubuntu victim. |
-| [04-kali-to-victim-connectivity-test.png](evidence/04-kali-to-victim-connectivity-test.png) | Successful ICMP connectivity test from Kali to the Ubuntu victim. |
-| [05-ssh-port-validation.png](evidence/05-ssh-port-validation.png) | Nmap validation showing TCP/22 open on the Ubuntu victim. |
-| [06-controlled-ssh-bruteforce-test.png](evidence/06-controlled-ssh-bruteforce-test.png) | Controlled Hydra test using a small password list against the Ubuntu victim over SSH. |
-| [07-victim-auth-log-failed-passwords.png](evidence/07-victim-auth-log-failed-passwords.png) | Ubuntu authentication logs showing repeated failed SSH login attempts from the Kali attacker IP. |
-| [08-tcpdump-ssh-traffic.png](evidence/08-tcpdump-ssh-traffic.png) | tcpdump output confirming SSH traffic between the attacker and victim systems on TCP/22. |
-| [09-security-onion-ssh-search-results.png](evidence/09-security-onion-ssh-search-results.png) | Security Onion Hunt results showing Zeek SSH/connection events and Suricata SSH scan alerts. |
-| [10-pfsense-controlled-test-rule.png](evidence/10-pfsense-controlled-test-rule.png) | pfSense ATTACK VLAN rule allowing controlled lab traffic from VLAN 20 to the VICTIM subnet. |
-
-### Key Evidence Highlights
+## Key Findings
 
 - Kali attacker IP: `192.168.20.100`
 - Ubuntu victim IP: `192.168.40.103`
-- Validated SSH exposure: TCP/22 open on the victim
-- Attack simulation: controlled Hydra SSH login attempts
-- Endpoint evidence: failed SSH login attempts recorded in `/var/log/auth.log`
-- Network evidence: tcpdump confirmed SSH traffic between attacker and victim
-- SIEM evidence: Security Onion showed Zeek SSH/connection events and Suricata SSH scan alerts
+- TCP/22 was confirmed open on the Ubuntu victim.
+- Controlled Hydra authentication attempts generated repeatable failed-login telemetry.
+- Ubuntu `/var/log/auth.log` provided strong endpoint evidence of failed SSH authentication attempts.
+- tcpdump confirmed SSH traffic between the attacker and victim systems.
+- Security Onion Hunt displayed Zeek SSH events, Zeek connection events, and Suricata SSH scan alerts.
+- pfSense rule evidence confirmed the traffic path was intentionally allowed for controlled lab testing.
 
-### Embedded Evidence
+## Key Evidence
 
-#### Kali Attacker IP
+The screenshots below highlight the most important SSH brute-force detection evidence while the table above preserves links to the full evidence set.
+
+**Kali Attacker IP**
 
 ![Kali attacker IP address](evidence/01-kali-attacker-ip.png)
 
-#### Ubuntu Victim IP
+**Ubuntu Victim IP**
 
 ![Ubuntu victim IP address](evidence/02-ubuntu-victim-ip.png)
 
-#### Victim SSH Service Status
+**Victim SSH Service Status**
 
 ![Victim SSH service status](evidence/03-victim-ssh-service-status.png)
 
-#### Kali-to-Victim Connectivity Test
+**Kali-to-Victim Connectivity Test**
 
 ![Kali to victim connectivity test](evidence/04-kali-to-victim-connectivity-test.png)
 
-#### SSH Port Validation
+**SSH Port Validation**
 
 ![SSH port validation](evidence/05-ssh-port-validation.png)
 
-#### Controlled SSH Brute-Force Test
+**Controlled SSH Brute-Force Test**
 
 ![Controlled SSH brute-force test](evidence/06-controlled-ssh-bruteforce-test.png)
 
-#### Victim Authentication Logs
+**Victim Authentication Logs**
 
 ![Victim authentication logs showing failed SSH attempts](evidence/07-victim-auth-log-failed-passwords.png)
 
-#### tcpdump SSH Traffic Capture
+**tcpdump SSH Traffic Capture**
 
 ![tcpdump SSH traffic capture](evidence/08-tcpdump-ssh-traffic.png)
 
-#### Security Onion SSH Investigation
+**Security Onion SSH Investigation**
 
 ![Security Onion SSH search results](evidence/09-security-onion-ssh-search-results.png)
 
-#### pfSense Controlled Test Rule
+**pfSense Controlled Test Rule**
 
 ![pfSense controlled test rule](evidence/10-pfsense-controlled-test-rule.png)
 
@@ -311,7 +188,7 @@ This project reinforces several practical security concepts:
 - Network logs and endpoint logs are more valuable when correlated together
 - Brute-force detection should consider source IP, destination IP, username, count, and time window
 
-## Remediation & Hardening Considerations
+## Remediation and Hardening Considerations
 
 Common defenses against SSH brute-force attacks include:
 

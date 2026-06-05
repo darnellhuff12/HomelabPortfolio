@@ -1,6 +1,6 @@
 # Project 8: Web Application Scanning with OWASP ZAP and Juice Shop
 
-## Project Overview
+## Objective
 
 This project documents the setup and validation of a controlled web application security testing lab using **OWASP ZAP** and **OWASP Juice Shop**. The goal is to safely practice web application reconnaissance, vulnerability scanning, proxy-based testing, and SIEM visibility inside the isolated homelab environment.
 
@@ -30,7 +30,7 @@ The web application testing workflow is performed inside the isolated homelab ne
 | Security Onion | SIEM VLAN | Monitors mirrored traffic from the lab environment |
 | pfSense | Firewall | Controls traffic between VLANs |
 
-## Objectives
+## Validation Goals
 
 - Deploy or access OWASP Juice Shop in the lab environment.
 - Install and launch OWASP ZAP from the Kali workstation.
@@ -53,165 +53,85 @@ The web application testing workflow is performed inside the isolated homelab ne
 - Docker or local application hosting
 - Web browser configured to proxy through ZAP
 
-## Implementation Steps
+## Business and Security Value
 
-### 1. Prepare the Target Application
+Web application scanning is a common part of vulnerability management, application security testing, and security validation. OWASP ZAP provides a safe way to inspect web traffic, identify common application weaknesses, and practice interpreting scanner output.
 
-OWASP Juice Shop should be started on the victim or target system. Once running, the application should be reachable from the Kali workstation over HTTP.
+This project connects web application testing with blue-team visibility by validating that Security Onion can observe web scanning traffic generated from Kali against the Juice Shop target. This demonstrates both offensive testing workflow and defensive monitoring awareness.
 
-Example access format:
+## Scope and Rules of Engagement
 
-```text
-http://<juice-shop-ip>:3000
-```
+All testing was limited to the isolated homelab environment. OWASP Juice Shop was used as the intentionally vulnerable target application, and scanning activity was performed only against the lab-hosted Juice Shop instance.
 
-The target application should only be exposed inside the lab network.
+Out of scope:
 
-### 2. Verify Network Connectivity
+- Public internet targets
+- Third-party websites
+- Production applications
+- Unauthorized scanning
+- Exploitation outside the lab environment
 
-From Kali, verify that the Juice Shop host is reachable.
+## Validation and Evidence
 
-Example checks:
+Web application scanning was validated through target deployment, attacker connectivity, ZAP launch, proxy-based browsing, automated scan execution, alert review, firewall rule review, Security Onion visibility, and ZAP report generation.
 
-```bash
-ping <juice-shop-ip>
-curl http://<juice-shop-ip>:3000
-```
-
-Successful connectivity confirms that the attacker workstation can access the vulnerable web application through the intended lab path.
-
-### 3. Launch OWASP ZAP
-
-OWASP ZAP is launched from Kali and used as the primary testing tool for this project.
-
-ZAP provides two important functions for this lab:
-
-1. Passive inspection of browser traffic.
-2. Active vulnerability scanning against the Juice Shop application.
-
-### 4. Configure Browser Proxying
-
-The browser on Kali should be configured to send traffic through ZAP.
-
-Typical proxy settings:
-
-| Setting | Value |
-|---|---|
-| Proxy Host | `127.0.0.1` |
-| Proxy Port | `8080` |
-| Protocol | HTTP / HTTPS |
-
-After proxying is enabled, browsing to Juice Shop should cause requests and responses to appear inside ZAP.
-
-### 5. Capture Baseline Traffic
-
-Before running an automated scan, manually browse the Juice Shop application while ZAP is proxying the traffic.
-
-Baseline browsing should include:
-
-- Loading the home page.
-- Navigating between pages.
-- Viewing product details.
-- Opening login or account-related pages.
-- Confirming requests appear in the ZAP history tab.
-
-This establishes that ZAP is correctly intercepting web traffic.
-
-### 6. Run a ZAP Scan
-
-A safe scan is run against Juice Shop to identify common web application security issues. Since Juice Shop is intentionally vulnerable and isolated inside the lab, it is an appropriate target for this activity.
-
-The scan should only target the lab-hosted Juice Shop URL.
-
-Example target format:
-
-```text
-http://<juice-shop-ip>:3000
-```
-
-### 7. Review ZAP Alerts
-
-After the scan completes, review the discovered alerts in ZAP.
-
-Findings should be grouped by severity:
-
-| Severity | Description |
-|---|---|
-| High | Issues that may allow serious compromise or exploitation |
-| Medium | Issues that may increase risk or support further attacks |
-| Low | Lower-impact weaknesses or misconfigurations |
-| Informational | Observations useful for assessment context |
-
-The purpose of this step is not only to collect alerts, but also to understand what each finding means and how it could be remediated in a real environment.
-
-### 8. Validate Security Onion Visibility
-
-Security Onion should be checked to confirm that web scanning traffic is visible from the monitoring side of the lab.
-
-Useful items to search for include:
-
-- Kali source IP address.
-- Juice Shop target IP address.
-- HTTP traffic.
-- ZAP user-agent strings if visible.
-- Suricata alerts related to web scanning activity.
-- Zeek HTTP logs.
-
-This step connects the web application testing activity back to the larger detection and monitoring goals of the homelab.
-
-## Evidence Collected
-
-| Evidence Item | Description | Status |
+| Validation Area | Result | Evidence |
 |---|---|---|
-| Docker installed | Docker service enabled and running on the Ubuntu victim host | Complete |
-| Juice Shop running | Juice Shop container running and listening on port `3000` | Complete |
-| Kali connectivity test | Kali successfully pinged and curled the Juice Shop web application | Complete |
-| Juice Shop browser access | Juice Shop loaded successfully from Kali in the browser | Complete |
-| ZAP launched | OWASP ZAP opened successfully on Kali | Complete |
-| ZAP HUD enabled | ZAP HUD used during manual browser exploration of Juice Shop | Complete |
-| ZAP history populated | ZAP captured HTTP requests and responses from Juice Shop browsing | Complete |
-| ZAP automated scan | Automated scan completed against the Juice Shop target URL | Complete |
-| ZAP alerts summary | ZAP identified multiple alerts, including SQL injection and security header findings | Complete |
-| Security Onion visibility | Security Onion observed web scanning traffic and related Suricata alerts to the Juice Shop target | Complete |
-| pfSense web testing rule | Firewall rule evidence showing lab traffic path for web testing | Complete |
-| Generated ZAP report | Screenshot showing the exported ZAP-generated report | Complete |
+| Docker service validation | Passed - Docker was installed and running on the Ubuntu victim host | [01-docker-installed.png](evidence/01-docker-installed.png) |
+| Juice Shop deployment | Passed - Juice Shop was running in Docker and listening on port `3000` | [02-juice-shop-running-docker.png](evidence/02-juice-shop-running-docker.png) |
+| Kali connectivity to Juice Shop | Passed - Kali successfully reached Juice Shop using ping and curl | [03a-kali-access-to-juice-shop.png](evidence/03a-kali-access-to-juice-shop.png) |
+| Browser access to Juice Shop | Passed - Juice Shop loaded successfully in the Kali browser | [03b-kali-access-to-juice-shop.png](evidence/03b-kali-access-to-juice-shop.png) |
+| OWASP ZAP launch | Passed - OWASP ZAP opened successfully on Kali | [04-zap-launched.png](evidence/04-zap-launched.png) |
+| ZAP HUD and browser exploration | Passed - ZAP HUD was enabled while manually browsing Juice Shop | [05-zap-hud-juice-shop-browser.png](evidence/05-zap-hud-juice-shop-browser.png) |
+| ZAP proxy history | Passed - ZAP captured HTTP requests and responses from Juice Shop browsing | [06-zap-history-capturing-juice-shop.png](evidence/06-zap-history-capturing-juice-shop.png) |
+| ZAP automated scan | Passed - Automated scanning completed against the Juice Shop target | [07-zap-scan-running.png](evidence/07-zap-scan-running.png) |
+| ZAP alert review | Passed - ZAP identified multiple web application findings, including SQL injection and security header alerts | [08-zap-alerts-summary.png](evidence/08-zap-alerts-summary.png) |
+| Security Onion visibility | Passed - Security Onion observed web scanning traffic and related Suricata alerts | [09-security-onion-web-scan-visibility.png](evidence/09-security-onion-web-scan-visibility.png) |
+| pfSense web testing rule review | Passed - Firewall rule evidence confirmed the lab traffic path for web application testing | [10-pfsense-web-testing-rule.png](evidence/10-pfsense-web-testing-rule.png) |
+| ZAP report generation | Passed - A ZAP-generated report was exported for review | [11-zap-generated-report.png](evidence/11-zap-generated-report.png) |
 
-## Screenshots
+## Implementation Summary
 
-The following screenshots were captured and stored in the `evidence/` folder.
+OWASP Juice Shop was hosted inside the lab as an intentionally vulnerable web application target. Kali was used as the testing workstation, with OWASP ZAP providing proxy-based traffic inspection and automated web application scanning. After confirming network access to Juice Shop, browser traffic was proxied through ZAP, baseline HTTP requests were captured, and an automated scan was executed against the lab target. The results were reviewed in ZAP, exported as a report, and correlated with Security Onion visibility and pfSense firewall rule evidence.
 
-| Screenshot | Description |
-|---|---|
-| [01-docker-installed.png](evidence/01-docker-installed.png) | Docker service enabled and running on the Ubuntu victim host |
-| [02-juice-shop-running-docker.png](evidence/02-juice-shop-running-docker.png) | Juice Shop Docker container running and mapped to port `3000` |
-| [03a-kali-access-to-juice-shop.png](evidence/03a-kali-access-to-juice-shop.png) | Kali successfully reaching Juice Shop with ping and curl |
-| [03b-kali-access-to-juice-shop.png](evidence/03b-kali-access-to-juice-shop.png) | Juice Shop loaded in the Kali browser |
-| [04-zap-launched.png](evidence/04-zap-launched.png) | OWASP ZAP launched on Kali |
-| [05-zap-hud-juice-shop-browser.png](evidence/05-zap-hud-juice-shop-browser.png) | ZAP HUD enabled while manually browsing Juice Shop |
-| [06-zap-history-capturing-juice-shop.png](evidence/06-zap-history-capturing-juice-shop.png) | ZAP history populated with captured Juice Shop requests |
-| [07-zap-scan-running.png](evidence/07-zap-scan-running.png) | ZAP automated scan completed against the Juice Shop target |
-| [08-zap-alerts-summary.png](evidence/08-zap-alerts-summary.png) | ZAP alerts summary showing discovered web application findings |
-| [09-security-onion-web-scan-visibility.png](evidence/09-security-onion-web-scan-visibility.png) | Security Onion visibility of web scanning traffic and related alerts |
-| [10-pfsense-web-testing-rule.png](evidence/10-pfsense-web-testing-rule.png) | pfSense firewall rule evidence for the web testing traffic path |
-| [11-zap-generated-report.png](evidence/11-zap-generated-report.png) | Exported ZAP report evidence |
+## Evidence Summary
 
-## Key Evidence Highlights
+The following evidence documents the completed OWASP ZAP and Juice Shop web application scanning workflow.
 
-### Juice Shop Target Application
+| ID | Evidence | What It Demonstrates |
+|---|---|---|
+| 01 | [01-docker-installed.png](evidence/01-docker-installed.png) | Docker service enabled and running on the Ubuntu victim host |
+| 02 | [02-juice-shop-running-docker.png](evidence/02-juice-shop-running-docker.png) | Juice Shop Docker container running and mapped to port `3000` |
+| 03a | [03a-kali-access-to-juice-shop.png](evidence/03a-kali-access-to-juice-shop.png) | Kali successfully reaching Juice Shop with ping and curl |
+| 03b | [03b-kali-access-to-juice-shop.png](evidence/03b-kali-access-to-juice-shop.png) | Juice Shop loaded in the Kali browser |
+| 04 | [04-zap-launched.png](evidence/04-zap-launched.png) | OWASP ZAP launched on Kali |
+| 05 | [05-zap-hud-juice-shop-browser.png](evidence/05-zap-hud-juice-shop-browser.png) | ZAP HUD enabled while manually browsing Juice Shop |
+| 06 | [06-zap-history-capturing-juice-shop.png](evidence/06-zap-history-capturing-juice-shop.png) | ZAP history populated with captured Juice Shop requests |
+| 07 | [07-zap-scan-running.png](evidence/07-zap-scan-running.png) | ZAP automated scan completed against the Juice Shop target |
+| 08 | [08-zap-alerts-summary.png](evidence/08-zap-alerts-summary.png) | ZAP alerts summary showing discovered web application findings |
+| 09 | [09-security-onion-web-scan-visibility.png](evidence/09-security-onion-web-scan-visibility.png) | Security Onion visibility of web scanning traffic and related alerts |
+| 10 | [10-pfsense-web-testing-rule.png](evidence/10-pfsense-web-testing-rule.png) | pfSense firewall rule evidence for the web testing traffic path |
+| 11 | [11-zap-generated-report.png](evidence/11-zap-generated-report.png) | Exported ZAP report evidence |
+
+## Key Evidence
+
+The screenshots below highlight the most important web application scanning evidence while the table above preserves links to the full evidence set.
+
+**Juice Shop Target Application**
 
 ![Juice Shop running in Kali browser](./evidence/03b-kali-access-to-juice-shop.png)
 
-### ZAP Alert Results
+**ZAP Alert Results**
 
 ![OWASP ZAP alerts summary](./evidence/08-zap-alerts-summary.png)
 
-### Security Onion Detection Visibility
+**Security Onion Detection Visibility**
 
 ![Security Onion web scan visibility](./evidence/09-security-onion-web-scan-visibility.png)
 
 ## Key Findings
 
-This project demonstrates how a vulnerable web application can be safely tested inside an isolated lab while maintaining visibility through the SIEM. OWASP ZAP provided the application security testing perspective, while Security Onion provided the network monitoring and detection perspective.
+This project demonstrated how a vulnerable web application can be safely tested inside an isolated lab while maintaining visibility through the SIEM. OWASP ZAP provided the application security testing perspective, while Security Onion provided the network monitoring and detection perspective.
 
 ZAP identified multiple web application findings against Juice Shop, including SQL injection-related alerts, missing security headers, content security policy issues, cross-domain misconfiguration, information disclosure, and application error disclosure. These findings are expected for an intentionally vulnerable training application and provide useful practice for interpreting scan output.
 
@@ -249,9 +169,18 @@ Although Juice Shop is intentionally vulnerable, the findings from ZAP can be ma
 
 ## Project Status
 
-**Status:** Complete
-
-This project is complete with evidence showing Juice Shop deployment, Kali connectivity, ZAP proxy capture, automated scan results, generated report evidence, pfSense rule validation, and Security Onion visibility.
+| Area | Status |
+|---|---|
+| Juice Shop deployment validated | Complete |
+| Kali connectivity to Juice Shop validated | Complete |
+| OWASP ZAP launched and configured | Complete |
+| Browser traffic captured through ZAP | Complete |
+| Automated ZAP scan completed | Complete |
+| ZAP findings reviewed | Complete |
+| ZAP report generated | Complete |
+| pfSense web testing rule documented | Complete |
+| Security Onion visibility confirmed | Complete |
+| Evidence screenshots captured and linked | Complete |
 
 ## Portfolio Value
 
