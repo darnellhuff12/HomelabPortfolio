@@ -6,7 +6,7 @@ This project documents a controlled service enumeration and exposure review insi
 
 This project builds on the earlier segmentation, monitoring, Proxmox, and Security Onion projects by shifting from infrastructure setup into active validation. Instead of assuming that firewall rules, VLANs, and services are configured correctly, this project uses attacker-style discovery from the Kali VM to confirm what is actually visible on the network.
 
-## Business & Security Value
+## Business and Security Value
 
 Service enumeration is a common early step in both legitimate security assessments and real-world attacks. From a defender's perspective, reviewing exposed services helps answer several important questions:
 
@@ -31,7 +31,7 @@ This type of review supports vulnerability management, attack surface reduction,
 | Netgear GS108T | Managed switch | Provides VLAN tagging and traffic mirroring |
 | Proxmox | Virtualization host | Hosts core lab VMs including Kali and Security Onion |
 
-## Scope & Rules of Engagement
+## Scope and Rules of Engagement
 
 This project was performed only inside the local homelab environment.
 
@@ -53,79 +53,23 @@ This project was performed only inside the local homelab environment.
 - Internet-wide enumeration
 - Unauthorized exploitation
 
-## Methodology
+## Validation and Evidence
 
-The project follows a basic enumeration workflow:
+Service enumeration was validated through attacker placement checks, host discovery, service enumeration, restricted management testing, Security Onion log review, and retained Nmap output.
 
-1. Confirm Kali is on the expected attacker network.
-2. Identify the target subnet or approved host range.
-3. Run basic host discovery.
-4. Enumerate open TCP services on approved targets.
-5. Perform limited service/version detection.
-6. Compare observed exposure against expected firewall and VLAN behavior.
-7. Review Security Onion for scan visibility.
-8. Document findings, screenshots, and lessons learned.
+| Validation Area | Result | Evidence |
+| --- | --- | --- |
+| Kali network placement | Passed - Kali was confirmed on the attacker VLAN with IP `192.168.20.100`, default route through `192.168.20.1`, and reachability to the approved victim host | [01-kali-network-placement.png](evidence/01-kali-network-placement.png) |
+| Victim VLAN host discovery | Passed - Nmap host discovery identified three live hosts on `192.168.40.0/24` | [02-host-discovery-scan.png](evidence/02-host-discovery-scan.png) |
+| Victim service enumeration | Passed - The victim host `192.168.40.102` was reachable, but common TCP services were filtered | [03-service-enumeration-filtered-results.png](evidence/03-service-enumeration-filtered-results.png) |
+| Security Onion visibility | Passed - Security Onion Hunt showed Zeek connection logs for Kali attacker activity | [04-security-onion-scan-visibility.png](evidence/04-security-onion-scan-visibility.png) |
+| Restricted management access | Passed - pfSense, Proxmox, iDRAC, and Security Onion management interfaces were filtered or unreachable from the attacker VLAN | [05-restricted-management-test.png](evidence/05-restricted-management-test.png) |
+| Scan output evidence | Passed - A screenshot documented saved Nmap output files in `.nmap`, `.gnmap`, and `.xml` formats | [06-nmap-output-files.png](evidence/06-nmap-output-files.png) |
+| ATTACK VLAN firewall rule review | Passed - pfSense rules supported controlled victim access while restricting unauthorized private/internal network access | [07-rules-vlan20-attacker-final.png](evidence/07-rules-vlan20-attacker-final.png) |
 
-## Commands Used
+## Outcome Summary
 
-> Replace the sample IP ranges below with the actual lab ranges used during testing.
-
-### Confirm Kali Network Placement
-
-```bash
-ip addr
-ip route
-ping -c 4 <target-ip>
-```
-
-### Host Discovery
-
-```bash
-sudo nmap -sn <target-subnet>
-```
-
-Example:
-
-```bash
-sudo nmap -sn 192.168.40.0/24
-```
-
-### Basic TCP Port Scan
-
-```bash
-sudo nmap -sS -Pn <target-ip>
-```
-
-### Service and Version Detection
-
-```bash
-sudo nmap -sV -Pn <target-ip>
-```
-
-### Full TCP Port Review
-
-```bash
-sudo nmap -p- -Pn <target-ip>
-```
-
-### Combined Targeted Scan
-
-```bash
-sudo nmap -sS -sV -O -Pn -oA project6-service-enumeration <target-ip>
-```
-
-### Optional: Save Output for Evidence
-
-```bash
-mkdir -p evidence/nmap-output
-sudo nmap -sS -sV -Pn <target-ip> -oA evidence/nmap-output/service-enumeration-<target-name>
-```
-
-## Expected Results
-
-The expected outcome is not necessarily that every scan finds open services. The goal is to validate that the network behaves as designed.
-
-Expected observations may include:
+The goal of this project was not to find as many open ports as possible. The goal was to validate whether the network behaved as designed from the perspective of the attacker VLAN. The completed review demonstrated that:
 
 - Kali can reach approved victim systems.
 - Kali cannot reach restricted management interfaces unless explicitly allowed.
@@ -134,7 +78,7 @@ Expected observations may include:
 - Firewall rules block traffic that should not cross VLAN boundaries.
 - Any discovered services are documented and reviewed.
 
-## Findings
+## Key Findings
 
 | Target | IP Address | Open Ports / Result | Service Notes | Expected? | Action Needed |
 | --- | --- | --- | --- | --- | --- |
@@ -147,73 +91,55 @@ Expected observations may include:
 | Security Onion Management | 192.168.30.10 | 443/tcp filtered; ICMP blocked | Security Onion management interface was not directly reachable from the attacker VLAN | Yes | None |
 | Security Onion Monitoring | N/A | Zeek connection logs observed | Hunt results confirmed activity from Kali was visible in Security Onion | Yes | None |
 
-## Evidence Collected
+## Evidence Summary
 
-Screenshots and output files were added to the `evidence/` folder to document attacker placement, service enumeration results, firewall behavior, Security Onion visibility, and saved Nmap output.
+The following evidence documents attacker placement, service enumeration results, firewall behavior, Security Onion visibility, and saved Nmap output evidence.
 
-| Evidence ID | File Name | Description |
+| ID | Evidence | What It Demonstrates |
 | --- | --- | --- |
-| E01 | [`kali-network-placement.png`](evidence/kali-network-placement.png) | Shows Kali on the attacker VLAN with IP address 192.168.20.100, default route through 192.168.20.1, and successful ping to the victim host |
-| E02 | [`host-discovery-scan.png`](evidence/host-discovery-scan.png) | Shows Nmap host discovery against 192.168.40.0/24 identifying three live hosts on the victim VLAN |
-| E03 | [`service-enumeration-filtered-results.png`](evidence/service-enumeration-filtered-results.png) | Shows Nmap service enumeration against 192.168.40.102 with the host up and 1000 TCP ports filtered |
-| E04 | [`security-onion-scan-visibility.png`](evidence/security-onion-scan-visibility.png) | Shows Security Onion Hunt results confirming Zeek connection logs for activity from the Kali attacker VM |
-| E05 | [`restricted-management-test.png`](evidence/restricted-management-test.png) | Shows management systems returning ICMP failures and filtered management ports from the attacker VLAN |
-| E06 | [`nmap-output-files.png`](evidence/nmap-output-files.png) | Shows saved Nmap output files in `.nmap`, `.gnmap`, and `.xml` formats |
-| E07 | [`rules-vlan20-attacker-final.png`](evidence/rules-vlan20-attacker-final.png) | Shows ATTACK VLAN firewall rules allowing victim lab testing while blocking unauthorized private/internal network access |
-| E08 | [`nmap-output/`](evidence/nmap-output/) | Contains saved service enumeration and full TCP scan output files for raw evidence retention |
+| 01 | [`01-kali-network-placement.png`](evidence/01-kali-network-placement.png) | Shows Kali on the attacker VLAN with IP address 192.168.20.100, default route through 192.168.20.1, and successful ping to the victim host |
+| 02 | [`02-host-discovery-scan.png`](evidence/02-host-discovery-scan.png) | Shows Nmap host discovery against 192.168.40.0/24 identifying three live hosts on the victim VLAN |
+| 03 | [`03-service-enumeration-filtered-results.png`](evidence/03-service-enumeration-filtered-results.png) | Shows Nmap service enumeration against 192.168.40.102 with the host up and 1000 TCP ports filtered |
+| 04 | [`04-security-onion-scan-visibility.png`](evidence/04-security-onion-scan-visibility.png) | Shows Security Onion Hunt results confirming Zeek connection logs for activity from the Kali attacker VM |
+| 05 | [`05-restricted-management-test.png`](evidence/05-restricted-management-test.png) | Shows management systems returning ICMP failures and filtered management ports from the attacker VLAN |
+| 06 | [`06-nmap-output-files.png`](evidence/06-nmap-output-files.png) | Shows a terminal listing of saved Nmap output files in `.nmap`, `.gnmap`, and `.xml` formats |
+| 07 | [`07-rules-vlan20-attacker-final.png`](evidence/07-rules-vlan20-attacker-final.png) | Shows ATTACK VLAN firewall rules allowing victim lab testing while blocking unauthorized private/internal network access |
 
-## Evidence Screenshots
+## Key Evidence
 
-### E01 - Kali Network Placement
+The screenshots below highlight the most important service enumeration and exposure review evidence while the table above preserves links to the full evidence set.
 
-![Kali network placement showing attacker VLAN IP, route, and victim reachability](evidence/kali-network-placement.png)
+**Kali Network Placement**
 
-### E02 - Host Discovery Scan
+![Kali network placement showing attacker VLAN IP, route, and victim reachability](evidence/01-kali-network-placement.png)
 
-![Nmap host discovery scan against the victim VLAN](evidence/host-discovery-scan.png)
+**Host Discovery Scan**
 
-### E03 - Service Enumeration Filtered Results
+![Nmap host discovery scan against the victim VLAN](evidence/02-host-discovery-scan.png)
 
-![Nmap service enumeration showing the victim host up with filtered TCP ports](evidence/service-enumeration-filtered-results.png)
+**Service Enumeration Filtered Results**
 
-### E04 - Security Onion Scan Visibility
+![Nmap service enumeration showing the victim host up with filtered TCP ports](evidence/03-service-enumeration-filtered-results.png)
 
-![Security Onion Hunt results showing Zeek logs for Kali attacker activity](evidence/security-onion-scan-visibility.png)
+**Security Onion Scan Visibility**
 
-### E05 - Restricted Management Test
+![Security Onion Hunt results showing Zeek logs for Kali attacker activity](evidence/04-security-onion-scan-visibility.png)
 
-![Nmap and ping tests showing management interfaces filtered or unreachable from the attacker VLAN](evidence/restricted-management-test.png)
+**Restricted Management Test**
 
-### E06 - Saved Nmap Output Files
+![Nmap and ping tests showing management interfaces filtered or unreachable from the attacker VLAN](evidence/05-restricted-management-test.png)
 
-![Saved Nmap output files in the evidence directory](evidence/nmap-output-files.png)
+**Saved Nmap Output Files**
 
-### E07 - ATTACK VLAN Firewall Rules
+![Saved Nmap output files in the evidence directory](evidence/06-nmap-output-files.png)
 
-![pfSense ATTACK VLAN firewall rules supporting controlled victim access and restricted management access](evidence/rules-vlan20-attacker-final.png)
+**ATTACK VLAN Firewall Rules**
+
+![pfSense ATTACK VLAN firewall rules supporting controlled victim access and restricted management access](evidence/07-rules-vlan20-attacker-final.png)
 
 ## Security Onion Validation
 
-Security Onion should be used to confirm that enumeration activity is visible to the monitoring stack where expected.
-
 Security Onion Hunt confirmed visibility into traffic from the Kali attacker VM (`192.168.20.100`). Zeek connection logs showed activity from the attacker VLAN, including attempted connections to management and lab infrastructure systems. This validated that the monitoring stack was receiving and indexing relevant scan and connection metadata.
-
-Items to review:
-
-- Source IP of the Kali VM
-- Destination IP of the scanned host
-- Connection attempts across multiple ports
-- Zeek connection logs
-- Alerts or notices generated by scan behavior
-- Timeline of scan activity compared to command execution time
-
-Useful Security Onion views may include:
-
-- Alerts
-- Hunt
-- Dashboards
-- Zeek logs
-- Connection metadata
 
 ## Defensive Review
 
@@ -231,7 +157,7 @@ The review confirmed that the victim host was reachable from the attacker VLAN f
 
 ## Remediation and Hardening Notes
 
-Potential remediation actions may include:
+Potential future remediation or hardening actions include:
 
 - Disabling unnecessary services
 - Restricting management ports to the Admin VLAN
@@ -257,17 +183,18 @@ Key takeaways:
 
 ## Project Status
 
-- [x] Confirm Kali network placement
-- [x] Identify approved target subnet or host range
-- [x] Run host discovery
-- [x] Run service enumeration
-- [x] Save Nmap output files
-- [x] Test restricted management access
-- [x] Review Security Onion logs
-- [x] Capture screenshots
-- [x] Document findings
-- [x] Add remediation notes
-- [x] Update main portfolio README
+| Area | Status |
+| --- | --- |
+| Kali network placement validated | Complete |
+| Approved target subnet identified | Complete |
+| Host discovery completed | Complete |
+| Service enumeration completed | Complete |
+| Nmap output file evidence documented | Complete |
+| Restricted management access tested | Complete |
+| Security Onion logs reviewed | Complete |
+| Evidence screenshots captured and linked | Complete |
+| Findings documented | Complete |
+| Remediation notes added | Complete |
 
 ## Portfolio Summary
 

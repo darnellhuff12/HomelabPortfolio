@@ -1,5 +1,3 @@
-
-
 # Project 5: Network Reconnaissance Detection
 
 ## Objective
@@ -8,7 +6,7 @@ This project documents the detection of network reconnaissance activity inside t
 
 This project builds on the previous homelab projects by moving from infrastructure validation into active security monitoring. Instead of only proving that VLANs, firewall rules, and port mirroring are configured correctly, this project demonstrates how the lab can be used to simulate attacker behavior and investigate that behavior from a defender perspective.
 
-## Business & Security Value
+## Business and Security Value
 
 Network reconnaissance is one of the earliest phases of an intrusion attempt. Attackers commonly scan internal networks to discover live hosts, open ports, running services, and potential attack paths. Detecting this behavior early gives defenders an opportunity to investigate suspicious activity before exploitation occurs.
 
@@ -66,100 +64,89 @@ Out of scope:
 
 ## Rules of Engagement
 
-All testing must remain inside the homelab environment.
+All testing was limited to authorized homelab systems. Reconnaissance activity was performed only against internal victim systems owned and controlled within the lab environment.
 
-- Only scan authorized lab systems.
-- Confirm the victim IP address before running scans.
-- Capture timestamps for each test so Security Onion logs can be searched accurately.
-- Avoid running aggressive scans against production/home devices.
-- Do not expose vulnerable systems to the internet.
+## Validation and Evidence
 
-## Planned Test Activity
+The following validation activity was used to confirm attacker placement, victim placement, sensor health, mirrored traffic visibility, scan execution, and Security Onion detection results.
 
-The following scan and validation activity was used to generate detection evidence.
-
-| Test ID | Activity | Command / Validation Method | Expected Result |
+| Test ID | Validation Area | Validation Method | Result |
 | --- | --- | --- | --- |
-| T01 | Attacker IP validation | `ip a` on Kali Linux | Kali is confirmed on the attacker VLAN with IP `192.168.20.100` |
-| T02 | Victim IP validation | `ipconfig` on Windows victim | Victim is confirmed on the victim VLAN with IP `192.168.40.102` |
-| T03 | Sensor health validation | `sudo so-status` on Security Onion | Security Onion services are running and healthy |
-| T04 | Proxmox mirror bridge validation | Review `/etc/network/interfaces` | `vmbr1` is configured as the dedicated sniffing bridge with `bridge-ageing 0` |
-| T05 | Packet capture validation | `sudo tcpdump -i enp6s19 -nn host 192.168.20.100 or host 192.168.40.102` | Security Onion monitor interface sees mirrored traffic between attacker and victim |
-| T06 | TCP SYN scan | `nmap -sS 192.168.40.102` | Kali generates reconnaissance traffic against the victim |
-| T07 | Security Onion Hunt review | Hunt query for attacker/victim IPs | Security Onion records Zeek connection logs for scan activity |
+| T01 | Attacker IP validation | `ip a` on Kali Linux | Passed - Kali was confirmed on the attacker VLAN with IP `192.168.20.100` |
+| T02 | Victim IP validation | `ipconfig` on Windows victim | Passed - The victim was confirmed on the victim VLAN with IP `192.168.40.102` |
+| T03 | Sensor health validation | `sudo so-status` on Security Onion | Passed - Security Onion services were running and healthy |
+| T04 | Proxmox mirror bridge validation | Review `/etc/network/interfaces` | Passed - `vmbr1` was configured as the dedicated sniffing bridge with `bridge-ageing 0` |
+| T05 | Packet capture validation | `sudo tcpdump -i enp6s19 -nn host 192.168.20.100 or host 192.168.40.102` | Passed - Security Onion monitor interface saw mirrored traffic between attacker and victim |
+| T06 | TCP SYN scan | `nmap -sS 192.168.40.102` | Passed - Kali generated reconnaissance traffic against the victim |
+| T07 | Security Onion Hunt review | Hunt query for attacker/victim IPs | Passed - Security Onion recorded Zeek connection logs for scan activity |
 
-## Detection Workflow
+## Implementation Summary
 
-1. Confirm the Kali attacker VM is assigned to VLAN 20 and has IP `192.168.20.100`.
-2. Confirm the Windows victim is assigned to VLAN 40 and has IP `192.168.40.102`.
-3. Confirm Security Onion services are running with `sudo so-status`.
-4. Confirm the Proxmox `vmbr1` sniffing bridge is configured with `bridge-ageing 0` so mirrored/SPAN traffic is forwarded into the Security Onion VM.
-5. Validate the Security Onion monitor interface using `tcpdump` on `enp6s19`.
-6. Generate reconnaissance traffic from Kali using an Nmap TCP SYN scan.
-7. Search Security Onion Hunt for traffic involving `192.168.20.100` and `192.168.40.102`.
-8. Capture evidence showing the attacker, victim, sensor health, packet visibility, scan execution, and Security Onion logs.
+The test workflow began by confirming the Kali attacker VM on VLAN 20 and the Windows victim on VLAN 40. Security Onion sensor health was validated, and the Proxmox `vmbr1` sniffing bridge was confirmed with `bridge-ageing 0` so mirrored/SPAN traffic would pass into the Security Onion VM. Packet visibility was validated with `tcpdump` on `enp6s19`, followed by a controlled Nmap TCP SYN scan from Kali against the victim. Security Onion Hunt was then used to review Zeek connection logs involving `192.168.20.100` and `192.168.40.102`.
 
-## Evidence Captured
+## Evidence Summary
 
-The following screenshots were captured and added to the `evidence/` folder.
+The following evidence documents the completed reconnaissance detection workflow and provides clickable links to each evidence file.
 
-| Evidence ID | Filename | Description |
+| ID | Evidence | What It Demonstrates |
 | --- | --- | --- |
-| E01 | [`01-kali-attacker-ip.png`](evidence/01-kali-attacker-ip.png) | Kali attacker VM assigned to VLAN 20 with IP `192.168.20.100`. |
-| E02 | [`02-victim-ip.png`](evidence/02-victim-ip.png) | Windows victim assigned to VLAN 40 with IP `192.168.40.102`. |
-| E03 | [`03-security-onion-sensor-status.png`](evidence/03-security-onion-sensor-status.png) | Security Onion services running and sensor stack healthy. |
-| E04 | [`04-proxmox-vmbr1-bridge-ageing-fix.png`](evidence/04-proxmox-vmbr1-bridge-ageing-fix.png) | Proxmox `vmbr1` sniffing bridge configured with `bridge-ageing 0` so mirrored/SPAN traffic reaches the Security Onion VM. |
-| E05 | [`05-monitor-interface-tcpdump.png`](evidence/05-monitor-interface-tcpdump.png) | Security Onion monitor interface `enp6s19` capturing mirrored ICMP traffic between the Kali attacker and Windows victim. |
-| E06 | [`06-nmap-syn-scan.png`](evidence/06-nmap-syn-scan.png) | Kali running a TCP SYN scan against the Windows victim at `192.168.40.102`. |
-| E07 | [`07-security-onion-syn-scan-logs.png`](evidence/07-security-onion-syn-scan-logs.png) | Security Onion Hunt showing Zeek connection logs from `192.168.20.100` to `192.168.40.102` across multiple destination ports. |
+| 01 | [`01-kali-attacker-ip.png`](evidence/01-kali-attacker-ip.png) | Kali attacker VM assigned to VLAN 20 with IP `192.168.20.100`. |
+| 02 | [`02-victim-ip.png`](evidence/02-victim-ip.png) | Windows victim assigned to VLAN 40 with IP `192.168.40.102`. |
+| 03 | [`03-security-onion-sensor-status.png`](evidence/03-security-onion-sensor-status.png) | Security Onion services running and sensor stack healthy. |
+| 04 | [`04-proxmox-vmbr1-bridge-ageing-fix.png`](evidence/04-proxmox-vmbr1-bridge-ageing-fix.png) | Proxmox `vmbr1` sniffing bridge configured with `bridge-ageing 0` so mirrored/SPAN traffic reaches the Security Onion VM. |
+| 05 | [`05-monitor-interface-tcpdump.png`](evidence/05-monitor-interface-tcpdump.png) | Security Onion monitor interface `enp6s19` capturing mirrored ICMP traffic between the Kali attacker and Windows victim. |
+| 06 | [`06-nmap-syn-scan.png`](evidence/06-nmap-syn-scan.png) | Kali running a TCP SYN scan against the Windows victim at `192.168.40.102`. |
+| 07 | [`07-security-onion-syn-scan-logs.png`](evidence/07-security-onion-syn-scan-logs.png) | Security Onion Hunt showing Zeek connection logs from `192.168.20.100` to `192.168.40.102` across multiple destination ports. |
 
-## Evidence Screenshots
+## Key Evidence
 
-### E01 - Kali Attacker IP
+The screenshots below highlight the most important reconnaissance detection evidence while the table above preserves links to the full evidence set.
+
+**Kali Attacker IP Validation**
 
 <a href="./evidence/01-kali-attacker-ip.png">
   <img src="./evidence/01-kali-attacker-ip.png" alt="Kali attacker VM showing VLAN 20 IP address 192.168.20.100" width="900">
 </a>
 
-### E02 - Windows Victim IP
+**Windows Victim IP Validation**
 
 <a href="./evidence/02-victim-ip.png">
   <img src="./evidence/02-victim-ip.png" alt="Windows victim showing VLAN 40 IP address 192.168.40.102" width="900">
 </a>
 
-### E03 - Security Onion Sensor Status
+**Security Onion Sensor Status**
 
 <a href="./evidence/03-security-onion-sensor-status.png">
   <img src="./evidence/03-security-onion-sensor-status.png" alt="Security Onion sensor status showing services running and healthy" width="900">
 </a>
 
-### E04 - Proxmox vmbr1 Bridge Ageing Fix
+**Proxmox vmbr1 Bridge Ageing Configuration**
 
 <a href="./evidence/04-proxmox-vmbr1-bridge-ageing-fix.png">
   <img src="./evidence/04-proxmox-vmbr1-bridge-ageing-fix.png" alt="Proxmox vmbr1 configuration showing bridge-ageing 0 applied to the sniffing bridge" width="900">
 </a>
 
-### E05 - Security Onion Monitor Interface tcpdump
+**Security Onion Monitor Interface tcpdump**
 
 <a href="./evidence/05-monitor-interface-tcpdump.png">
   <img src="./evidence/05-monitor-interface-tcpdump.png" alt="Security Onion tcpdump on enp6s19 showing mirrored ICMP traffic between attacker and victim" width="900">
 </a>
 
-### E06 - Nmap SYN Scan
+**Nmap SYN Scan**
 
 <a href="./evidence/06-nmap-syn-scan.png">
   <img src="./evidence/06-nmap-syn-scan.png" alt="Kali running an Nmap SYN scan against the Windows victim" width="900">
 </a>
 
-### E07 - Security Onion SYN Scan Logs
+**Security Onion SYN Scan Logs**
 
 <a href="./evidence/07-security-onion-syn-scan-logs.png">
   <img src="./evidence/07-security-onion-syn-scan-logs.png" alt="Security Onion Hunt showing Zeek connection logs for the Nmap SYN scan" width="900">
 </a>
 
-## Findings
+## Key Findings
 
-| Test ID | Source | Destination | Activity | Security Onion Result | Status |
+| Test ID | Source | Destination | Validation Area | Result | Status |
 | --- | --- | --- | --- | --- | --- |
 | T01 | Kali / VLAN 20 | N/A | Attacker IP validation | Kali confirmed as `192.168.20.100` | Complete |
 | T02 | Windows victim / VLAN 40 | N/A | Victim IP validation | Victim confirmed as `192.168.40.102` | Complete |
@@ -186,9 +173,9 @@ iface vmbr1 inet manual
 
 After rebooting the Proxmox host, Security Onion began receiving mirrored traffic again on `enp6s19`, and Hunt logs populated successfully. This configuration ensures the dedicated monitoring bridge forwards mirrored/SPAN traffic into the Security Onion VM instead of relying on normal bridge MAC learning behavior.
 
-## Expected Outcomes
+## Outcome Summary
 
-By the end of this project, the lab should demonstrate that:
+This project demonstrated that:
 
 - The Kali attacker VM can generate controlled reconnaissance traffic from VLAN 20.
 - The Windows victim on VLAN 40 can be targeted by controlled lab scans.
@@ -209,6 +196,6 @@ By the end of this project, the lab should demonstrate that:
 - Evidence-based technical documentation.
 - Safe lab rules of engagement.
 
-## Next Steps
+## Future Enhancements
 
-After this project is complete, the next logical step is to expand from basic reconnaissance detection into vulnerability scanning and alert triage. That future project can use tools such as Nessus, OpenVAS, or authenticated scans to compare vulnerability scanner results against Security Onion network visibility.
+Future work can expand from basic reconnaissance detection into vulnerability scanning and alert triage. A follow-on project can use tools such as Nessus, OpenVAS, or authenticated scans to compare vulnerability scanner results against Security Onion network visibility.

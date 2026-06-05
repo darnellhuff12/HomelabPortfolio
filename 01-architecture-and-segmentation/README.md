@@ -405,11 +405,11 @@ The goal of these firewall boundaries is to reduce lateral movement risk, protec
 
 Detailed VLAN firewall rule hardening and validation evidence is documented in Project 2: VLAN Segmentation and Firewall Rule Validation. Project 1 establishes the baseline architecture, while Project 2 focuses on proving that pfSense rules and switch VLAN configuration enforce the intended segmentation model.
 
-## Baseline Evidence Checklist
+## Validation and Evidence Summary
 
-The following screenshots and evidence should be captured for this project before moving into active testing:
+The following evidence was collected to validate the baseline architecture, VLAN segmentation, management access model, virtualization placement, and monitoring readiness of the homelab.
 
-| Evidence | Purpose | Status |
+| Evidence | What It Demonstrates | Status |
 |---|---|---|
 | Network topology diagram | Shows the full lab architecture | Complete |
 | pfSense VLAN interfaces | Proves VLAN gateways are configured | Complete |
@@ -426,10 +426,10 @@ The following screenshots and evidence should be captured for this project befor
 | iDRAC Admin VLAN access and virtual console | Shows out-of-band server management and remote console access reachable only through the approved Admin/Bastion path | Complete |
 | Victim VNC tunnel | Shows remote GUI access to the Ubuntu victim host through the Raspberry Pi 5 jump-host path | Complete |
 | Windows victim VM baseline connectivity | Shows the Windows VM on VLAN 40, reachable by Nmap while default Windows Firewall filters ICMP and common inbound ports | Complete |
-| Elastic Agent/Sysmon status on victim | Endpoint telemetry setup planned for future detection and host-visibility projects | Deferred |
+| Elastic Agent/Sysmon status on victim | Endpoint telemetry integration identified for future detection and host-visibility projects | Future Enhancement |
 
 
-Screenshots will be sanitized before publishing. Sensitive information such as public IP addresses, passwords, serial numbers, tokens, and unrelated personal or employer information will not be included.
+All screenshots were reviewed before publication to avoid exposing public IP addresses, passwords, serial numbers, tokens, private keys, unrelated personal information, or employer-owned information.
 
 ## Evidence: Windows Victim VM Baseline
 
@@ -477,7 +477,9 @@ The mirror/SPAN configuration sends selected traffic to the Security Onion monit
 
 At the time of evidence capture, the victim port was configured for mirroring but may appear as link down if the victim MacBook was not physically connected. This does not invalidate the configuration; it simply reflects the port state during the screenshot.
 
-### Key Switch Screenshots
+### Key Evidence
+
+The screenshots below highlight the most important switch evidence while the table above preserves links to the full evidence set.
 
 **Mirror/SPAN Configuration**
 
@@ -510,7 +512,9 @@ Security Onion is configured with two network interfaces. The first interface is
 
 Proxmox host management was moved from the LAN network to Admin VLAN 50 as part of management-plane hardening. The host bridge `vmbr0` remains VLAN-aware and continues carrying tagged VM traffic, while the Proxmox management IP now resides on the VLAN subinterface `vmbr0.50`. The Proxmox host management address is `192.168.50.10/24`, using `192.168.50.1` as the Admin VLAN gateway. Access to the Proxmox web interface is performed through the Raspberry Pi 5 bastion path rather than direct Home VLAN access.
 
-### Key Proxmox Screenshots
+### Key Evidence
+
+The screenshots below highlight the most important Proxmox and VM placement evidence while the table above preserves links to the full evidence set.
 
 **Kali VM VLAN 20 Placement**
 

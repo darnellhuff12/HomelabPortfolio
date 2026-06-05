@@ -3,16 +3,13 @@
 ## Project Status
 
 **Status:** Complete  
-**Configuration Phase:** Completed  
-**Evidence Phase:** Completed  
-**Live Validation Phase:** Completed  
 **Related Project:** Project 1 - Home Cybersecurity Lab Network Architecture
 
-This project validates the VLAN segmentation and firewall rule design used in my cybersecurity homelab. The goal is to prove that each network segment is isolated by default and that only explicitly approved traffic is allowed between VLANs.
+This project validates the VLAN segmentation and firewall rule design used in my cybersecurity homelab. The goal was to confirm that each network segment is isolated by default, that only explicitly approved traffic is allowed between VLANs, and that allowed and blocked traffic can be validated through pfSense logs, live connectivity testing, and Security Onion visibility.
 
-Project 1 focused on building and documenting the overall lab architecture. Project 2 focuses on validating that the architecture enforces the intended access control model through pfSense firewall rules, managed switch VLAN configuration, Proxmox VLAN tagging, and live connectivity testing.
+Project 1 documented the overall lab architecture. Project 2 focuses on proving that the architecture enforces the intended access control model through pfSense firewall rules, managed switch VLAN configuration, Proxmox VLAN tagging, and live validation testing.
 
-As part of this project, the pfSense rules were hardened to enforce a dedicated admin/bastion workflow through the Raspberry Pi 5 on VLAN 50. Firewall, VLAN, DHCP, alias, switch, Proxmox bridge, Security Onion, and live validation evidence has been collected. Live validation confirmed that Kali-to-victim traffic is allowed by policy and visible in Security Onion Hunt after correcting the Security Onion sensor interface from the unused `bond0` interface to the active mirrored interface `enp6s19`. Kali-to-Admin access was blocked and logged by pfSense, Admin/Bastion access from the Raspberry Pi 5 to pfSense and Proxmox was validated, and Proxmox host management was migrated from the LAN network to the Admin VLAN using `vmbr0.50`. This project is complete and demonstrates allowed-path testing, blocked-path testing, firewall log validation, management-plane isolation, and Security Onion visibility.
+As part of this project, pfSense rules were hardened to enforce a dedicated Admin/Bastion workflow through the Raspberry Pi 5 on VLAN 50. Validation confirmed that Kali-to-victim traffic was allowed by policy and visible in Security Onion Hunt, Kali-to-Admin access was blocked and logged by pfSense, Admin/Bastion access from the Raspberry Pi 5 to pfSense and Proxmox was allowed, and Proxmox host management was successfully migrated to the Admin VLAN using `vmbr0.50`.
 
 ---
 
@@ -20,7 +17,7 @@ As part of this project, the pfSense rules were hardened to enforce a dedicated 
 
 The objective of this project is to validate that my pfSense firewall rules, managed switch VLAN configuration, and Proxmox VLAN tagging work together to enforce segmentation across the lab environment.
 
-This includes confirming that:
+This project confirmed that:
 
 - The attacker VLAN can reach only the intended victim systems during lab simulations.
 - The victim VLAN cannot access administrative systems.
@@ -76,23 +73,12 @@ The security goal of this project is to move away from a flat network and demons
 
 The main design principles are:
 
-1. **Least privilege**  
-   VLANs should only communicate when there is a specific reason.
-
-2. **Default deny**  
-   Traffic between VLANs should be blocked unless explicitly allowed.
-
-3. **Administrative isolation**  
-   Management interfaces should not be reachable from attacker or victim networks.
-
-4. **Controlled attack paths**  
-   Kali should be able to test victim systems, but not freely access the rest of the lab.
-
-5. **Monitoring visibility**  
-   Security Onion should be able to observe mirrored traffic without becoming broadly exposed.
-
-6. **Documented exceptions**  
-   Every allowed rule should have a clear purpose.
+- **Least privilege:** VLANs only communicate when there is a specific security or lab requirement.
+- **Default deny:** Inter-VLAN traffic is blocked unless explicitly allowed.
+- **Administrative isolation:** Management interfaces are isolated from attacker and victim networks.
+- **Controlled attack paths:** Kali can reach approved victim systems for testing but cannot freely access the rest of the lab.
+- **Monitoring visibility:** Security Onion observes mirrored traffic without requiring broad management exposure.
+- **Documented exceptions:** Allowed rules are tied to clear operational or lab purposes.
 
 ---
 
@@ -119,22 +105,22 @@ The main design principles are:
 
 ---
 
-## Validation Plan
+## Validation and Evidence
 
-The following validation tests were completed to confirm the firewall, VLAN, management-plane, and monitoring behavior of the lab.
+The following validation tests confirm the firewall, VLAN, management-plane, and monitoring behavior of the lab.
 
-| Test ID | Source | Destination | Test Method | Expected Result | Actual Result | Evidence |
-|---|---|---|---|---|---|---|
-| T01 | VLAN 20 Attacker | VLAN 40 Victim | `nmap -Pn 192.168.40.102` | Allowed | Passed - Kali identified the victim host as up while ports were filtered by the Windows host firewall | `t01-kali-to-victim-nmap-allowed.png` |
-| T02 | VLAN 20 Attacker | Security Onion Hunt | Hunt query for Kali/victim scan traffic | Visible | Passed - Security Onion Hunt displayed Suricata alerts for Kali-to-victim scan traffic | `t02-security-onion-hunt-kali-to-victim-nmap.png` |
-| T03 | Security Onion Hunt | VLAN 20 to VLAN 40 ICMP traffic | Hunt query for Kali/victim ICMP traffic | Visible | Passed - Security Onion Hunt displayed ICMP-related Suricata alerts from Kali `192.168.20.100` to victim `192.168.40.102` | `t03-security-onion-hunt-kali-to-victim-icmp-alerts.png` |
-| T04 | Security Onion sensor interface | VLAN 20/VLAN 40 mirrored traffic | `tcpdump` on `enp6s19` | Visible | Passed - Security Onion sensor interface observed mirrored ICMP traffic between Kali and the victim network | `t04-security-onion-tcpdump-observed-icmp-traffic.png` |
-| T05 | VLAN 20 Attacker | VLAN 50 Admin | `ping` and scan tests | Blocked | Passed - Kali could not reach the Admin VLAN gateway or Admin VLAN host | `t05-kali-to-admin-vlan-blocked.png` |
-| T06 | VLAN 20 Attacker | pfSense/Proxmox management services | `curl` and connectivity tests | Blocked | Passed - Kali could not reach pfSense management or Proxmox management services directly | `t06-kali-to-pfsense-management-blocked.png` |
-| T07 | VLAN 50 Admin/Bastion | pfSense Web UI | `ping` and `curl` from Raspberry Pi 5 | Allowed | Passed - Raspberry Pi 5 reached pfSense at `192.168.50.1` and received an HTTP 200 response | `t07-admin-to-pfsense-allowed.png` |
-| T08 | VLAN 50 Admin/Bastion | Proxmox Web UI | `ping` and `curl` from Raspberry Pi 5 | Allowed | Passed - Raspberry Pi 5 reached Proxmox at `192.168.50.10:8006` and received the Proxmox web interface HTML | `t08-admin-to-proxmox-allowed.png` |
-| T09 | Proxmox host | Admin VLAN gateway and switch | `ip addr`, `ip route`, and `ping` | Allowed | Passed - Proxmox used `vmbr0.50` with IP `192.168.50.10/24`, default route `192.168.50.1`, and successful connectivity to Admin VLAN services | `proxmox-management-vlan50-vmbr0-50.png` |
-| T10 | pfSense firewall logs | Blocked Kali-to-Admin traffic | Firewall log review | Blocked events visible in logs | Passed - pfSense logs captured blocked Kali-to-Admin traffic attempts | `pfsense-firewall-logs-kali-admin-blocked.png` |
+| Test ID | Source | Destination | Validation Method | Result | Evidence |
+|---|---|---|---|---|---|
+| T01 | VLAN 20 Attacker | VLAN 40 Victim | `nmap -Pn 192.168.40.102` | Passed - Kali identified the victim host as up while ports were filtered by the Windows host firewall | [01-kali-to-victim-nmap-allowed.png](screenshots/01-kali-to-victim-nmap-allowed.png) |
+| T02 | VLAN 20 Attacker | Security Onion Hunt | Hunt query for Kali/victim scan traffic | Passed - Security Onion displayed Suricata alerts for Kali-to-victim scan traffic | [02-security-onion-hunt-scan-alerts.png](screenshots/02-security-onion-hunt-scan-alerts.png) |
+| T03 | Security Onion Hunt | VLAN 20 to VLAN 40 ICMP traffic | Hunt query for Kali/victim ICMP traffic | Passed - Security Onion displayed ICMP-related Suricata alerts from Kali `192.168.20.100` to victim `192.168.40.102` | [03-security-onion-hunt-icmp-alerts.png](screenshots/03-security-onion-hunt-icmp-alerts.png) |
+| T04 | Security Onion sensor interface | VLAN 20/VLAN 40 mirrored traffic | `tcpdump` on `enp6s19` | Passed - Security Onion observed mirrored ICMP traffic between Kali and the victim network | [04-security-onion-tcpdump-icmp-traffic.png](screenshots/04-security-onion-tcpdump-icmp-traffic.png) |
+| T05 | VLAN 20 Attacker | VLAN 50 Admin | Ping and scan tests | Passed - Kali could not reach the Admin VLAN gateway or Admin VLAN host | [05-kali-to-admin-blocked.png](screenshots/05-kali-to-admin-blocked.png) |
+| T06 | VLAN 20 Attacker | pfSense/Proxmox management services | `curl` and connectivity tests | Passed - Kali could not reach pfSense management or Proxmox management services directly | [06-kali-to-management-blocked.png](screenshots/06-kali-to-management-blocked.png) |
+| T07 | VLAN 50 Admin/Bastion | pfSense Web UI | `ping` and `curl` from Raspberry Pi 5 | Passed - Raspberry Pi 5 reached pfSense at `192.168.50.1` and received an HTTP 200 response | [07-admin-to-pfsense-allowed.png](screenshots/07-admin-to-pfsense-allowed.png) |
+| T08 | VLAN 50 Admin/Bastion | Proxmox Web UI | `ping` and `curl` from Raspberry Pi 5 | Passed - Raspberry Pi 5 reached Proxmox at `192.168.50.10:8006` and received the Proxmox web interface HTML | [08-admin-to-proxmox-allowed.png](screenshots/08-admin-to-proxmox-allowed.png) |
+| T09 | Proxmox host | Admin VLAN gateway and switch | `ip addr`, `ip route`, and `ping` | Passed - Proxmox used `vmbr0.50` with IP `192.168.50.10/24`, default route `192.168.50.1`, and successful connectivity to Admin VLAN services | [09-proxmox-admin-vlan50-validation.png](screenshots/09-proxmox-admin-vlan50-validation.png) |
+| T10 | pfSense firewall logs | Blocked Kali-to-Admin traffic | Firewall log review | Passed - pfSense logs captured blocked Kali-to-Admin traffic attempts | [10-pfsense-blocked-traffic-logs.png](screenshots/10-pfsense-blocked-traffic-logs.png) |
 
 ### Current Firewall Rule Evidence
 
@@ -181,158 +167,42 @@ The following screenshots document the managed switch configuration supporting t
 
 ---
 
-## Evidence Collected
+### Evidence Summary
 
-Configuration and validation evidence has been collected to prove that the documented firewall rules, VLANs, management access paths, Proxmox VLAN tagging, and Security Onion monitoring path behave as intended.
-
-pfSense firewall rule evidence, pfSense VLAN/DHCP evidence, and managed switch VLAN evidence are stored under the `evidence/` directory. Final validation screenshots are stored under the `screenshots/` directory and document allowed-path testing, blocked-path testing, Security Onion visibility, Proxmox Admin VLAN migration, Admin/Bastion access, and pfSense firewall log enforcement.
-
-### pfSense Evidence
-
-- VLAN interface assignments: collected
-- VLAN tag assignments: collected
-- DHCP scopes for each VLAN: collected
-- Firewall rule list for VLAN 10: collected
-- Firewall rule list for VLAN 20: collected
-- Firewall rule list for VLAN 30: collected
-- Firewall rule list for VLAN 40: collected
-- Firewall rule list for VLAN 50: collected
-- RFC1918 private network alias: collected
-- Default block rule behavior: documented through final explicit block rules
-
-### Switch Evidence
-
-- VLAN membership table: collected
-- Port PVID configuration: collected
-- Trunk port configuration: collected
-- Access port configuration: collected
-- Mirror/SPAN configuration for Security Onion monitoring: collected
-
-### Proxmox Evidence
-
-- [x] VM list showing Kali and Security Onion
-- [x] Kali VM VLAN 20 tag configuration
-- [x] Security Onion management interface configuration
-- [x] Security Onion monitoring/sniffing interface configuration
-- [x] Proxmox bridge configuration showing `vmbr1` monitor bridge and `bridge-ageing 0`
-- [x] Proxmox management interface migrated from LAN to Admin VLAN 50 using `vmbr0.50` with IP `192.168.50.10/24`
-
-### Connectivity Evidence
-
-- [x] Kali to victim allowed traffic test
-- [x] Kali to Admin VLAN blocked traffic test
-- [x] Kali to management interfaces blocked traffic test
-- [x] Admin/Bastion access to pfSense allowed test
-- [x] Admin/Bastion access to Proxmox allowed test
-- [x] Proxmox Admin VLAN migration validation
-- [x] pfSense firewall logs showing blocked traffic
-
-### Security Onion Evidence
-
-- [x] Hunt screenshot showing attacker-to-victim traffic
-- [x] Packet-level validation showing mirrored traffic on the active Security Onion sensor interface
-- [x] Suricata alert screenshot showing Kali-to-victim ICMP traffic
-- [x] Evidence that Security Onion can observe mirrored traffic without requiring direct access from attacker systems
-- [x] Evidence showing Security Onion sensor interface corrected from `bond0` to `enp6s19`
-
-### Final Validation Evidence Summary
-
-| Evidence | Screenshot | What It Shows |
+| Evidence | Screenshot | What It Demonstrates |
 |---|---|---|
-| Kali-to-victim Nmap allowed | [t01-kali-to-victim-nmap-allowed.png](screenshots/t01-kali-to-victim-nmap-allowed.png) | Shows Kali on VLAN 20 identifying the victim host `192.168.40.102` as up while ports are filtered by the endpoint firewall |
-| Security Onion Hunt scan alerts | [t02-security-onion-hunt-kali-to-victim-nmap.png](screenshots/t02-security-onion-hunt-kali-to-victim-nmap.png) | Shows Security Onion Hunt displaying Suricata scan alerts for Kali-to-victim traffic |
-| Security Onion Hunt ICMP alerts | [t03-security-onion-hunt-kali-to-victim-icmp-alerts.png](screenshots/t03-security-onion-hunt-kali-to-victim-icmp-alerts.png) | Shows Security Onion Hunt displaying ICMP-related Suricata alerts from Kali `192.168.20.100` to victim `192.168.40.102` |
-| Security Onion sensor tcpdump | [t04-security-onion-tcpdump-observed-icmp-traffic.png](screenshots/t04-security-onion-tcpdump-observed-icmp-traffic.png) | Shows the active Security Onion sensor interface `enp6s19` observing mirrored VLAN 20/VLAN 40 traffic |
-| Kali-to-Admin VLAN blocked | [t05-kali-to-admin-vlan-blocked.png](screenshots/t05-kali-to-admin-vlan-blocked.png) | Shows Kali unable to reach Admin VLAN systems, confirming segmentation between the attacker and management networks |
-| Kali-to-management blocked | [t06-kali-to-pfsense-management-blocked.png](screenshots/t06-kali-to-pfsense-management-blocked.png) | Shows Kali unable to reach pfSense/Proxmox management services directly |
-| Admin-to-pfSense allowed | [t07-admin-to-pfsense-allowed.png](screenshots/t07-admin-to-pfsense-allowed.png) | Shows the Raspberry Pi 5 on VLAN 50 reaching pfSense at `192.168.50.1` and receiving an HTTP 200 response |
-| Admin-to-Proxmox allowed | [t08-admin-to-proxmox-allowed.png](screenshots/t08-admin-to-proxmox-allowed.png) | Shows the Raspberry Pi 5 on VLAN 50 reaching Proxmox at `192.168.50.10:8006` and receiving the Proxmox web interface HTML |
-| Proxmox Admin VLAN migration | [proxmox-management-vlan50-vmbr0-50.png](screenshots/proxmox-management-vlan50-vmbr0-50.png) | Shows Proxmox using `vmbr0.50` with IP `192.168.50.10/24`, default route through `192.168.50.1`, and successful connectivity to Admin VLAN services |
-| pfSense blocked traffic logs | [pfsense-firewall-logs-kali-admin-blocked.png](screenshots/pfsense-firewall-logs-kali-admin-blocked.png) | Shows pfSense firewall logs for blocked Kali-to-Admin traffic, proving policy enforcement at the firewall boundary |
+| Kali-to-victim Nmap allowed | [01-kali-to-victim-nmap-allowed.png](screenshots/01-kali-to-victim-nmap-allowed.png) | Shows Kali on VLAN 20 identifying the victim host `192.168.40.102` as up while ports are filtered by the endpoint firewall |
+| Security Onion Hunt scan alerts | [02-security-onion-hunt-scan-alerts.png](screenshots/02-security-onion-hunt-scan-alerts.png) | Shows Security Onion Hunt displaying Suricata scan alerts for Kali-to-victim traffic |
+| Security Onion Hunt ICMP alerts | [03-security-onion-hunt-icmp-alerts.png](screenshots/03-security-onion-hunt-icmp-alerts.png) | Shows Security Onion Hunt displaying ICMP-related Suricata alerts from Kali `192.168.20.100` to victim `192.168.40.102` |
+| Security Onion sensor tcpdump | [04-security-onion-tcpdump-icmp-traffic.png](screenshots/04-security-onion-tcpdump-icmp-traffic.png) | Shows the active Security Onion sensor interface `enp6s19` observing mirrored VLAN 20/VLAN 40 traffic |
+| Kali-to-Admin VLAN blocked | [05-kali-to-admin-blocked.png](screenshots/05-kali-to-admin-blocked.png) | Shows Kali unable to reach Admin VLAN systems, confirming segmentation between the attacker and management networks |
+| Kali-to-management blocked | [06-kali-to-management-blocked.png](screenshots/06-kali-to-management-blocked.png) | Shows Kali unable to reach pfSense/Proxmox management services directly |
+| Admin-to-pfSense allowed | [07-admin-to-pfsense-allowed.png](screenshots/07-admin-to-pfsense-allowed.png) | Shows the Raspberry Pi 5 on VLAN 50 reaching pfSense at `192.168.50.1` and receiving an HTTP 200 response |
+| Admin-to-Proxmox allowed | [08-admin-to-proxmox-allowed.png](screenshots/08-admin-to-proxmox-allowed.png) | Shows the Raspberry Pi 5 on VLAN 50 reaching Proxmox at `192.168.50.10:8006` and receiving the Proxmox web interface HTML |
+| Proxmox Admin VLAN migration | [09-proxmox-admin-vlan50-validation.png](screenshots/09-proxmox-admin-vlan50-validation.png) | Shows Proxmox using `vmbr0.50` with IP `192.168.50.10/24`, default route through `192.168.50.1`, and successful connectivity to Admin VLAN services |
+| pfSense blocked traffic logs | [10-pfsense-blocked-traffic-logs.png](screenshots/10-pfsense-blocked-traffic-logs.png) | Shows pfSense firewall logs for blocked Kali-to-Admin traffic, proving policy enforcement at the firewall boundary |
+
+### Key Evidence
+
+The screenshots below highlight the most important validation results while the evidence table preserves links to the full evidence set.
+
+**Allowed Kali-to-Victim Testing**
+
+![Allowed Kali-to-Victim Nmap Test](screenshots/01-kali-to-victim-nmap-allowed.png)
+
+**Security Onion Visibility**
+
+![Security Onion Hunt Kali-to-Victim Alerts](screenshots/02-security-onion-hunt-scan-alerts.png)
+
+**Blocked Kali-to-Admin Testing**
+
+![Kali-to-Admin VLAN Blocked](screenshots/05-kali-to-admin-blocked.png)
+
+**pfSense Blocked Traffic Logs**
+
+![pfSense Blocked Traffic Logs](screenshots/10-pfsense-blocked-traffic-logs.png)
 ---
 
-## Recommended Screenshot Naming
-
-| Test ID | Suggested Screenshot Name |
-|---|---|
-| T01 | `t01-kali-to-victim-nmap-allowed.png` |
-| T02 | `t02-security-onion-hunt-kali-to-victim-nmap.png` |
-| T03 | `t03-security-onion-hunt-kali-to-victim-icmp-alerts.png` |
-| T04 | `t04-security-onion-tcpdump-observed-icmp-traffic.png` |
-| T05 | `t05-kali-to-admin-vlan-blocked.png` |
-| T06 | `t06-kali-to-pfsense-management-blocked.png` |
-| T07 | `t07-admin-to-pfsense-allowed.png` |
-| T08 | `t08-admin-to-proxmox-allowed.png` |
-| Proxmox VLAN 50 migration | `proxmox-management-vlan50-vmbr0-50.png` |
-| pfSense blocked traffic logs | `pfsense-firewall-logs-kali-admin-blocked.png` |
-
----
-
-## Testing Commands
-
-The following commands may be used during validation.
-
-### Basic Connectivity
-
-```bash
-ping <target-ip>
-```
-
-### Trace Network Path
-
-```bash
-traceroute <target-ip>
-```
-
-### TCP Port Check
-
-```bash
-nc -vz <target-ip> <port>
-```
-
-### Basic Nmap Scan
-
-```bash
-nmap -Pn <target-ip>
-```
-
-### Monitor Mirrored Traffic on Proxmox
-
-```bash
-tcpdump -i vmbr1 -nn -e 'icmp or host 192.168.40.102'
-```
-
-### Monitor Security Onion Sniffing Interface
-
-```bash
-sudo tcpdump -i enp6s19 -nn -e 'icmp or host 192.168.40.102'
-```
-
-### Service Detection Scan
-
-```bash
-nmap -sV -Pn <target-ip>
-```
-
-### Scan a Small Approved Range
-
-```bash
-nmap -sV -Pn <approved-victim-range>
-```
-
-### HTTP Test
-
-```bash
-curl -I http://<target-ip>
-```
-
-### SSH Test
-
-```bash
-ssh <username>@<target-ip>
-```
-
----
 
 ## Rule Design Notes
 
@@ -352,9 +222,9 @@ For example, the ATTACK VLAN allows traffic to the VICTIM VLAN before blocking a
 
 ---
 
-## Current Known Status
+## Implementation Summary
 
-At the time this README was completed:
+The completed implementation includes the following validated configuration outcomes:
 
 - pfSense VLAN interfaces, DHCP pools, firewall rules, and aliases have been configured for the segmented lab design.
 - The managed switch VLAN membership, PVID settings, trunk ports, and mirror/SPAN configuration have been validated.
@@ -365,7 +235,7 @@ At the time this README was completed:
 - Raspberry Pi 5 Admin/Bastion access to pfSense and Proxmox was validated from VLAN 50.
 - Project 2 validation evidence has been captured and the project is complete.
 
-### Firewall Rule Hardening Update
+### Firewall Rule Hardening
 
 The VLAN firewall rules were updated to enforce a cleaner segmented design.
 
@@ -377,7 +247,7 @@ The VLAN firewall rules were updated to enforce a cleaner segmented design.
 
 Remote access through the Raspberry Pi 5/Admin VLAN path remained functional after applying the updated rules.
 
-### Proxmox Management VLAN Migration Update
+### Proxmox Management VLAN Migration
 
 Proxmox host management was moved from the LAN network to the dedicated Admin VLAN to better align the hypervisor with the lab's management-plane isolation model. The original Proxmox management address was `192.168.1.185/24` on `vmbr0`. The management IP was removed from `vmbr0`, and a VLAN subinterface, `vmbr0.50`, was created for Admin VLAN access.
 
@@ -400,7 +270,7 @@ iface vmbr0.50 inet static
 
 Validation confirmed that Proxmox successfully received the new Admin VLAN address and default route. From the Proxmox console, `vmbr0.50` showed `192.168.50.10/24`, the default route pointed to `192.168.50.1`, and pings to the pfSense Admin VLAN gateway `192.168.50.1` and managed switch `192.168.50.2` succeeded. From the Raspberry Pi 5 bastion on VLAN 50, `ping 192.168.50.10` succeeded, and `curl -k https://192.168.50.10:8006` returned the Proxmox web interface HTML. This confirms that Proxmox management is now reachable from the Admin VLAN while no longer relying on the old LAN management address.
 
-### Security Onion Monitoring Path Validation Update
+### Security Onion Monitoring Path Validation
 
 During live validation, Kali on VLAN 20 successfully reached the victim endpoint on VLAN 40. The Kali attacker IP was `192.168.20.100`, and the victim endpoint IP was `192.168.40.102`. ICMP echo requests and replies confirmed that the allowed attacker-to-victim firewall path was functioning as intended.
 
@@ -434,7 +304,7 @@ After Zeek and Suricata were restarted, Security Onion Hunt displayed Suricata a
 
 ---
 
-## Findings
+## Key Findings
 
 Final validation confirmed that the segmentation model is functioning as intended. The approved attacker-to-victim path from Kali on VLAN 20 to the victim on VLAN 40 worked and was visible in Security Onion Hunt as Suricata events. The Security Onion sensor interface `enp6s19` also observed mirrored ICMP traffic directly with `tcpdump`, confirming that the monitoring path was operational. Attempts from Kali to reach Admin VLAN 50 and management services were blocked, while the Raspberry Pi 5 on VLAN 50 successfully reached approved management services such as pfSense and Proxmox. pfSense firewall logs provided additional evidence that blocked Kali-to-Admin traffic was enforced at the firewall boundary.
 
@@ -442,30 +312,16 @@ Final validation confirmed that the segmentation model is functioning as intende
 
 ## Lessons Learned
 
-Initial lessons from the firewall hardening phase:
-
-- How pfSense rule order affected traffic flow
-- Difference between VLAN tagging, untagged access ports, and PVID settings
-- Why management interfaces should be isolated
-- Why attacker and victim networks should not have unrestricted access to the SIEM or admin VLAN
-- How port mirroring supports detection without weakening segmentation
-- A dedicated admin/bastion VLAN creates a cleaner management model than allowing the Home VLAN to directly administer lab systems.
-- RFC1918 aliases can simplify firewall policies by blocking unauthorized access to private/internal networks with one reusable object.
-- Explicit final block rules are useful for screenshots and documentation, even when pfSense already has an implicit deny rule.
-- Proxmox bridge settings should be verified live, not only checked in `/etc/network/interfaces`.
-- A monitoring bridge can see mirrored traffic while the Security Onion VM tap interface still misses unicast traffic if bridge aging/learning behavior is not applied correctly.
-- Setting the live `vmbr1` bridge aging value to `0` allowed mirrored unicast traffic to reach the Security Onion sniffing interface.
-- Testing `vmbr1`, the VM tap interface, and the Security Onion sniffing interface separately made it possible to isolate the monitoring-path issue.
-- Seeing traffic with `tcpdump` does not automatically mean Security Onion dashboards will show the traffic; Zeek and Suricata must be configured to process the correct sensor interface.
-- Security Onion was initially configured to monitor `bond0`, but mirrored traffic was arriving on `enp6s19`, so packet capture worked manually while Hunt initially showed no matching events.
-- Updating the Security Onion sensor interface to `enp6s19` and restarting Zeek/Suricata allowed the traffic to appear in Hunt as Suricata alerts.
-- Hypervisor management should be treated as a protected administrative service and placed on the Admin VLAN rather than the general LAN.
-- A VLAN-aware Proxmox bridge can continue carrying tagged VM traffic while the Proxmox host management IP is moved to a VLAN subinterface such as `vmbr0.50`.
-- Console or iDRAC access is important before changing Proxmox management networking because moving the management IP can temporarily interrupt web UI access.
-- Successful segmentation validation requires both allowed-path and blocked-path testing.
-- Security Onion visibility should be validated in multiple ways, including Hunt events and packet-level checks with `tcpdump`.
-- Host firewalls can cause systems to appear filtered even when network routing and firewall policy are working correctly.
-- Firewall logs provide important proof that blocked traffic was denied by policy rather than failing silently.
+- pfSense rule order directly affects segmentation behavior because rules are evaluated from top to bottom.
+- VLAN tagging, untagged access ports, and PVID settings must align across pfSense, the managed switch, and Proxmox.
+- Management interfaces should be isolated from attacker and victim networks and reachable only through approved administrative paths.
+- Port mirroring supports network detection without exposing the SIEM management interface to attacker systems.
+- A dedicated Admin/Bastion VLAN creates a cleaner management model than allowing broad access from the home network.
+- RFC1918 aliases simplify firewall policy by blocking unauthorized access to private/internal networks with a reusable object.
+- Proxmox bridge settings should be validated live, not only reviewed in `/etc/network/interfaces`.
+- Security Onion visibility should be validated at multiple layers, including packet capture, sensor interface configuration, and Hunt events.
+- Successful segmentation validation requires both allowed-path testing and blocked-path testing.
+- Firewall logs provide important evidence that blocked traffic was denied by policy rather than failing silently.
 - Moving Proxmox management to `vmbr0.50` improved management-plane isolation while preserving VLAN-aware VM networking.
 
 ---

@@ -1,5 +1,3 @@
-
-
 # Project 4: Security Onion Visibility Baseline
 
 ## Objective
@@ -100,7 +98,7 @@ Security Onion was accessed through the approved management workflow and confirm
 
 Evidence:
 
-- [E01 - Security Onion Dashboard](evidence/E01-security-onion-dashboard.png)
+- [01 - Security Onion Dashboard](evidence/01-security-onion-dashboard.png)
 
 ### 2. Sensor Health Confirmed
 
@@ -108,7 +106,7 @@ Security Onion service health was validated with `so-status`. The output showed 
 
 Evidence:
 
-- [E02 - Security Onion Status Output](evidence/E02-so-status-output.png)
+- [02 - Security Onion Status Output](evidence/02-so-status-output.png)
 
 ### 3. Management and Monitoring Interfaces Verified
 
@@ -116,7 +114,7 @@ The Security Onion VM was configured with separate network interfaces for manage
 
 Evidence:
 
-- [E03 - Security Onion Proxmox Interfaces](evidence/E03-security-onion-proxmox-interfaces.png)
+- [03 - Security Onion Proxmox Interfaces](evidence/03-security-onion-proxmox-interfaces.png)
 
 ### 4. Switch Mirroring Validated
 
@@ -124,7 +122,7 @@ The managed switch was configured to mirror traffic from `g1`, `g2`, and `g4` to
 
 Evidence:
 
-- [E04 - Switch Mirror Configuration](evidence/E04-switch-mirror-configuration.png)
+- [04 - Switch Mirror Configuration](evidence/04-switch-mirror-configuration.png)
 
 ### 5. Controlled Test Traffic Generated
 
@@ -132,7 +130,7 @@ Kali generated controlled ICMP traffic from the attacker VLAN to the victim syst
 
 Evidence:
 
-- [E05 - Kali Test Traffic](evidence/E05-kali-test-traffic.png)
+- [05 - Kali Test Traffic](evidence/05-kali-test-traffic.png)
 
 ### 6. Packet-Level Visibility Confirmed
 
@@ -140,7 +138,7 @@ Security Onion confirmed packet-level visibility with `tcpdump`. The capture sho
 
 Evidence:
 
-- [E06 - Security Onion tcpdump Traffic](evidence/E06-security-onion-tcpdump-traffic.png)
+- [06 - Security Onion tcpdump Traffic](evidence/06-security-onion-tcpdump-traffic.png)
 
 ### 7. Security Onion Hunt Visibility Confirmed
 
@@ -148,31 +146,31 @@ Security Onion Hunt displayed Suricata ICMP events for the controlled Kali-to-vi
 
 Evidence:
 
-- [E07 - Security Onion Hunt Results](evidence/E07-security-onion-hunt-results.png)
+- [07 - Security Onion Hunt Results](evidence/07-security-onion-hunt-results.png)
 
 ## Evidence Checklist
 
 | ID | Evidence Item | Status |
 |---|---|---|
-| [E01](evidence/E01-security-onion-dashboard.png) | Security Onion dashboard showing populated network telemetry | Complete |
-| [E02](evidence/E02-so-status-output.png) | Security Onion service/status output showing healthy containers | Complete |
-| [E03](evidence/E03-security-onion-proxmox-interfaces.png) | Security Onion VM network interface layout in Proxmox | Complete |
-| [E04](evidence/E04-switch-mirror-configuration.png) | Switch mirror/SPAN configuration showing `g1`, `g2`, and `g4` mirrored to `g3` | Complete |
-| [E05](evidence/E05-kali-test-traffic.png) | Kali attacker test traffic to victim system | Complete |
-| [E06](evidence/E06-security-onion-tcpdump-traffic.png) | `tcpdump` showing mirrored VLAN traffic on Security Onion | Complete |
-| [E07](evidence/E07-security-onion-hunt-results.png) | Security Onion Hunt results showing Suricata ICMP events | Complete |
+| [01](evidence/01-security-onion-dashboard.png) | Security Onion dashboard showing populated network telemetry | Complete |
+| [02](evidence/02-so-status-output.png) | Security Onion service/status output showing healthy containers | Complete |
+| [03](evidence/03-security-onion-proxmox-interfaces.png) | Security Onion VM network interface layout in Proxmox | Complete |
+| [04](evidence/04-switch-mirror-configuration.png) | Switch mirror/SPAN configuration showing `g1`, `g2`, and `g4` mirrored to `g3` | Complete |
+| [05](evidence/05-kali-test-traffic.png) | Kali attacker test traffic to victim system | Complete |
+| [06](evidence/06-security-onion-tcpdump-traffic.png) | `tcpdump` showing mirrored VLAN traffic on Security Onion | Complete |
+| [07](evidence/07-security-onion-hunt-results.png) | Security Onion Hunt results showing Suricata ICMP events | Complete |
 
 ## Screenshots
 
 The following evidence files are stored in the [`evidence/`](evidence/) folder:
 
-- [E01 - Security Onion Dashboard](evidence/E01-security-onion-dashboard.png)
-- [E02 - Security Onion Status Output](evidence/E02-so-status-output.png)
-- [E03 - Security Onion Proxmox Interfaces](evidence/E03-security-onion-proxmox-interfaces.png)
-- [E04 - Switch Mirror Configuration](evidence/E04-switch-mirror-configuration.png)
-- [E05 - Kali Test Traffic](evidence/E05-kali-test-traffic.png)
-- [E06 - Security Onion tcpdump Traffic](evidence/E06-security-onion-tcpdump-traffic.png)
-- [E07 - Security Onion Hunt Results](evidence/E07-security-onion-hunt-results.png)
+- [01 - Security Onion Dashboard](evidence/01-security-onion-dashboard.png)
+- [02 - Security Onion Status Output](evidence/02-so-status-output.png)
+- [03 - Security Onion Proxmox Interfaces](evidence/03-security-onion-proxmox-interfaces.png)
+- [04 - Switch Mirror Configuration](evidence/04-switch-mirror-configuration.png)
+- [05 - Kali Test Traffic](evidence/05-kali-test-traffic.png)
+- [06 - Security Onion tcpdump Traffic](evidence/06-security-onion-tcpdump-traffic.png)
+- [07 - Security Onion Hunt Results](evidence/07-security-onion-hunt-results.png)
 
 ## Key Evidence
 
@@ -180,19 +178,19 @@ The following evidence files are stored in the [`evidence/`](evidence/) folder:
 
 The managed switch was configured to mirror traffic from `g1`, `g2`, and `g4` to destination port `g3`, which connects to the Security Onion sniffing interface.
 
-![Switch mirror configuration](evidence/E04-switch-mirror-configuration.png)
+![Switch mirror configuration](evidence/04-switch-mirror-configuration.png)
 
 ### Packet-Level Validation
 
 Security Onion confirmed packet-level visibility with `tcpdump`, showing mirrored VLAN traffic from the attacker and victim networks reaching the sensor interface.
 
-![Security Onion tcpdump validation](evidence/E06-security-onion-tcpdump-traffic.png)
+![Security Onion tcpdump validation](evidence/06-security-onion-tcpdump-traffic.png)
 
 ### Security Onion Hunt Results
 
 Security Onion Hunt displayed Suricata ICMP events for the controlled Kali-to-victim traffic, confirming that the observed packets were processed into searchable security telemetry.
 
-![Security Onion Hunt results](evidence/E07-security-onion-hunt-results.png)
+![Security Onion Hunt results](evidence/07-security-onion-hunt-results.png)
 
 ## Findings
 
