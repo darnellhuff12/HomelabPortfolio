@@ -188,19 +188,20 @@ The screenshots below highlight the most important validation results while the 
 
 **Allowed Kali-to-Victim Testing**
 
-![Allowed Kali-to-Victim Nmap Test](screenshots/01-kali-to-victim-nmap-allowed.png)
+![Allowed Kali-to-Victim Nmap Test](./screenshots/01-kali-to-victim-nmap-allowed.png)
 
 **Security Onion Visibility**
 
-![Security Onion Hunt Kali-to-Victim Alerts](screenshots/02-security-onion-hunt-scan-alerts.png)
+![Security Onion Hunt Kali-to-Victim Alerts](./screenshots/02-security-onion-hunt-scan-alerts.png)
 
 **Blocked Kali-to-Admin Testing**
 
-![Kali-to-Admin VLAN Blocked](screenshots/05-kali-to-admin-blocked.png)
+![Kali-to-Admin VLAN Blocked](./screenshots/05-kali-to-admin-blocked.png)
 
 **pfSense Blocked Traffic Logs**
 
-![pfSense Blocked Traffic Logs](screenshots/10-pfsense-blocked-traffic-logs.png)
+![pfSense Blocked Traffic Logs](./screenshots/10-pfsense-blocked-traffic-logs.png)
+
 ---
 
 
