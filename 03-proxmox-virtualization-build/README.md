@@ -6,54 +6,25 @@
 
 This project documents the completed virtualization layer of my cybersecurity homelab using **Proxmox VE** on a **Dell PowerEdge R730xd**. The purpose of this project was to build a scalable compute platform capable of hosting segmented attacker, monitoring, victim, and management systems while keeping administrative access restricted through the Admin VLAN and Raspberry Pi 5 bastion host.
 
-Project 1 established the segmented network foundation by separating home, attacker, victim, SIEM, and management traffic into controlled VLANs. Project 2 validated that traffic from Kali and the victim network could be observed by Security Onion. Project 3 completes the next layer of the lab by documenting how Proxmox hosts and connects the virtual systems used for future red-team, blue-team, and detection-engineering projects.
-
-This completed build demonstrates:
-
-- Proxmox VE deployed on enterprise server hardware
-- Dedicated host management on **Admin VLAN 50**
-- VLAN-aware virtual networking for lab workloads
-- Kali Linux placed on **VLAN 20** as an attacker system
-- Security Onion placed on **VLAN 30** for management
-- A separate Security Onion sniffing interface for mirrored traffic ingestion
-- Secure remote access through a **Raspberry Pi 5 bastion** on the Admin VLAN
-- A repeatable virtualization design that can support future projects such as Active Directory, honeypots, detection engineering, and adversary emulation
-
----
-## Project Role in the Portfolio
-
-This project serves as the virtualization foundation for the rest of the homelab portfolio. The goal was not only to install Proxmox, but to document how the hypervisor supports the segmented security lab built in Projects 1 and 2.
-
-In the current lab design:
-
-- Proxmox runs on the Dell PowerEdge R730xd
-- Proxmox management is isolated on Admin VLAN 50
-- Kali runs on the attacker network for controlled testing
-- Security Onion runs as the SIEM platform with separate management and monitoring paths
-- The Raspberry Pi 5 provides bastion access into the management network
-- Future victim systems, Active Directory services, vulnerable applications, and honeypot systems can be added as additional VMs
-
-This makes Project 3 the bridge between the physical network buildout and the larger portfolio projects that will focus on endpoint telemetry, detection engineering, attack simulation, Active Directory, honeypots, and automation.
-
----
+Project 1 established the segmented network foundation by separating home, attacker, victim, SIEM, and management traffic into controlled VLANs. Project 2 validated firewall segmentation and monitoring visibility. Project 3 completes the next layer of the lab by documenting how Proxmox hosts and connects the virtual systems used for future red-team, blue-team, and detection-engineering projects.
 
 ## Business and Security Value
 
 Virtualization is a core skill in enterprise security environments because many security tools, test systems, and lab networks depend on controlled compute infrastructure. This project demonstrates the ability to design and operate a segmented virtualization environment that supports both offensive and defensive security workflows.
 
-From a business and security perspective, this project shows how to:
+From a business and security perspective, this project shows how to centralize lab workloads on dedicated server hardware, isolate hypervisor management on a restricted Admin VLAN, separate attacker and monitoring systems by trust zone, support blue-team visibility through Security Onion, and preserve scalability for future enterprise-style projects such as Active Directory, honeypots, detection engineering, and adversary emulation.
 
-- Centralize lab workloads on a dedicated server platform
-- Separate management, attacker, victim, and monitoring networks using VLANs
-- Reduce risk by limiting Proxmox management access to the Admin VLAN
-- Support blue-team monitoring with Security Onion
-- Support red-team activity with Kali Linux in a controlled attacker segment
-- Preserve scalability for future enterprise-style projects
-- Use a bastion host model for safer remote administration
+## Scope and Rules of Engagement
 
-This mirrors common enterprise practices where virtualization hosts are placed on restricted management networks, workloads are separated by trust zone, and monitoring systems receive dedicated telemetry or mirrored traffic instead of relying on flat network access.
+This project was limited to the Proxmox virtualization layer and its role in supporting the segmented homelab. Validation focused on Proxmox host management, VLAN-aware networking, core VM placement, Security Onion interface separation, storage availability, and bastion-based administrative access.
 
----
+Out of scope:
+
+- Public internet targets
+- Third-party systems
+- Production workloads
+- Unauthorized access attempts
+- Exploitation or attack simulation beyond VM placement and infrastructure validation
 
 ## Lab Environment
 
@@ -68,8 +39,6 @@ This mirrors common enterprise practices where virtualization hosts are placed o
 | Security Onion VM | SIEM / monitoring platform | Management on VLAN 30 with a separate sniffing interface |
 | M2 MacBook Air | Admin workstation | Accesses lab services through SSH tunnels |
 
----
-
 ## VLAN Design
 
 | VLAN | Name / Function | Example Systems | Purpose |
@@ -79,8 +48,6 @@ This mirrors common enterprise practices where virtualization hosts are placed o
 | VLAN 30 | SIEM | Security Onion management interface | SIEM access and management |
 | VLAN 40 | Victim | Windows/Linux victim systems | Target systems for testing and detection |
 | VLAN 50 | Admin / Management | Raspberry Pi 5, Proxmox host, iDRAC, management interfaces | Restricted administrative access |
-
----
 
 ## Proxmox Host Management
 
@@ -95,8 +62,6 @@ The Proxmox host is managed through the Admin VLAN rather than the general home 
 | Access method | SSH tunnel through Raspberry Pi 5 bastion |
 
 Restricting Proxmox management to VLAN 50 helps protect the hypervisor from unnecessary exposure. Since the hypervisor controls multiple security lab VMs, it is treated as a high-value management asset.
-
----
 
 ## Virtual Network Design
 
@@ -136,8 +101,6 @@ The management interface allows administrative access to Security Onion, while t
 
 This separation is important because Security Onion should not rely on its management interface for packet inspection. Monitoring traffic should enter through the dedicated sniffing interface.
 
----
-
 ## Access Model
 
 Administrative access follows a bastion host model.
@@ -163,8 +126,6 @@ This model helps reduce exposure of sensitive services such as:
 - Security Onion console
 - iDRAC
 - Switch management UI
-
----
 
 ## Implementation Summary
 
@@ -251,8 +212,6 @@ Example management targets:
 | iDRAC | SSH tunnel through Pi 5 |
 | Switch UI | SSH tunnel through Pi 5 |
 
----
-
 ## Validation and Evidence
 
 The Proxmox virtualization build was validated through host configuration review, VM placement checks, VLAN assignment verification, storage review, and bastion-based access testing.
@@ -266,8 +225,6 @@ The Proxmox virtualization build was validated through host configuration review
 | Security Onion interface separation | Passed - Security Onion used VLAN 30 for management and a separate interface on `vmbr1` for sniffing/monitoring traffic | [06-security-onion-vlan30-and-sniffing-hardware.png](evidence/06-security-onion-vlan30-and-sniffing-hardware.png) |
 | Virtualization storage | Passed - `local-lvm` storage was available for current and future lab workloads | [07-proxmox-storage-summary.png](evidence/07-proxmox-storage-summary.png) |
 | Bastion access workflow | Passed - Proxmox and other management interfaces were accessed through SSH tunnels using the Raspberry Pi 5 bastion | [08-pi-bastion-tunnel-validation.png](evidence/08-pi-bastion-tunnel-validation.png) |
-
----
 
 ## Evidence Summary
 
@@ -284,7 +241,7 @@ The following evidence documents the completed Proxmox virtualization build and 
 | 07 | [Proxmox Storage Summary](evidence/07-proxmox-storage-summary.png) | Shows `local-lvm` storage capacity available for current and future lab workloads. |
 | 08 | [Pi Bastion Tunnel Validation](evidence/08-pi-bastion-tunnel-validation.png) | Shows the tunnel workflow used to access Proxmox, pfSense, Security Onion, the switch, and iDRAC through the Raspberry Pi 5 bastion. |
 
-### Key Evidence
+## Key Evidence
 
 The screenshots below highlight the most important Proxmox virtualization evidence while the table above preserves links to the full evidence set.
 
@@ -336,7 +293,7 @@ This screenshot documents the `local-lvm` storage pool and confirms that the Pro
 
 This screenshot confirms the bastion-based access workflow. Proxmox, pfSense, Security Onion, the switch, and iDRAC are accessed through SSH tunnels using the Raspberry Pi 5 on Admin VLAN 50 instead of exposing management interfaces directly to the general home network.
 
-## Security Considerations
+## Key Findings
 
 This build intentionally separates management access from lab activity.
 

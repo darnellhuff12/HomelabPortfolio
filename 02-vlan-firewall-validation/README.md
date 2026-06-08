@@ -1,32 +1,28 @@
 # Project 2: VLAN Segmentation and Firewall Rule Validation
 
-## Project Status
-
-**Status:** Complete  
-**Related Project:** Project 1 - Home Cybersecurity Lab Network Architecture
+## Objective
 
 This project validates the VLAN segmentation and firewall rule design used in my cybersecurity homelab. The goal was to confirm that each network segment is isolated by default, that only explicitly approved traffic is allowed between VLANs, and that allowed and blocked traffic can be validated through pfSense logs, live connectivity testing, and Security Onion visibility.
 
 Project 1 documented the overall lab architecture. Project 2 focuses on proving that the architecture enforces the intended access control model through pfSense firewall rules, managed switch VLAN configuration, Proxmox VLAN tagging, and live validation testing.
 
-As part of this project, pfSense rules were hardened to enforce a dedicated Admin/Bastion workflow through the Raspberry Pi 5 on VLAN 50. Validation confirmed that Kali-to-victim traffic was allowed by policy and visible in Security Onion Hunt, Kali-to-Admin access was blocked and logged by pfSense, Admin/Bastion access from the Raspberry Pi 5 to pfSense and Proxmox was allowed, and Proxmox host management was successfully migrated to the Admin VLAN using `vmbr0.50`.
+## Business and Security Value
 
----
+VLAN segmentation and firewall rule validation reduce lateral movement risk by separating attacker, victim, SIEM, home, and management networks. This project demonstrates practical firewall validation, management-plane protection, and evidence-based testing of both allowed and blocked traffic paths.
 
-## Objective
+The completed validation confirmed that Kali-to-victim traffic was allowed by policy and visible in Security Onion Hunt, Kali-to-Admin access was blocked and logged by pfSense, Admin/Bastion access from the Raspberry Pi 5 to pfSense and Proxmox was allowed, and Proxmox host management was successfully migrated to the Admin VLAN using `vmbr0.50`.
 
-The objective of this project is to validate that my pfSense firewall rules, managed switch VLAN configuration, and Proxmox VLAN tagging work together to enforce segmentation across the lab environment.
+## Scope and Rules of Engagement
 
-This project confirmed that:
+Testing was limited to authorized systems inside the homelab. The Kali attacker VM was used only for controlled validation against approved victim and management-path test targets.
 
-- The attacker VLAN can reach only the intended victim systems during lab simulations.
-- The victim VLAN cannot access administrative systems.
-- The SIEM VLAN remains protected while still receiving required monitoring traffic.
-- The admin VLAN can access management interfaces such as Proxmox, pfSense, Security Onion, and the Raspberry Pi 5.
-- Default-deny firewall behavior is enforced wherever possible.
-- Allowed traffic is intentional, documented, and tied to a specific lab purpose.
+Out of scope:
 
----
+- Public internet targets
+- Third-party systems
+- Work devices or production systems
+- Unauthorized scanning or access attempts
+- Exploitation outside the isolated lab environment
 
 ## Lab Environment Overview
 
@@ -53,7 +49,6 @@ Management access is intentionally centralized through the Admin VLAN. The Raspb
 
 Proxmox host management was moved from the LAN network to the Admin VLAN by removing the management IP from `vmbr0` and assigning it to `vmbr0.50`. The new Proxmox management address is `192.168.50.10/24`, with the Admin VLAN gateway set to `192.168.50.1`. This keeps the hypervisor management plane aligned with the rest of the Admin/Bastion network while preserving VLAN-aware trunking for lab VMs on `vmbr0`.
 
----
 
 ## VLAN Design
 
