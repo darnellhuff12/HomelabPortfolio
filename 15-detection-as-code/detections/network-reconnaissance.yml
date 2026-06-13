@@ -1,0 +1,61 @@
+title: Network Reconnaissance Detection
+id: homelab-network-recon-001
+status: experimental
+description: Detects network scanning behavior from a single source host against lab systems.
+author: Darnell Huff
+date: 2026-06-12
+severity: medium
+
+mitre_attack:
+  tactic: Discovery
+  technique_id: T1046
+  technique_name: Network Service Discovery
+
+data_sources:
+  - Zeek connection logs
+  - Suricata alerts
+  - Security Onion events
+
+log_source:
+  product: network
+  service: zeek
+
+detection_logic:
+  selection:
+    behavior:
+      - multiple destination ports
+      - repeated connection attempts
+      - short time window
+  condition: One source host attempts connections to many ports or services on a destination system.
+
+threshold:
+  count: 10
+  timeframe: 5 minutes
+
+test_environment:
+  attacker: Kali Linux
+  victim: Lab victim system
+  monitoring: Security Onion
+
+test_procedure:
+  - Run an Nmap scan from Kali against a lab target.
+  - Search Security Onion for Zeek connection logs or Suricata scan alerts.
+  - Confirm source IP, destination IP, scanned ports, and timestamps.
+
+expected_result:
+  Security Onion should show multiple connection attempts from Kali to the scanned target.
+
+false_positives:
+  - Vulnerability scanners
+  - Asset inventory tools
+  - Administrator troubleshooting
+  - Approved internal scanning
+
+tuning_recommendations:
+  - Exclude known approved scanner IP addresses.
+  - Increase severity for scans from non-administrative VLANs.
+  - Increase severity if scanning is followed by authentication attempts.
+  - Tune thresholds based on normal network behavior.
+
+notes:
+  This detection was created from controlled Nmap reconnaissance activity generated in the homelab.

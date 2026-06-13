@@ -1,0 +1,64 @@
+title: SSH Brute Force Detection
+id: homelab-ssh-bruteforce-001
+status: experimental
+description: Detects repeated failed SSH authentication attempts from a single source host against a Linux victim system.
+author: Darnell Huff
+date: 2026-06-08
+severity: medium
+
+mitre_attack:
+  tactic: Credential Access
+  technique_id: T1110
+  technique_name: Brute Force
+
+data_sources:
+  - Linux authentication logs
+  - Security Onion events
+  - Network telemetry
+
+log_source:
+  product: linux
+  service: ssh
+
+detection_logic:
+  selection:
+    event_type: authentication_failure
+    protocol: ssh
+    message_contains:
+      - "Failed password"
+      - "Invalid user"
+      - "authentication failure"
+  condition: Multiple failed SSH authentication attempts from the same source IP within a short time window.
+
+threshold:
+  count: 5
+  timeframe: 5 minutes
+
+test_environment:
+  attacker: Kali Linux
+  victim: Ubuntu Victim
+  monitoring: Security Onion
+
+test_procedure:
+  - Generate repeated failed SSH login attempts from Kali against the Ubuntu victim.
+  - Review Ubuntu authentication logs for failed login messages.
+  - Search Security Onion for SSH traffic between the attacker and victim.
+  - Validate that the activity matches the detection logic.
+
+expected_result:
+  Repeated SSH authentication failures should be visible from the Kali source IP against the Ubuntu victim.
+
+false_positives:
+  - A legitimate user mistyping a password multiple times
+  - Administrator troubleshooting SSH access
+  - Misconfigured scripts or automation
+  - Monitoring tools using outdated credentials
+
+tuning_recommendations:
+  - Increase severity if multiple usernames are attempted.
+  - Increase severity if failed logins are followed by a successful login.
+  - Exclude known administrator jump boxes if needed.
+  - Adjust the threshold depending on normal login behavior.
+
+notes:
+  This detection was created from controlled SSH brute force activity generated in the homelab and converted into a detection-as-code format for repeatable documentation and future tuning.
