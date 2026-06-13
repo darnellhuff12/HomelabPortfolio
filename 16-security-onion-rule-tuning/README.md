@@ -58,6 +58,24 @@ The selected alert was not disabled globally. Instead, a source-based suppressio
 | [05-alert-validation-after-tuning.png](evidence/05-alert-validation-after-tuning.png) | Alerts view after tuning showing the STUN alert no longer appearing in the recent 15-minute window |
 | [06-final-alert-review.png](evidence/06-final-alert-review.png) | Hunt validation showing STUN and connection records remained searchable after alert tuning |
 
+## Key Screenshots
+
+### Baseline Alert Review
+
+![Security Onion alert baseline](evidence/01-security-onion-alert-baseline.png)
+
+### Source-Based Suppression
+
+![Security Onion rule tuning change](evidence/04-rule-tuning-change.png)
+
+### Alert Validation After Tuning
+
+![Security Onion alert validation after tuning](evidence/05-alert-validation-after-tuning.png)
+
+### Hunt Validation
+
+![Security Onion Hunt validation](evidence/06-final-alert-review.png)
+
 ## Skills Demonstrated
 
 | Skill | Description |
