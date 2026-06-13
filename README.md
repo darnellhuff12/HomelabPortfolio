@@ -64,7 +64,7 @@ The diagram below shows the current homelab architecture, including pfSense, VLA
 | 13 | [Bastion and Tailscale Access](13-bastion-and-tailscale-access/) | Tailscale remote access, Raspberry Pi 5 bastion host, scripted SSH tunnels, management-plane isolation, and VNC access through a jump host | Complete |
 | 14 | [MITRE ATT&CK Emulation](14-mitre-att&ck-emulation/) | MITRE Caldera deployment, Sandcat agent check-in, safe discovery operation, pfSense least-privilege access, and Security Onion Zeek visibility | Complete |
 | 15 | [Detection-as-Code](15-detection-as-code/) | Structured detection rule files, SSH brute-force detection logic, Nmap reconnaissance detection logic, MITRE ATT&CK mapping, Security Onion validation, and tuning considerations | Complete |
-| 16 | [Security Onion Rule Tuning](16-security-onion-rule-tuning/) | False positive review and alert tuning decisions | Planned |
+| 16 | [Security Onion Rule Tuning](16-security-onion-rule-tuning/) | Security Onion alert review, STUN rule tuning, source-based suppression, false-positive reduction, and Hunt validation | Complete |
 | 17 | [Multi-Source Log Correlation](17-multi-source-log-correlation/) | Firewall, SIEM, endpoint, and system log timeline building | Planned |
 | 18 | [Incident Response Capstone](18-incident-response-capstone/) | Full attack simulation, detection, triage, and reporting | Planned |
 | 19 | [Enterprise Purple Team Capstone](19-enterprise-purple-team-capstone/) | Final polished portfolio summary | Planned |
@@ -85,7 +85,7 @@ The diagram below shows the current homelab architecture, including pfSense, VLA
 | Attack path investigation | Kali-to-victim path validation, Nmap service discovery, SSH validation, Security Onion alert review, Zeek connection logs, and pfSense segmentation context |
 | Secure remote administration | Raspberry Pi 5 bastion host, Tailscale access, scripted SSH tunnels, loopback aliases, VNC tunneling, and no public management port forwarding |
 | Adversary emulation | MITRE Caldera deployment, Sandcat agent check-in, safe discovery operations, least-privilege firewall access, and Security Onion Zeek telemetry |
-| Detection engineering | Detection-as-code rule files, SSH brute-force detection logic, Nmap reconnaissance detection logic, MITRE ATT&CK mapping, false-positive review, tuning notes, Ubuntu authentication logs, and Security Onion validation |
+| Detection engineering | Detection-as-code rule files, SSH brute-force detection logic, Nmap reconnaissance detection logic, MITRE ATT&CK mapping, Security Onion false-positive review, source-based alert suppression, tuning validation, Ubuntu authentication logs, and Hunt-based visibility confirmation |
 
 ## Documentation Standard
 
@@ -126,9 +126,9 @@ Screenshots and logs are sanitized before publishing. Passwords, tokens, public 
 - Demonstrate practical security engineering skills through a segmented, personally owned homelab.
 - Validate both offensive activity and defensive visibility in a controlled purple-team environment.
 - Document firewall rules, SIEM telemetry, endpoint logs, scan results, and attack-path evidence in a professional format.
-- Build repeatable workflows for reconnaissance detection, service enumeration, SSH brute-force analysis, web application scanning, vulnerability management, adversary emulation, detection-as-code, and incident-style investigation.
+- Build repeatable workflows for reconnaissance detection, service enumeration, SSH brute-force analysis, web application scanning, vulnerability management, adversary emulation, detection-as-code, Security Onion alert tuning, and incident-style investigation.
 - Show clear business value by connecting technical controls to risk reduction, visibility, hardening, and response readiness.
 
 ## Highlight Resume Bullet
 
-Built and documented a segmented purple-team cybersecurity homelab using pfSense, Proxmox, Security Onion, Kali Linux, Ubuntu/Windows victims, OWASP ZAP, Nessus Essentials, MITRE Caldera, VLAN isolation, firewall hardening, Tailscale bastion access, SIEM telemetry validation, and detection-as-code workflows to support controlled adversary simulation, detection engineering, vulnerability management, endpoint telemetry review, secure remote administration, and incident-response-style investigations.
+Built and documented a segmented purple-team cybersecurity homelab using pfSense, Proxmox, Security Onion, Kali Linux, Ubuntu/Windows victims, OWASP ZAP, Nessus Essentials, MITRE Caldera, VLAN isolation, firewall hardening, Tailscale bastion access, SIEM telemetry validation, detection-as-code, and alert tuning workflows to support controlled adversary simulation, detection engineering, vulnerability management, endpoint telemetry review, secure remote administration, and incident-response-style investigations.
