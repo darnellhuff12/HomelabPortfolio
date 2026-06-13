@@ -1,14 +1,10 @@
-
-
 # Project 15: Detection-as-Code Rule Development
 
 ## Overview
 
 This project demonstrates a detection-as-code workflow inside the homelab. Instead of creating security detections as one-off searches inside a SIEM, this project documents detections as structured rule files that can be reviewed, tested, tuned, and version-controlled.
 
-
 The project focuses on two controlled attacker behaviors generated in the lab: SSH brute force activity and network reconnaissance. Each behavior is mapped to MITRE ATT&CK, translated into detection logic, validated against lab telemetry, and documented with false-positive and tuning considerations.
-
 
 ## Project Goals
 
@@ -22,14 +18,16 @@ The project focuses on two controlled attacker behaviors generated in the lab: S
 
 ## Lab Environment
 
-| Component | Role |
-|---|---|
-| Kali Linux | Generates SSH brute force and reconnaissance activity |
-| Ubuntu Victim | Receives SSH login attempts and produces authentication logs |
+
+| Component      | Role                                                               |
+| -------------- | ------------------------------------------------------------------ |
+| Kali Linux     | Generates SSH brute force and reconnaissance activity              |
+| Ubuntu Victim  | Receives SSH login attempts and produces authentication logs       |
 | Security Onion | Provides network visibility, event search, and validation evidence |
-| pfSense | Segments lab VLANs and controls traffic between systems |
-| Proxmox | Hosts core lab infrastructure and virtual machines |
-| GitHub | Stores detection files, notes, screenshots, and documentation |
+| pfSense        | Segments lab VLANs and controls traffic between systems            |
+| Proxmox        | Hosts core lab infrastructure and virtual machines                 |
+| GitHub         | Stores detection files, notes, screenshots, and documentation      |
+
 
 ## Skills Demonstrated
 
@@ -52,36 +50,14 @@ This makes detections easier to review, improve, reuse, and explain. It also cre
 
 This project focuses on two detections:
 
-| Detection | Behavior | Data Sources | MITRE ATT&CK Mapping |
-|---|---|---|---|
-| SSH Brute Force Detection | Multiple failed SSH login attempts from Kali to Ubuntu Victim | Ubuntu auth logs, Security Onion events | T1110 - Brute Force |
-| Network Reconnaissance Detection | Nmap scan activity from Kali against a lab target | Zeek/Suricata/Security Onion events | T1046 - Network Service Discovery |
+
+| Detection                        | Behavior                                                      | Data Sources                            | MITRE ATT&CK Mapping              |
+| -------------------------------- | ------------------------------------------------------------- | --------------------------------------- | --------------------------------- |
+| SSH Brute Force Detection        | Multiple failed SSH login attempts from Kali to Ubuntu Victim | Ubuntu auth logs, Security Onion events | T1110 - Brute Force               |
+| Network Reconnaissance Detection | Nmap scan activity from Kali against a lab target             | Zeek/Suricata/Security Onion events     | T1046 - Network Service Discovery |
+
 
 Additional detection ideas such as OWASP ZAP scanning, Nessus scan activity, Caldera agent behavior, and honeynet alerts can be added in future projects.
-
-## Repository Structure
-
-```text
-15-detection-as-code/
-├── README.md
-├── detections/
-│   ├── ssh-brute-force.yml
-│   └── network-reconnaissance.yml
-├── evidence/
-│   ├── 01-ssh-brute-force-rule-file.png
-│   ├── 02-ssh-brute-force-validation-notes.jpeg
-│   ├── 03-ubuntu-victim-ssh-service.jpeg
-│   ├── 04-kali-failed-ssh-attempts.png
-│   ├── 05-ubuntu-auth-log-failures.png
-│   ├── 06-security-onion-ssh-events.png
-│   ├── 07-security-onion-ssh-event-details.png
-│   ├── 08-network-reconnaissance-rule-file.png
-│   ├── 09-kali-nmap-scan.png
-│   ├── 10-security-onion-recon-events.png
-│   └── 11-security-onion-recon-event-details.png
-└── notes/
-    └── ssh-brute-force-validation.md
-```
 
 ## Detection Workflow
 
@@ -103,11 +79,13 @@ Detect repeated failed SSH authentication attempts from a single source host aga
 
 ### ATT&CK Mapping
 
-| Field | Value |
-|---|---|
-| Tactic | Credential Access |
-| Technique | Brute Force |
-| Technique ID | T1110 |
+
+| Field        | Value             |
+| ------------ | ----------------- |
+| Tactic       | Credential Access |
+| Technique    | Brute Force       |
+| Technique ID | T1110             |
+
 
 ### Detection Logic Summary
 
@@ -147,11 +125,13 @@ Detect network scanning activity from a single source host against a lab target.
 
 ### ATT&CK Mapping
 
-| Field | Value |
-|---|---|
-| Tactic | Discovery |
-| Technique | Network Service Discovery |
-| Technique ID | T1046 |
+
+| Field        | Value                     |
+| ------------ | ------------------------- |
+| Tactic       | Discovery                 |
+| Technique    | Network Service Discovery |
+| Technique ID | T1046                     |
+
 
 ### Detection Logic Summary
 
@@ -184,65 +164,67 @@ Security Onion should show multiple connection attempts from Kali to the scanned
 
 ## Evidence
 
-| Screenshot | Description |
-|---|---|
-| 01-ssh-brute-force-rule-file.png | Shows the SSH brute force detection rule file, including MITRE mapping, detection logic, threshold, false positives, and tuning notes |
-| 02-ssh-brute-force-validation-notes.jpeg | Shows the SSH brute force validation notes documenting the test summary, expected evidence, validation result, and tuning considerations |
-| 03-ubuntu-victim-ssh-service.jpeg | Confirms the Ubuntu victim IP address and verifies that the SSH service was active and listening |
-| 04-kali-failed-ssh-attempts.png | Shows failed SSH login attempts generated from Kali against the Ubuntu victim |
-| 05-ubuntu-auth-log-failures.png | Shows Ubuntu authentication logs recording failed login attempts from the Kali source IP |
-| 06-security-onion-ssh-events.png | Shows Security Onion Hunt results for SSH activity between Kali and the Ubuntu victim |
-| 07-security-onion-ssh-event-details.png | Shows detailed Zeek SSH event fields, including source IP, destination IP, destination port, and SSH metadata |
-| 08-network-reconnaissance-rule-file.png | Shows the network reconnaissance detection rule file with MITRE T1046 mapping and detection logic |
-| 09-kali-nmap-scan.png | Shows an Nmap service scan from Kali against the Ubuntu victim |
-| 10-security-onion-recon-events.png | Shows Security Onion Hunt results containing high-volume Zeek connection activity from Kali to the victim after the scan |
-| 11-security-onion-recon-event-details.png | Shows detailed Security Onion event fields for reconnaissance-related network telemetry |
+
+| Evidence                                                                                        | Description                                                                                                                              |
+| ----------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| [01-ssh-brute-force-rule-file.png](evidence/01-ssh-brute-force-rule-file.png)                   | Shows the SSH brute force detection rule file, including MITRE mapping, detection logic, threshold, false positives, and tuning notes    |
+| [02-ssh-brute-force-validation-notes.png](evidence/02-ssh-brute-force-validation-notes.png)     | Shows the SSH brute force validation notes documenting the test summary, expected evidence, validation result, and tuning considerations |
+| [03-ubuntu-victim-ssh-service.png](evidence/03-ubuntu-victim-ssh-service.png)                   | Confirms the Ubuntu victim IP address and verifies that the SSH service was active and listening                                         |
+| [04-kali-failed-ssh-attempts.png](evidence/04-kali-failed-ssh-attempts.png)                     | Shows failed SSH login attempts generated from Kali against the Ubuntu victim                                                            |
+| [05-ubuntu-auth-log-failures.png](evidence/05-ubuntu-auth-log-failures.png)                     | Shows Ubuntu authentication logs recording failed login attempts from the Kali source IP                                                 |
+| [06-security-onion-ssh-events.png](evidence/06-security-onion-ssh-events.png)                   | Shows Security Onion Hunt results for SSH activity between Kali and the Ubuntu victim                                                    |
+| [07-security-onion-ssh-event-details.png](evidence/07-security-onion-ssh-event-details.png)     | Shows detailed Zeek SSH event fields, including source IP, destination IP, destination port, and SSH metadata                            |
+| [08-network-reconnaissance-rule-file.png](evidence/08-network-reconnaissance-rule-file.png)     | Shows the network reconnaissance detection rule file with MITRE T1046 mapping and detection logic                                        |
+| [09-kali-nmap-scan.png](evidence/09-kali-nmap-scan.png)                                         | Shows an Nmap service scan from Kali against the Ubuntu victim                                                                           |
+| [10-security-onion-recon-events.png](evidence/10-security-onion-recon-events.png)               | Shows Security Onion Hunt results containing high-volume Zeek connection activity from Kali to the victim after the scan                 |
+| [11-security-onion-recon-event-details.png](evidence/11-security-onion-recon-event-details.png) | Shows detailed Security Onion event fields for reconnaissance-related network telemetry                                                  |
+
 
 ## Embedded Evidence
 
 ### SSH Brute Force Detection Rule
 
-![SSH brute force detection rule](evidence/01-ssh-brute-force-rule-file.png)
+SSH brute force detection rule
 
 ### SSH Brute Force Validation Notes
 
-![SSH brute force validation notes](evidence/02-ssh-brute-force-validation-notes.jpeg)
+SSH brute force validation notes
 
 ### Ubuntu Victim SSH Service
 
-![Ubuntu victim SSH service](evidence/03-ubuntu-victim-ssh-service.jpeg)
+Ubuntu victim SSH service
 
 ### Kali Failed SSH Attempts
 
-![Kali failed SSH attempts](evidence/04-kali-failed-ssh-attempts.png)
+Kali failed SSH attempts
 
 ### Ubuntu Authentication Log Failures
 
-![Ubuntu authentication log failures](evidence/05-ubuntu-auth-log-failures.png)
+Ubuntu authentication log failures
 
 ### Security Onion SSH Events
 
-![Security Onion SSH events](evidence/06-security-onion-ssh-events.png)
+Security Onion SSH events
 
 ### Security Onion SSH Event Details
 
-![Security Onion SSH event details](evidence/07-security-onion-ssh-event-details.png)
+Security Onion SSH event details
 
 ### Network Reconnaissance Detection Rule
 
-![Network reconnaissance detection rule](evidence/08-network-reconnaissance-rule-file.png)
+Network reconnaissance detection rule
 
 ### Kali Nmap Scan
 
-![Kali Nmap scan](evidence/09-kali-nmap-scan.png)
+Kali Nmap scan
 
 ### Security Onion Reconnaissance Events
 
-![Security Onion reconnaissance events](evidence/10-security-onion-recon-events.png)
+Security Onion reconnaissance events
 
 ### Security Onion Reconnaissance Event Details
 
-![Security Onion reconnaissance event details](evidence/11-security-onion-recon-event-details.png)
+Security Onion reconnaissance event details
 
 ## Key Findings
 
