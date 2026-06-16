@@ -146,19 +146,19 @@ The following screenshots document the pfSense VLAN interface assignments, VLAN 
 
 ### Managed Switch Evidence
 
-The following screenshots document the managed switch configuration supporting the VLAN design. These screenshots show VLAN membership, PVID assignments, port configuration, and port mirroring/SPAN configuration used for Security Onion visibility.
+The following screenshots document the managed switch configuration supporting the VLAN design. These screenshots show VLAN membership, PVID assignments, port configuration, and port mirroring/SPAN configuration used for Security Onion visibility. The current switch evidence reflects the active lab setup, including Admin VLAN membership on the pfSense/Proxmox trunk paths and Admin access ports, VLAN 1 limited to the expected untagged trunk/default behavior, and port mirroring configured with g3 as the Security Onion probe/destination port.
 
 | Evidence | Description | Screenshot |
 |---|---|---|
-| Switch port configuration | Shows physical switch port configuration and device placement | [switch-port-configuration.png](evidence/switch-vlan-config/switch-port-configuration.png) |
-| Switch port mirroring | Shows mirror/SPAN configuration for Security Onion monitoring | [switch-port-mirroring.png](evidence/switch-vlan-config/switch-port-mirroring.png) |
+| Switch port configuration | Shows active port status, mirrored source ports, and g3 configured as the probe port for Security Onion monitoring | [switch-port-configuration.png](evidence/switch-vlan-config/switch-port-configuration.png) |
+| Switch port mirroring | Shows g3 as the mirror destination/probe port and mirrored source ports configured for Tx/Rx monitoring | [switch-port-mirroring.png](evidence/switch-vlan-config/switch-port-mirroring.png) |
 | Switch PVID configuration | Shows untagged VLAN assignment behavior for access ports | [switch-pvid-configuration.png](evidence/switch-vlan-config/switch-pvid-configuration.png) |
-| VLAN 1 membership | Shows default/native VLAN membership state | [switch-vlan-membership-vlan1.png](evidence/switch-vlan-config/switch-vlan-membership-vlan1.png) |
+| VLAN 1 membership | Shows the default/native VLAN membership state after cleanup, with VLAN 1 limited to the expected untagged ports | [switch-vlan-membership-vlan1.png](evidence/switch-vlan-config/switch-vlan-membership-vlan1.png) |
 | VLAN 10 membership | Shows HOME VLAN membership | [switch-vlan-membership-vlan10.png](evidence/switch-vlan-config/switch-vlan-membership-vlan10.png) |
 | VLAN 20 membership | Shows ATTACK VLAN membership | [switch-vlan-membership-vlan20.png](evidence/switch-vlan-config/switch-vlan-membership-vlan20.png) |
 | VLAN 30 membership | Shows SIEM VLAN membership | [switch-vlan-membership-vlan30.png](evidence/switch-vlan-config/switch-vlan-membership-vlan30.png) |
 | VLAN 40 membership | Shows VICTIM VLAN membership | [switch-vlan-membership-vlan40.png](evidence/switch-vlan-config/switch-vlan-membership-vlan40.png) |
-| VLAN 50 membership | Shows ADMIN VLAN membership | [switch-vlan-membership-vlan50.png](evidence/switch-vlan-config/switch-vlan-membership-vlan50.png) |
+| VLAN 50 membership | Shows ADMIN/Bastion VLAN membership, including tagged trunk participation and untagged Admin access ports | [switch-vlan-membership-vlan50.png](evidence/switch-vlan-config/switch-vlan-membership-vlan50.png) |
 
 ---
 
@@ -223,7 +223,7 @@ For example, the ATTACK VLAN allows traffic to the VICTIM VLAN before blocking a
 The completed implementation includes the following validated configuration outcomes:
 
 - pfSense VLAN interfaces, DHCP pools, firewall rules, and aliases have been configured for the segmented lab design.
-- The managed switch VLAN membership, PVID settings, trunk ports, and mirror/SPAN configuration have been validated.
+- The managed switch VLAN membership, PVID settings, trunk ports, and mirror/SPAN configuration have been validated, with g3 serving as the Security Onion probe/destination port and mirrored source ports configured for Tx/Rx monitoring.
 - Proxmox uses a VLAN-aware bridge for lab VM traffic, and Proxmox host management has been migrated from LAN `192.168.1.185/24` to Admin VLAN 50 using `vmbr0.50` with address `192.168.50.10/24` and gateway `192.168.50.1`.
 - Kali on VLAN 20 successfully reached the victim host on VLAN 40 during approved testing.
 - Security Onion observed Kali-to-victim ICMP and scan traffic after the active sensor interface was corrected from `bond0` to `enp6s19`.
@@ -285,7 +285,7 @@ sudo tcpdump -i enp6s19 -nn -e 'icmp or host 192.168.40.102'
 ```
 
 
-After this correction, Security Onion observed VLAN 20/VLAN 40 ICMP traffic between Kali and the victim endpoint at the packet-capture level. However, the traffic initially did not appear in the Security Onion Hunt dashboard. Additional troubleshooting showed that Security Onion was configured to use `bond0` as the sensor interface, while the mirrored attacker-to-victim traffic was actually arriving on `enp6s19`. The `bond0` interface was down and was not processing the mirrored traffic.
+After this correction, Security Onion observed VLAN 20/VLAN 40 ICMP traffic between Kali and the victim endpoint at the packet-capture level through the switch mirror/SPAN path using g3 as the probe/destination port. However, the traffic initially did not appear in the Security Onion Hunt dashboard. Additional troubleshooting showed that Security Onion was configured to use `bond0` as the sensor interface, while the mirrored attacker-to-victim traffic was actually arriving on `enp6s19`. The `bond0` interface was down and was not processing the mirrored traffic.
 
 The Security Onion local pillar configuration was updated so the sensor interface used `enp6s19` instead of `bond0`:
 
@@ -310,6 +310,7 @@ Final validation confirmed that the segmentation model is functioning as intende
 
 - pfSense rule order directly affects segmentation behavior because rules are evaluated from top to bottom.
 - VLAN tagging, untagged access ports, and PVID settings must align across pfSense, the managed switch, and Proxmox.
+- Switch evidence should be refreshed after cleanup changes so VLAN membership, native/default VLAN behavior, and mirror/SPAN configuration match the current lab state.
 - Management interfaces should be isolated from attacker and victim networks and reachable only through approved administrative paths.
 - Port mirroring supports network detection without exposing the SIEM management interface to attacker systems.
 - A dedicated Admin/Bastion VLAN creates a cleaner management model than allowing broad access from the home network.
