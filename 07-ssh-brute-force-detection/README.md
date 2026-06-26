@@ -1,5 +1,4 @@
 # Project 07: SSH Brute-Force Detection
-# Project 07: SSH Brute-Force Detection
 
 ## Overview
 

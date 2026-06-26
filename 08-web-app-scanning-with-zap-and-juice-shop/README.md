@@ -1,5 +1,4 @@
 # Project 08: Web Application Scanning with OWASP ZAP and Juice Shop
-# Project 08: Web Application Scanning with OWASP ZAP and Juice Shop
 
 ## Overview
 

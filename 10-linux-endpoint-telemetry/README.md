@@ -118,7 +118,7 @@ This screenshot shows a successful SSH login from Kali to the Ubuntu endpoint, p
 
 ### Authentication Log Review
 
-![Authentication Log Review](evidence/06-auth-log-review.jpeg)
+![Authentication Log Review](evidence/06-auth-log-review.png)
 
 This screenshot shows `/var/log/auth.log` entries for accepted logins, failed passwords, invalid users, and the Kali source IP address. This provides the strongest endpoint evidence for the project.
 

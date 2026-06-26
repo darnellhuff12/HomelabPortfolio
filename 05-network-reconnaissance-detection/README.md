@@ -123,7 +123,7 @@ This screenshot shows Kali running a controlled TCP SYN scan against the Windows
 
 ### Security Onion SYN Scan Logs
 
-![Security Onion SYN Scan Logs](evidence/07-security-onion-syn-scan-logs.png)
+![Security Onion SYN Scan Logs](evidence/07-security-onion-syn-scan-alerts.png)
 
 This screenshot shows Security Onion Hunt displaying Zeek connection logs for the Nmap SYN scan, confirming that reconnaissance activity was captured and searchable from the defender interface.
 
