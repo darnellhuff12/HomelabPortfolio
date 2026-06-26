@@ -1,57 +1,61 @@
 # Project 13: Bastion Host and Tailscale Remote Access
 
-## Objective
+## Overview
 
-This project documents the deployment of a secure remote-access path into the cybersecurity homelab using a Raspberry Pi 5 as a bastion host and Tailscale as the private access overlay. The goal of this project is to avoid exposing lab services directly to the internet while still allowing secure remote administration of critical systems from a trusted workstation.
+This project documents the deployment of a secure remote-access path into the cybersecurity homelab using a Raspberry Pi 5 as a bastion host and Tailscale as the private access overlay. The goal was to avoid exposing lab services directly to the public internet while still allowing secure remote administration of critical systems from a trusted workstation.
 
-The bastion host provides a controlled entry point into the Admin VLAN, while Tailscale provides encrypted remote connectivity using identity-based access. From the trusted MacBook workstation, administrative services such as pfSense, Proxmox, Security Onion, iDRAC, the managed switch, and VNC-accessible lab systems are reached through scripted SSH tunnels rather than direct public exposure.
+The bastion host provides a controlled entry point into the Admin VLAN, while Tailscale provides encrypted remote connectivity using identity-based access. From the trusted MacBook workstation, administrative services such as pfSense, Proxmox, Security Onion, iDRAC, the managed switch, and VNC-accessible lab systems are reached through scripted SSH tunnels instead of direct public exposure.
 
-This project strengthens the homelab by demonstrating secure remote administration, segmentation-aware access control, and practical bastion-host design.
-
-## Validation Goals
-
-- Deploy a Raspberry Pi 5 as a dedicated bastion host on the Admin VLAN.
-- Use Tailscale to securely access the bastion host from a trusted remote workstation.
-- Avoid exposing internal management services directly to the public internet.
-- Use SSH tunneling to access sensitive administrative web interfaces.
-- Validate access to pfSense, Proxmox, Security Onion, iDRAC, switch management, and VNC/SSH services through the bastion workflow.
-- Document the access architecture, validation steps, and evidence collected.
-
-## Business and Security Value
-
-Secure remote administration is a common requirement for infrastructure teams, but exposing management interfaces directly to the internet creates unnecessary risk. This project demonstrates a safer remote-access model by combining a bastion host, Tailscale private overlay networking, SSH tunneling, and VLAN-based management-plane isolation.
-
-The design keeps sensitive services such as pfSense, Proxmox, Security Onion, iDRAC, switch management, and VNC access private while still allowing controlled administration from a trusted workstation.
+The project reinforces practical skills related to secure remote administration, bastion host design, Tailscale private overlay networking, SSH tunneling, management-plane isolation, VLAN-aware access control, and remote-access validation.
 
 ## Lab Environment
 
-| Component | Role |
-| --- | --- |
-| Raspberry Pi 5 | Bastion host, Tailscale node, Omada controller host |
+| Component | Purpose |
+|---|---|
+| Raspberry Pi 5 | Bastion host, Tailscale node, and Omada controller host |
 | Tailscale | Secure private overlay network for remote access |
 | MacBook Air M2 | Trusted administrator workstation |
-| pfSense / Protectli | Firewall and VLAN routing |
+| pfSense / Protectli | Firewall, VLAN routing, and access control |
 | Dell PowerEdge R730xd | Proxmox virtualization host |
 | Security Onion | SIEM and network security monitoring platform |
 | Netgear Managed Switch | VLAN and port-mirroring infrastructure |
-| iDRAC | Out-of-band server management |
-| Victim MacBook / VMs | Internal lab systems accessed through controlled paths |
+| iDRAC | Out-of-band server management interface |
+| Victim MacBook / VMs | Internal lab systems accessed through controlled tunnel paths |
 
-## Network Placement
+## Objectives
 
-The bastion host is placed on the Admin VLAN so that it can reach internal management interfaces while remaining isolated from general home and lab traffic.
+- Deploy a Raspberry Pi 5 as a dedicated bastion host on the Admin VLAN.
+- Use Tailscale to securely access the bastion host from a trusted workstation.
+- Avoid exposing internal management services directly to the public internet.
+- Use SSH tunneling to access sensitive administrative web interfaces.
+- Validate access to pfSense, Proxmox, Security Onion, iDRAC, switch management, and VNC/SSH services through the bastion workflow.
+- Confirm that public management port forwarding is not configured in pfSense.
+- Document the access architecture, validation steps, and evidence collected.
 
-| VLAN | Purpose | Example Systems |
-| --- | --- | --- |
-| VLAN 10 | Home network | Personal devices and wireless clients |
-| VLAN 20 | Attacker network | Kali Linux |
-| VLAN 30 | SIEM network | Security Onion management |
-| VLAN 40 | Victim network | Victim MacBook and test VMs |
-| VLAN 50 | Admin / Management | Raspberry Pi bastion, Proxmox, pfSense, switch, iDRAC |
+## Network / System Scope
 
-## Access Design
+| Item | Details |
+|---|---|
+| Bastion Host | Raspberry Pi 5 |
+| Bastion VLAN | VLAN 50 Admin / Management |
+| Remote Access Overlay | Tailscale |
+| Trusted Workstation | MacBook Air M2 |
+| Protected Management Interfaces | pfSense, Proxmox, Security Onion, iDRAC, and managed switch |
+| Additional Internal Access | VNC/SSH access to victim MacBook and lab VMs through controlled tunnels |
+| Public Exposure Model | No public management port forwarding |
+| Validation Method | Tailscale device validation, SSH-to-bastion testing, internal reachability checks, scripted tunnel execution, management interface access, VNC tunnel validation, and pfSense NAT review |
 
-The remote-access design follows this general flow:
+## Implementation Summary
+
+The Raspberry Pi 5 was placed on the Admin VLAN and configured as the controlled bastion host for remote homelab administration. Tailscale provided private encrypted connectivity between the trusted MacBook and the Raspberry Pi without requiring public inbound port forwarding.
+
+From the MacBook, scripted SSH tunnels were used to reach internal management services including pfSense, Proxmox, Security Onion, iDRAC, and the managed switch. A separate VNC tunnel workflow provided controlled graphical access to internal lab systems.
+
+Final validation confirmed that management access worked through the bastion path and that pfSense did not expose public management port forwarding rules for internal administrative services.
+
+## Remote Access Design
+
+The remote-access design follows a bastion-host model.
 
 ```text
 Trusted MacBook
@@ -69,138 +73,109 @@ This design keeps management services private and reachable only through the aut
 
 ## Security Controls Implemented
 
-- Tailscale is used instead of direct port forwarding from the public internet.
-- The Raspberry Pi 5 acts as a controlled access point into the Admin VLAN.
-- Administrative interfaces remain on internal VLANs instead of being publicly exposed.
-- SSH tunneling is used for sensitive web management portals.
-- A reusable tunnel script starts multiple management tunnels at once and applies temporary loopback aliases for services that are easier to access by their internal IP addresses.
-- Firewall rules restrict access between Home, Attacker, Victim, SIEM, and Admin VLANs.
-- Access is limited to trusted administrator devices and internal management paths.
+| Control | Purpose |
+|---|---|
+| Tailscale overlay access | Provides encrypted private access without exposing public management ports |
+| Raspberry Pi bastion | Centralizes trusted administrative access into the Admin VLAN |
+| Admin VLAN placement | Keeps the bastion and management services separated from general home, attacker, and victim networks |
+| SSH tunneling | Allows sensitive web portals to remain private while still being reachable through localhost tunnel endpoints |
+| Scripted tunnel workflow | Improves repeatability and reduces manual tunnel errors |
+| VNC tunnel workflow | Provides controlled graphical access to internal victim systems without broad network exposure |
+| No public management NAT | Confirms that internal management services are not exposed through pfSense WAN port forwarding |
+| Firewall segmentation | Restricts access between Home, Attacker, Victim, SIEM, and Admin VLANs |
 
-## Scope and Rules of Engagement
+## Evidence
 
-Testing was limited to authorized homelab systems and trusted administrator devices. No management services were exposed directly to the public internet as part of this project.
-
-Out of scope:
-
-- Public port forwarding for management services
-- Third-party systems
-- Unauthorized remote access
-- Work devices or production systems
-- Public internet targets
-
-## Validation and Evidence
-
-Bastion and Tailscale access was validated through Tailscale device verification, SSH access to the bastion, internal reachability testing, scripted tunnel execution, management interface access, VNC tunnel access, and confirmation that public management port forwarding was not configured.
-
-| Validation Area | Result | Evidence |
+| # | Evidence | Description |
 |---|---|---|
-| Tailscale device validation | Passed - The trusted MacBook and Raspberry Pi bastion appeared online in the Tailscale device list | [01-tailscale-devices.png](evidence/01-tailscale-devices.png) |
-| SSH access over Tailscale | Passed - The MacBook successfully connected to the Raspberry Pi bastion over the Tailscale IP | [02-ssh-to-bastion-over-tailscale.png](evidence/02-ssh-to-bastion-over-tailscale.png) |
-| Bastion internal reachability | Passed - The bastion reached pfSense, Proxmox, Security Onion, switch management, and iDRAC on internal management paths | [03-bastion-internal-reachability.png](evidence/03-bastion-internal-reachability.png) |
-| Scripted management tunnels | Passed - The `homelab-tunnels` script started tunnels for Proxmox, pfSense, Security Onion, switch, and iDRAC access | [04-homelab-tunnel-script-running.png](evidence/04-homelab-tunnel-script-running.png) |
-| Proxmox tunnel access | Passed - Proxmox was reached through the localhost SSH tunnel | [05-proxmox-tunnel-access.png](evidence/05-proxmox-tunnel-access.png) |
-| pfSense tunnel access | Passed - pfSense was reached through the localhost SSH tunnel | [06-pfsense-tunnel-access.png](evidence/06-pfsense-tunnel-access.png) |
-| Security Onion tunnel access | Passed - Security Onion was reached through the bastion tunnel workflow | [07-security-onion-tunnel-access.png](evidence/07-security-onion-tunnel-access.png) |
-| iDRAC tunnel access | Passed - Dell iDRAC was reached through the bastion tunnel workflow | [08-idrac-tunnel-access.png](evidence/08-idrac-tunnel-access.png) |
-| Switch tunnel access | Passed - Netgear switch management was reached through the bastion tunnel workflow | [09-switch-tunnel-access.png](evidence/09-switch-tunnel-access.png) |
-| VNC tunnel script | Passed - The `victim-vnc` tunnel script was used to reach the victim MacBook through the Pi jump host | [10-victim-vnc-tunnel-script.png](evidence/10-victim-vnc-tunnel-script.png) |
-| VNC access through bastion | Passed - RealVNC successfully reached the victim MacBook and Ubuntu victim VM through the bastion workflow | [11-victim-vnc-through-bastion.png](evidence/11-victim-vnc-through-bastion.png) |
-| No public management forwarding | Passed - pfSense NAT evidence showed no public management port forwarding rules | [12-no-public-management-port-forwarding.png](evidence/12-no-public-management-port-forwarding.png) |
-
-## Implementation Summary
-
-The Raspberry Pi 5 was placed on the Admin VLAN and configured as the controlled bastion host for remote homelab administration. Tailscale provided private encrypted connectivity between the trusted MacBook and the Raspberry Pi without requiring public inbound port forwarding. From the MacBook, scripted SSH tunnels were used to reach internal management services including pfSense, Proxmox, Security Onion, iDRAC, and the managed switch. A separate VNC tunnel workflow provided controlled graphical access to internal lab systems. Final validation confirmed that management access worked through the bastion path and that pfSense did not expose public management port forwarding rules.
-
-## Evidence Summary
-
-| ID | Evidence | What It Demonstrates |
-|---|---|---|
-| 01 | [01-tailscale-devices.png](evidence/01-tailscale-devices.png) | Shows the trusted MacBook and Raspberry Pi bastion online in Tailscale |
-| 02 | [02-ssh-to-bastion-over-tailscale.png](evidence/02-ssh-to-bastion-over-tailscale.png) | Shows a successful SSH session from the MacBook to the Raspberry Pi over the Tailscale IP |
-| 03 | [03-bastion-internal-reachability.png](evidence/03-bastion-internal-reachability.png) | Shows the bastion host reaching pfSense, Proxmox, Security Onion, switch management, and iDRAC |
-| 04 | [04-homelab-tunnel-script-running.png](evidence/04-homelab-tunnel-script-running.png) | Shows scripted management tunnels running for Proxmox, pfSense, Security Onion, switch, and iDRAC access |
-| 05 | [05-proxmox-tunnel-access.png](evidence/05-proxmox-tunnel-access.png) | Shows Proxmox accessed through the localhost SSH tunnel |
-| 06 | [06-pfsense-tunnel-access.png](evidence/06-pfsense-tunnel-access.png) | Shows pfSense accessed through the localhost SSH tunnel |
-| 07 | [07-security-onion-tunnel-access.png](evidence/07-security-onion-tunnel-access.png) | Shows Security Onion accessed through the bastion tunnel workflow |
-| 08 | [08-idrac-tunnel-access.png](evidence/08-idrac-tunnel-access.png) | Shows Dell iDRAC accessed through the bastion tunnel workflow |
-| 09 | [09-switch-tunnel-access.png](evidence/09-switch-tunnel-access.png) | Shows Netgear managed switch accessed through the bastion tunnel workflow |
-| 10 | [10-victim-vnc-tunnel-script.png](evidence/10-victim-vnc-tunnel-script.png) | Shows the VNC tunnel script running from the MacBook through the Pi jump host to the victim MacBook |
-| 11 | [11-victim-vnc-through-bastion.png](evidence/11-victim-vnc-through-bastion.png) | Shows successful RealVNC access to the victim MacBook and Ubuntu victim VM through the bastion workflow |
-| 12 | [12-no-public-management-port-forwarding.png](evidence/12-no-public-management-port-forwarding.png) | Shows the pfSense NAT page with no public management port forwarding rules |
+| 01 | [Tailscale Devices](evidence/01-tailscale-devices.png) | Shows the trusted MacBook and Raspberry Pi bastion online in the Tailscale device list. |
+| 02 | [SSH to Bastion Over Tailscale](evidence/02-ssh-to-bastion-over-tailscale.png) | Shows a successful SSH session from the MacBook to the Raspberry Pi over the Tailscale IP. |
+| 03 | [Bastion Internal Reachability](evidence/03-bastion-internal-reachability.png) | Shows the bastion reaching pfSense, Proxmox, Security Onion, switch management, and iDRAC. |
+| 04 | [Homelab Tunnel Script Running](evidence/04-homelab-tunnel-script-running.png) | Shows scripted management tunnels running for Proxmox, pfSense, Security Onion, switch, and iDRAC access. |
+| 05 | [Proxmox Tunnel Access](evidence/05-proxmox-tunnel-access.png) | Shows Proxmox accessed through the localhost SSH tunnel. |
+| 06 | [pfSense Tunnel Access](evidence/06-pfsense-tunnel-access.png) | Shows pfSense accessed through the localhost SSH tunnel. |
+| 07 | [Security Onion Tunnel Access](evidence/07-security-onion-tunnel-access.png) | Shows Security Onion accessed through the bastion tunnel workflow. |
+| 08 | [iDRAC Tunnel Access](evidence/08-idrac-tunnel-access.png) | Shows Dell iDRAC accessed through the bastion tunnel workflow. |
+| 09 | [Switch Tunnel Access](evidence/09-switch-tunnel-access.png) | Shows Netgear managed switch accessed through the bastion tunnel workflow. |
+| 10 | [Victim VNC Tunnel Script](evidence/10-victim-vnc-tunnel-script.png) | Shows the VNC tunnel script running from the MacBook through the Pi jump host to the victim MacBook. |
+| 11 | [Victim VNC Through Bastion](evidence/11-victim-vnc-through-bastion.png) | Shows successful RealVNC access to the victim MacBook and Ubuntu victim VM through the bastion workflow. |
+| 12 | [No Public Management Port Forwarding](evidence/12-no-public-management-port-forwarding.png) | Shows the pfSense NAT page with no public management port forwarding rules. |
 
 ## Key Evidence
 
-The screenshots below highlight the most important bastion and Tailscale remote-access evidence while the table above preserves links to the full evidence set.
+### Tailscale Device Validation
 
-**Tailscale Device Validation**
+![Tailscale Device Validation](evidence/01-tailscale-devices.png)
 
-![Tailscale device list](evidence/01-tailscale-devices.png)
+This screenshot shows the trusted MacBook and Raspberry Pi bastion online in Tailscale, confirming the private overlay connection used for remote access.
 
-**SSH to Bastion Over Tailscale**
+### SSH to Bastion Over Tailscale
 
-![SSH to bastion over Tailscale](evidence/02-ssh-to-bastion-over-tailscale.png)
+![SSH to Bastion Over Tailscale](evidence/02-ssh-to-bastion-over-tailscale.png)
 
-**Scripted Management Tunnels**
+This screenshot shows a successful SSH session from the trusted MacBook to the Raspberry Pi bastion over the Tailscale IP address.
 
-![Homelab tunnel script running](evidence/04-homelab-tunnel-script-running.png)
+### Scripted Management Tunnels
 
-**Proxmox Tunnel Access**
+![Scripted Management Tunnels](evidence/04-homelab-tunnel-script-running.png)
 
-![Proxmox tunnel access](evidence/05-proxmox-tunnel-access.png)
+This screenshot shows the `homelab-tunnels` script running and creating access paths for Proxmox, pfSense, Security Onion, iDRAC, and the managed switch.
 
-**VNC Through Bastion**
+### VNC Through Bastion
 
-![Victim VNC through bastion](evidence/11-victim-vnc-through-bastion.png)
+![VNC Through Bastion](evidence/11-victim-vnc-through-bastion.png)
 
-**No Public Management Port Forwarding**
+This screenshot shows successful VNC access to internal lab systems through the bastion workflow, validating controlled graphical access without direct public exposure.
 
-![No public management port forwarding](evidence/12-no-public-management-port-forwarding.png)
+### No Public Management Port Forwarding
 
-## Key Findings
+![No Public Management Port Forwarding](evidence/12-no-public-management-port-forwarding.png)
 
-This project successfully establishes a secure remote-access model for the homelab. The Raspberry Pi 5 bastion host provides a single controlled access point into the Admin VLAN, while Tailscale provides encrypted access from a trusted workstation without requiring public inbound firewall rules for management services.
+This screenshot shows the pfSense NAT page with no public management port forwarding rules, confirming that sensitive management interfaces are not exposed directly to the internet.
 
-The completed design improves the security of the homelab by keeping administrative interfaces private, limiting access paths, and creating a repeatable workflow for remotely managing segmented infrastructure.
+## Validation
 
-The final workflow uses two repeatable scripts: one script for management tunnels to Proxmox, pfSense, Security Onion, iDRAC, and the managed switch, and a second script for VNC access to the victim MacBook. This makes the remote administration process faster, more consistent, and easier to document.
+Bastion and Tailscale access was validated through Tailscale device verification, SSH access to the bastion, internal reachability testing, scripted tunnel execution, management interface access, VNC tunnel access, and confirmation that public management port forwarding was not configured.
 
-## Skills Demonstrated
+Validation confirmed the following:
 
-- Bastion host deployment
-- Secure remote administration
-- Tailscale private overlay networking
-- SSH tunneling
-- SSH jump host workflows
-- Scripted remote-access automation
-- VLAN-aware access control
-- Firewall segmentation
-- Management-plane isolation
-- Secure homelab architecture
-- Documentation and evidence collection
+- The trusted MacBook and Raspberry Pi bastion appeared online in the Tailscale device list.
+- The MacBook successfully connected to the Raspberry Pi bastion over the Tailscale IP.
+- The bastion reached pfSense, Proxmox, Security Onion, switch management, and iDRAC on internal management paths.
+- The `homelab-tunnels` script started tunnels for Proxmox, pfSense, Security Onion, switch, and iDRAC access.
+- Proxmox, pfSense, Security Onion, iDRAC, and switch management were reachable through the bastion tunnel workflow.
+- The `victim-vnc` tunnel script provided controlled VNC access to internal lab systems through the Pi jump host.
+- pfSense NAT evidence showed no public management port forwarding rules.
 
-## Lessons Learned
+## Challenges and Lessons Learned
 
-- Bastion hosts reduce exposure by centralizing administrative access.
-- Tailscale simplifies secure remote connectivity without traditional VPN complexity.
-- SSH tunnels allow sensitive web interfaces to remain private while still being remotely reachable.
-- Management services should remain isolated from home, attacker, and victim networks.
-- Remote access should be validated from both a usability and security perspective.
+This project reinforced that secure remote administration should avoid exposing sensitive management services directly to the public internet. A bastion host provides a safer model because it centralizes access through a known, trusted path.
 
-## Project Status
+Tailscale simplified private remote access by creating an encrypted overlay between trusted devices, while SSH tunnels allowed internal services to remain private and reachable only through local tunnel endpoints. The scripted tunnel workflow also made administration more consistent and reduced the chance of manual tunnel mistakes.
 
-| Area | Status |
-|---|---|
-| Raspberry Pi bastion placed on Admin VLAN | Complete |
-| Tailscale remote access validated | Complete |
-| SSH access to bastion validated | Complete |
-| Bastion internal reachability validated | Complete |
-| Scripted management tunnels validated | Complete |
-| pfSense, Proxmox, Security Onion, iDRAC, and switch access validated | Complete |
-| VNC access through bastion validated | Complete |
-| Public management port forwarding review completed | Complete |
-| Evidence screenshots captured and linked | Complete |
+A key lesson was that remote access should be validated from both a usability and security perspective. It is not enough for remote access to work; the design should also confirm that sensitive services are not exposed through public port forwarding.
 
-## Future Enhancements
+## Security Relevance
 
-Future improvements could include adding SSH config aliases, documenting the tunnel scripts in a dedicated scripts folder, and applying stricter Tailscale ACLs for device-level access control.
+This project demonstrates how bastion hosts and private overlay networks support secure remote administration. Management interfaces such as firewalls, hypervisors, SIEM consoles, iDRAC, switches, and VNC services should not be directly exposed to the public internet.
+
+The project also demonstrates the value of management-plane isolation. Placing the bastion on the Admin VLAN and using tunnel-based access helps reduce exposure, limits lateral movement paths, and keeps sensitive services reachable only from trusted administrative workflows.
+
+## Business Value
+
+This project provides business value by showing how remote administration can be performed securely without exposing critical infrastructure to the internet. It supports operational flexibility while reducing the risk associated with public management interfaces.
+
+In an enterprise environment, this type of work helps teams:
+
+- Securely administer infrastructure from trusted devices.
+- Reduce public exposure of sensitive management interfaces.
+- Centralize access through bastion hosts or jump systems.
+- Support remote troubleshooting without broad firewall openings.
+- Improve repeatability with scripted access workflows.
+- Document secure remote-access architecture for operational handoff and review.
+
+## Portfolio Summary
+
+This project demonstrates a secure remote-access model for the cybersecurity homelab using a Raspberry Pi 5 bastion host, Tailscale private overlay networking, and SSH tunnel workflows. The design allows remote administration of pfSense, Proxmox, Security Onion, iDRAC, the managed switch, and internal VNC targets without exposing management services directly to the public internet.
+
+The completed evidence validates Tailscale connectivity, SSH access to the bastion, internal reachability, scripted management tunnels, VNC access through the bastion, and the absence of public management port forwarding. This project adds secure remote administration, management-plane isolation, and bastion-based access design to the broader homelab portfolio.

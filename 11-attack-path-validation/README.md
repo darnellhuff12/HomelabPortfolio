@@ -1,177 +1,153 @@
 # Project 11: Attack Path Validation
 
-## Project Status
+## Overview
 
-**Status:** Complete  
-**Portfolio Phase:** Detection Engineering / Attack Validation  
-**Primary Goal:** Validate a controlled attacker-to-victim path from the Kali attacker VLAN to the Ubuntu victim VLAN and confirm that the activity is visible in Security Onion alerts and Zeek connection logs.
+This project documents a controlled attacker-to-victim path inside the segmented cybersecurity homelab. The goal was to validate a realistic attack sequence from the Kali attacker VLAN to the Ubuntu victim VLAN and confirm that each major stage could be observed, investigated, and explained from a defender perspective.
 
----
+This project builds on earlier reconnaissance, brute-force, vulnerability scanning, endpoint telemetry, firewall segmentation, and Security Onion visibility projects by chaining several activities together into a single attack-path validation workflow.
 
-## Objective
-
-The purpose of this project is to document and validate a complete attack path inside the segmented homelab environment. This project builds on the earlier reconnaissance, brute-force, vulnerability scanning, and SIEM visibility projects by chaining multiple actions together into a realistic attack sequence.
-
-The goal is not only to perform the activity, but to prove that each major stage can be observed, investigated, and explained from a defender's perspective.
-
-This project focuses on:
-
-- Identifying a target system in the victim network
-- Performing controlled reconnaissance from the attacker network
-- Validating an exposed service or weakness
-- Attempting controlled access or exploitation in a lab-safe manner
-- Confirming Security Onion visibility across the attack path
-- Documenting the evidence, detection points, and defensive lessons learned
-
----
+The project reinforces practical skills related to attack-path validation, service enumeration, SSH access validation, SIEM investigation, Zeek log review, Suricata alert review, pfSense segmentation context, and defensive timeline reconstruction.
 
 ## Lab Environment
 
-This project uses the existing segmented homelab architecture.
-
-| Component | Role |
+| Component | Purpose |
 |---|---|
-| Kali Linux VM | Attacker system located in the attacker VLAN |
-| Ubuntu Server Victim | Target host located in the victim VLAN |
-| Security Onion | SIEM / NIDS / detection and investigation platform |
+| Kali Linux VM | Attacker system located in the Attacker VLAN |
+| Ubuntu Server Victim | Target host located in the Victim VLAN |
+| Security Onion | SIEM, NIDS, detection, and investigation platform |
 | pfSense | Firewall and VLAN segmentation enforcement |
 | Netgear Managed Switch | VLAN trunking and traffic mirroring |
 | Raspberry Pi 5 | Bastion host and remote access jump point |
 | MacBook Air M2 | Administrator workstation |
 
----
+## Objectives
 
-## Network Placement
+- Confirm Kali attacker placement on VLAN 20.
+- Confirm Ubuntu victim placement on VLAN 40.
+- Validate attacker-to-victim connectivity.
+- Perform controlled service discovery against the victim host.
+- Validate the exposed SSH service path on TCP/22.
+- Generate controlled SSH authentication activity from the attacker system.
+- Confirm Security Onion alert visibility tied to the attacker source IP.
+- Confirm Zeek connection and SSH log visibility in Security Onion Hunt.
+- Review pfSense segmentation context for the allowed lab path.
+- Reconstruct the attack path from attacker-side evidence and defender-side telemetry.
 
-| VLAN | Purpose |
+## Network / System Scope
+
+| Item | Details |
 |---|---|
-| VLAN 20 | Attacker network |
-| VLAN 30 | Security Onion management network |
-| VLAN 40 | Victim network |
-| VLAN 50 | Admin / management network |
-
-
-| System | IP Address | VLAN / Role |
-|---|---|---|
-| Kali Attacker VM | `192.168.20.100` | VLAN 20 / Attacker |
-| Ubuntu Server Victim | `192.168.40.103` | VLAN 40 / Victim |
-
-Security Onion receives mirrored traffic from the monitored lab segments, allowing attacker-to-victim activity to be reviewed from the defender side.
-
----
-
-## Tools Used
-
-- Kali Linux
-- Nmap
-- Security Onion
-- Zeek
-- Suricata
-- Elastic / Security Onion dashboards
-- pfSense firewall logs
-- tcpdump
-- SSH or other controlled lab service, depending on the selected victim system
-
----
-
-## Attack Path Overview
-
-The completed attack path followed a controlled and realistic flow:
-
-1. **Reconnaissance**
-   - The Kali attacker VM identified and confirmed connectivity to the Ubuntu victim system.
-   - ICMP connectivity was validated from `192.168.20.100` to `192.168.40.103`.
-
-2. **Service Enumeration**
-   - Nmap service discovery was performed against the victim host.
-   - The scan identified SSH exposed on TCP/22.
-   - Nmap reported OpenSSH `9.6p1 Ubuntu 3ubuntu13.16` running on the victim.
-
-3. **Controlled Access Attempt**
-   - SSH login attempts were performed from the attacker system.
-   - Failed login attempts were generated using invalid credentials.
-   - A successful SSH login was performed using the authorized `labuser` account to validate the service path.
-
-4. **Detection and Investigation**
-   - Security Onion generated alerts tied to the attacker IP address.
-   - Alerts included scan-related activity, including SSH scan detections.
-   - Security Onion Hunt showed Zeek connection and SSH logs from the Kali attacker to the Ubuntu victim over TCP/22.
-
-5. **Defensive Analysis**
-   - The attack path was reconstructed from command output, SIEM alerts, Zeek logs, and pfSense segmentation evidence.
-   - The lab confirmed that attacker-to-victim reconnaissance and SSH validation activity was visible from a defender perspective.
-
----
-
-## Validation and Evidence
-
-Attack path validation was completed by confirming endpoint placement, validating attacker-to-victim connectivity, performing controlled reconnaissance, validating the exposed SSH service, generating detectable SSH activity, reviewing Security Onion alerts, confirming Zeek connection visibility, reviewing pfSense segmentation context, and reconstructing the activity from a defender perspective.
-
-| Validation Area | Result | Evidence |
-|---|---|---|
-| Victim placement | Passed - The Ubuntu victim system was confirmed at `192.168.40.103` on the victim VLAN | [01a-victim-ip-address.png](evidence/01a-victim-ip-address.png) |
-| Attacker placement | Passed - The Kali attacker VM was confirmed at `192.168.20.100` on the attacker VLAN | [01b-attacker-ip-address.png](evidence/01b-attacker-ip-address.png) |
-| Attacker-to-victim connectivity | Passed - ICMP connectivity from Kali to the Ubuntu victim succeeded | [02-attacker-to-victim-connectivity.png](evidence/02-attacker-to-victim-connectivity.png) |
-| Service discovery | Passed - Nmap identified SSH exposed on TCP/22 with OpenSSH service details | [03-nmap-service-discovery.png](evidence/03-nmap-service-discovery.png) |
-| SSH service validation | Passed - Controlled SSH validation showed failed attempts and an authorized successful login using the lab account | [04-ssh-service-validation.png](evidence/04-ssh-service-validation.png) |
-| Controlled attack activity | Passed - Focused SSH scanning and failed authentication activity were generated from the attacker system | [05-controlled-attack-activity.png](evidence/05-controlled-attack-activity.png) |
-| Security Onion alert review | Passed - Security Onion displayed alerts associated with the attacker source IP | [06-security-onion-alerts.png](evidence/06-security-onion-alerts.png) |
-| Zeek connection visibility | Passed - Security Onion Hunt confirmed Zeek SSH and connection logs from attacker to victim over TCP/22 | [07-zeek-connection-logs.png](evidence/07-zeek-connection-logs.png) |
-| pfSense segmentation context | Passed - pfSense rules showed VLAN20 attacker access to the victim lab path while broader unauthorized internal access remained blocked | [08-pfsense-segmentation-rule.png](evidence/08-pfsense-segmentation-rule.png) |
-| Attack path reconstruction | Passed - The activity was reconstructed from command output, SIEM evidence, Zeek logs, and firewall context | [09-attack-path-reconstruction.png](evidence/09-attack-path-reconstruction.png) |
+| Attacker System | Kali Linux VM |
+| Attacker VLAN | VLAN 20 |
+| Attacker IP | `192.168.20.100` |
+| Victim System | Ubuntu Server victim |
+| Victim VLAN | VLAN 40 |
+| Victim IP | `192.168.40.103` |
+| Exposed Service | SSH on TCP/22 |
+| Service Version | OpenSSH `9.6p1 Ubuntu 3ubuntu13.16` |
+| Monitoring Platform | Security Onion |
+| Firewall Context | pfSense rules allowing the controlled attacker-to-victim lab path while restricting unauthorized internal access |
+| Validation Method | IP validation, ICMP testing, Nmap service discovery, SSH validation, Security Onion alerts, Zeek Hunt logs, pfSense rule review, and attack path reconstruction |
 
 ## Implementation Summary
 
-The attack path began with Kali attacker placement validation on VLAN 20 and Ubuntu victim placement validation on VLAN 40. After confirming attacker-to-victim connectivity, Nmap service discovery was performed against the victim and identified SSH exposed on TCP/22. The SSH service was then validated with controlled failed login attempts and an authorized successful login using the lab account. Security Onion was used to review alerts and Zeek logs tied to the attacker IP, while pfSense rule evidence provided segmentation context for the allowed lab path. The final evidence reconstructed the activity from both attacker and defender perspectives.
+The attack path began with Kali attacker placement validation on VLAN 20 and Ubuntu victim placement validation on VLAN 40. After confirming attacker-to-victim connectivity, Nmap service discovery was performed against the victim and identified SSH exposed on TCP/22.
 
----
+The SSH service was then validated with controlled failed login attempts and an authorized successful login using the lab account. Security Onion was used to review alerts and Zeek logs tied to the attacker IP, while pfSense rule evidence provided segmentation context for the allowed lab path.
 
-## Evidence Summary
+The final evidence reconstructed the activity from both attacker and defender perspectives, showing how a simple sequence of reconnaissance, service discovery, SSH validation, and SIEM review can be documented as an end-to-end attack-path validation.
 
-| ID | Evidence | What It Demonstrates |
+## Attack Path Workflow
+
+The completed attack path followed a controlled and realistic flow:
+
+```text
+Kali attacker on VLAN 20
+        |
+        | ICMP validation and Nmap service discovery
+        v
+Ubuntu victim on VLAN 40
+        |
+        | SSH validation and controlled authentication attempts
+        v
+Security Onion alerts / Zeek connection logs
+        |
+        | pfSense segmentation context
+        v
+Attack path reconstruction and defensive analysis
+```
+
+This workflow validated not only that the attacker path worked, but also that the activity could be investigated from the defender side.
+
+## Attack Path Stages
+
+| Stage | Activity | Defensive Evidence |
 |---|---|---|
-| 01a | [01a-victim-ip-address.png](evidence/01a-victim-ip-address.png) | Shows the Ubuntu victim system at `192.168.40.103` |
-| 01b | [01b-attacker-ip-address.png](evidence/01b-attacker-ip-address.png) | Shows the Kali attacker system at `192.168.20.100` |
-| 02 | [02-attacker-to-victim-connectivity.png](evidence/02-attacker-to-victim-connectivity.png) | Shows successful ICMP connectivity from Kali to the victim |
-| 03 | [03-nmap-service-discovery.png](evidence/03-nmap-service-discovery.png) | Shows SSH exposed on TCP/22 with OpenSSH service details |
-| 04 | [04-ssh-service-validation.png](evidence/04-ssh-service-validation.png) | Shows failed SSH attempts and a successful login using the authorized lab account |
-| 05 | [05-controlled-attack-activity.png](evidence/05-controlled-attack-activity.png) | Shows focused SSH scanning and failed authentication activity |
-| 06 | [06-security-onion-alerts.png](evidence/06-security-onion-alerts.png) | Shows Security Onion alerts associated with the attacker source IP |
-| 07 | [07-zeek-connection-logs.png](evidence/07-zeek-connection-logs.png) | Shows Zeek SSH and connection logs from attacker to victim over TCP/22 |
-| 08 | [08-pfsense-segmentation-rule.png](evidence/08-pfsense-segmentation-rule.png) | Shows VLAN20 attacker rules allowing lab victim traffic while blocking unauthorized internal access |
-| 09 | [09-attack-path-reconstruction.png](evidence/09-attack-path-reconstruction.png) | Shows the final written attack path summary and defensive takeaway |
+| Reconnaissance | Kali confirmed connectivity to the Ubuntu victim using ICMP | Attacker command output and network visibility |
+| Service Enumeration | Nmap identified SSH exposed on TCP/22 | Nmap output and Security Onion visibility |
+| Controlled Access Validation | SSH failed attempts and an authorized successful login were performed | SSH validation evidence and Security Onion logs |
+| Detection and Investigation | Security Onion alerts and Hunt results were reviewed | Suricata alert evidence and Zeek connection/SSH logs |
+| Segmentation Review | pfSense rule evidence was reviewed for VLAN20-to-VLAN40 lab access | Firewall rule context showing the allowed test path |
+| Reconstruction | Activity was summarized from attacker and defender evidence | Final attack-path reconstruction screenshot |
+
+## Evidence
+
+| # | Evidence | Description |
+|---|---|---|
+| 01a | [Victim IP Address](evidence/01a-victim-ip-address.png) | Shows the Ubuntu victim system at `192.168.40.103` on the Victim VLAN. |
+| 01b | [Attacker IP Address](evidence/01b-attacker-ip-address.png) | Shows the Kali attacker system at `192.168.20.100` on the Attacker VLAN. |
+| 02 | [Attacker-to-Victim Connectivity](evidence/02-attacker-to-victim-connectivity.png) | Shows successful ICMP connectivity from Kali to the Ubuntu victim. |
+| 03 | [Nmap Service Discovery](evidence/03-nmap-service-discovery.png) | Shows SSH exposed on TCP/22 with OpenSSH service details. |
+| 04 | [SSH Service Validation](evidence/04-ssh-service-validation.png) | Shows failed SSH attempts and a successful login using the authorized lab account. |
+| 05 | [Controlled Attack Activity](evidence/05-controlled-attack-activity.png) | Shows focused SSH scanning and failed authentication activity from the attacker system. |
+| 06 | [Security Onion Alerts](evidence/06-security-onion-alerts.png) | Shows Security Onion alerts associated with the attacker source IP. |
+| 07 | [Zeek Connection Logs](evidence/07-zeek-connection-logs.png) | Shows Zeek SSH and connection logs from attacker to victim over TCP/22. |
+| 08 | [pfSense Segmentation Rule](evidence/08-pfsense-segmentation-rule.png) | Shows VLAN20 attacker rules allowing lab victim traffic while blocking unauthorized internal access. |
+| 09 | [Attack Path Reconstruction](evidence/09-attack-path-reconstruction.png) | Shows the final written attack path summary and defensive takeaway. |
 
 ## Key Evidence
 
-The screenshots below highlight the most important attack path validation evidence while the table above preserves links to the full evidence set.
+### Attacker-to-Victim Connectivity
 
-**Attacker-to-Victim Connectivity**
+![Attacker-to-Victim Connectivity](evidence/02-attacker-to-victim-connectivity.png)
 
-![Attacker-to-victim connectivity test](evidence/02-attacker-to-victim-connectivity.png)
+This screenshot confirms the attacker system could reach the victim host over the approved lab path before additional validation was performed.
 
-**Nmap Service Discovery**
+### Nmap Service Discovery
 
-![Nmap service discovery](evidence/03-nmap-service-discovery.png)
+![Nmap Service Discovery](evidence/03-nmap-service-discovery.png)
 
-**SSH Service Validation**
+This screenshot shows Nmap identifying SSH exposed on TCP/22 and reporting the OpenSSH service details for the Ubuntu victim.
 
-![SSH service validation](evidence/04-ssh-service-validation.png)
+### Security Onion Alerts
 
-**Security Onion Alerts**
+![Security Onion Alerts](evidence/06-security-onion-alerts.png)
 
-![Security Onion alerts](evidence/06-security-onion-alerts.png)
+This screenshot shows Security Onion alerts associated with the attacker source IP, confirming defender-side visibility into the controlled activity.
 
-**Zeek Connection Logs**
+### Zeek Connection Logs
 
-![Zeek connection logs](evidence/07-zeek-connection-logs.png)
+![Zeek Connection Logs](evidence/07-zeek-connection-logs.png)
 
-**Attack Path Reconstruction**
+This screenshot shows Zeek connection and SSH logs from the Kali attacker to the Ubuntu victim over TCP/22, supporting timeline reconstruction and investigation.
 
-![Attack path reconstruction](evidence/09-attack-path-reconstruction.png)
+### Attack Path Reconstruction
 
----
+![Attack Path Reconstruction](evidence/09-attack-path-reconstruction.png)
 
-## Key Findings
+This screenshot summarizes the full attack path and defensive takeaway, tying attacker-side actions to Security Onion and firewall evidence.
+
+## Defensive Analysis
+
+This project demonstrated that a simple attacker workflow can be investigated from a defender perspective when network visibility is properly configured. The activity did not need to be destructive to be useful. A controlled sequence of ping, Nmap scanning, SSH validation, and authentication attempts was enough to generate evidence across multiple defensive layers.
+
+Security Onion provided visibility into attacker-to-victim traffic. Zeek logs were especially useful for reconstruction because they showed source IP, destination IP, destination port, dataset, and timestamps. Suricata alerts helped identify scan-like behavior from the attacker source IP. pfSense segmentation rules provided important context by showing that the Attacker VLAN was intentionally restricted and only allowed toward the Victim VLAN lab path.
+
+## Validation
+
+Attack path validation was completed by confirming endpoint placement, attacker-to-victim connectivity, controlled reconnaissance, exposed SSH service validation, detectable SSH activity, Security Onion alert visibility, Zeek connection visibility, pfSense segmentation context, and attack path reconstruction.
+
+Validation confirmed the following:
 
 - The Kali attacker VM used IP address `192.168.20.100` in VLAN 20.
 - The Ubuntu victim system used IP address `192.168.40.103` in VLAN 40.
@@ -183,60 +159,37 @@ The screenshots below highlight the most important attack path validation eviden
 - Security Onion Hunt confirmed Zeek `conn` and `ssh` logs between the attacker and victim.
 - pfSense rules showed that VLAN20 attacker traffic was intentionally allowed to the VLAN40 victim lab while broader unauthorized internal access remained blocked.
 
-Note: The Security Onion alert view showed multiple alert categories associated with the attacker IP. The most relevant detections for this project were the SSH scan and connection events tied to the controlled attack path.
+## Challenges and Lessons Learned
 
----
+This project reinforced that attack-path validation is stronger when it combines attacker-side actions with defender-side evidence. Command output from Kali showed what the attacker performed, while Security Onion and pfSense evidence showed how the activity appeared to defenders.
 
-## Defensive Takeaways
+The project also showed the value of chaining smaller activities together. Connectivity testing, Nmap service discovery, SSH validation, alert review, Zeek log review, and firewall context were each useful on their own, but together they created a stronger end-to-end validation story.
 
-This project demonstrated that a simple attacker workflow can be investigated from a defender perspective when network visibility is properly configured.
+A key lesson was that firewall context matters during investigation. Alerts and logs show that activity occurred, but firewall rules help explain whether the traffic path was expected, intentionally allowed, or suspicious.
 
-The most important defensive takeaway is that the activity did not need to be destructive to be valuable. A small controlled sequence of ping, Nmap scanning, SSH validation, and authentication attempts was enough to generate evidence across multiple defensive layers.
+## Security Relevance
 
-Defensive observations:
+This project demonstrates how attack-path validation supports real-world detection engineering and incident response. Security teams often need to understand not only whether an alert fired, but how an attacker moved through the environment, which systems were involved, which services were exposed, and whether the traffic path should have been allowed.
 
-- Security Onion provided visibility into attacker-to-victim traffic.
-- Zeek logs were especially useful for reconstructing the timeline because they showed source IP, destination IP, destination port, dataset, and timestamps.
-- Suricata alerts helped identify scan-like behavior from the attacker source IP.
-- pfSense segmentation rules provided important context by showing that the attacker VLAN was intentionally restricted and only allowed toward the victim lab path.
-- The combination of firewall context, SIEM alerts, and Zeek logs created a stronger investigation than any single screenshot alone.
+The project also demonstrates the importance of timeline reconstruction. Zeek connection logs, Suricata alerts, endpoint/service validation, and firewall context help defenders move from isolated events to a complete explanation of attacker behavior.
 
----
+## Business Value
 
-## Skills Demonstrated
+This project provides business value by showing how controlled attack-path validation can improve monitoring confidence and incident response readiness. Validating the full path from attacker activity to defender visibility helps teams identify monitoring gaps, confirm segmentation behavior, and improve documentation.
 
-- Attack path validation
-- Network reconnaissance
-- Service enumeration
-- SIEM investigation
-- Zeek and Suricata log review
-- Defensive timeline reconstruction
-- VLAN-aware lab testing
-- Firewall and segmentation validation
-- Evidence-based cybersecurity documentation
+In an enterprise environment, this type of work helps teams:
 
----
-
-## Project Status
-
-| Area | Status |
-|---|---|
-| Controlled attack path performed from attacker VLAN to victim VLAN | Complete |
-| Reconnaissance and validation activity documented | Complete |
-| SSH service path validated | Complete |
-| Security Onion alert evidence reviewed | Complete |
-| Zeek connection and SSH logs reviewed | Complete |
-| pfSense segmentation context documented | Complete |
-| Attack path reconstructed from logs and screenshots | Complete |
-| Defensive findings and recommendations documented | Complete |
-| Evidence files stored and linked from README | Complete |
-
----
+- Validate that approved security tests are visible to monitoring tools.
+- Confirm whether segmentation controls support or restrict expected traffic paths.
+- Reconstruct attack activity using multiple evidence sources.
+- Improve detection engineering and alert triage workflows.
+- Support communication between SOC, network, firewall, and infrastructure teams.
+- Document end-to-end security validation in a repeatable format.
 
 ## Portfolio Summary
 
-Project 11 validated a controlled attack path from the Kali attacker VM in VLAN 20 to the Ubuntu victim system in VLAN 40. The attack path began with connectivity testing, continued through Nmap service discovery, and then moved into SSH service validation and controlled authentication attempts.
+This project validated a controlled attack path from the Kali attacker VM in VLAN 20 to the Ubuntu victim system in VLAN 40. The attack path began with connectivity testing, continued through Nmap service discovery, and then moved into SSH service validation and controlled authentication attempts.
 
 The victim exposed SSH on TCP/22, with Nmap identifying OpenSSH `9.6p1 Ubuntu 3ubuntu13.16`. The activity generated useful defensive telemetry in Security Onion. Alerts were observed for attacker-source activity, and Security Onion Hunt confirmed Zeek `conn` and `ssh` logs between `192.168.20.100` and `192.168.40.103` over TCP/22.
 
-This project tied together earlier portfolio work by combining VLAN segmentation, firewall context, reconnaissance, service validation, SIEM investigation, and defensive timeline reconstruction. The completed evidence demonstrates the ability to validate attacker behavior while also explaining how that behavior can be detected and investigated from a defender's perspective.
+This project tied together earlier portfolio work by combining VLAN segmentation, firewall context, reconnaissance, service validation, SIEM investigation, and defensive timeline reconstruction. The completed evidence demonstrates the ability to validate attacker behavior while also explaining how that behavior can be detected and investigated from a defender perspective.

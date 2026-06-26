@@ -1,24 +1,17 @@
 # Project 12: pfSense Firewall Hardening
 
-## Project Status
+## Overview
 
-**Status:** Complete  
-**Portfolio Category:** Network Security / Firewall Administration  
-**Primary Tool:** pfSense  
-**Environment:** Cybersecurity Homelab
+This project documents the hardening of the pfSense firewall that separates and protects the segmented cybersecurity homelab. The goal was to move beyond basic VLAN connectivity and validate the firewall controls that reduce unnecessary access, protect management interfaces, support controlled lab testing, and provide clear evidence of blocked traffic.
 
-## Objective
+The firewall is responsible for enforcing separation between the Home, Attacker, Victim, SIEM, and Admin networks. This project reviewed firewall rules, aliases, management access paths, blocked traffic behavior, and approved administrative access to confirm that the final firewall configuration matched the intended security design.
 
-This project focused on hardening the pfSense firewall that separates and protects the homelab environment. The goal was to move beyond basic VLAN connectivity and document the security controls that make the lab safer, more segmented, and easier to manage.
-
-The firewall is responsible for enforcing separation between the home network, attacker network, victim network, SIEM network, and admin network. This project documents the process of reviewing firewall rules, using aliases, reducing unnecessary access, protecting management interfaces, validating blocked traffic, and confirming that approved administrative access still works.
+The project reinforces practical skills related to pfSense administration, firewall alias design, VLAN-based access control, management-plane protection, rule ordering, logged block rules, bastion-based administration, and firewall log validation.
 
 ## Lab Environment
 
-The firewall hardening work was performed inside the existing cybersecurity homelab environment.
-
 | Component | Purpose |
-| --- | --- |
+|---|---|
 | pfSense Firewall | Core firewall and routing device for the homelab |
 | Protectli Appliance | Hardware platform running pfSense |
 | Netgear Managed Switch | VLAN trunking and port segmentation |
@@ -29,61 +22,48 @@ The firewall hardening work was performed inside the existing cybersecurity home
 | Raspberry Pi Bastion | Trusted administrative access point |
 | MacBook Air | Primary workstation used for browser-based management access |
 
-## Network Segmentation
+## Objectives
 
-The firewall rules are built around the existing VLAN design.
-
-| VLAN | Network Role | Purpose |
-| --- | --- | --- |
-| VLAN 10 | HOME | Regular home devices and wireless clients |
-| VLAN 20 | ATTACK | Kali Linux and offensive testing systems |
-| VLAN 30 | SIEM | Security Onion management and monitoring |
-| VLAN 40 | VICTIM | Target systems used for detection and validation projects |
-| VLAN 50 | ADMIN | Management systems, bastion access, Proxmox, iDRAC, and firewall administration |
-
-## Validation Goals
-
-- Review existing pfSense firewall rules for each VLAN.
-- Use firewall aliases to simplify rule management.
+- Review pfSense firewall rules for each VLAN.
+- Use firewall aliases to simplify rule management and documentation.
 - Confirm that management access is restricted to trusted administrative systems.
 - Reduce unnecessary inter-VLAN communication.
-- Validate that home devices cannot freely access lab networks.
-- Validate that attacker systems cannot access firewall or management interfaces.
-- Confirm that required access paths still work through the Raspberry Pi bastion and approved admin path.
+- Validate that Home VLAN devices cannot freely access lab networks.
+- Validate that Attacker VLAN systems cannot access firewall or management interfaces.
+- Confirm that approved administrative access still works through the Raspberry Pi bastion and trusted admin path.
 - Capture evidence showing firewall rules, aliases, blocked traffic, and successful administrative access.
 - Document the final firewall hardening state in a repeatable portfolio format.
 
-## Business and Security Value
+## Network / System Scope
 
-Firewall hardening is a core network security control that reduces unnecessary exposure, limits lateral movement, and protects sensitive management interfaces. In this project, pfSense was used to enforce segmented access between home, attacker, victim, SIEM, and admin networks.
-
-This project demonstrates practical firewall administration skills including alias design, VLAN-based rule review, management-plane protection, bastion-based administration, blocked-path validation, and firewall log analysis.
-
-## Tools and Technologies
-
-- pfSense Community Edition
-- VLANs
-- Firewall aliases
-- Inter-VLAN firewall rules
-- ICMP testing
-- Netcat
-- SSH
-- Tailscale / bastion access path
-- Security Onion
-- Kali Linux
-- Proxmox
-- Managed switch trunking
+| Item | Details |
+|---|---|
+| Firewall Platform | pfSense Community Edition on Protectli appliance |
+| Home VLAN | VLAN 10 / regular home devices and wireless clients |
+| Attacker VLAN | VLAN 20 / Kali Linux and offensive testing systems |
+| SIEM VLAN | VLAN 30 / Security Onion management and monitoring |
+| Victim VLAN | VLAN 40 / target systems used for detection and validation projects |
+| Admin VLAN | VLAN 50 / management systems, bastion access, Proxmox, iDRAC, and firewall administration |
+| Trusted Admin Path | MacBook Air through Raspberry Pi bastion on the Admin VLAN |
+| Protected Management Interfaces | pfSense, Proxmox, Security Onion, iDRAC, and managed switch interfaces |
+| Validation Method | Alias review, VLAN rule review, approved admin access testing, blocked management testing, and firewall log review |
 
 ## Implementation Summary
 
-The firewall hardening process focused on simplifying rule management with aliases, reviewing each VLAN rule set, reducing unnecessary inter-VLAN access, restricting management interfaces to trusted administrative paths, and validating both approved and blocked traffic. The final design preserved required lab functionality while improving management-plane isolation and visibility into denied traffic.
+The firewall hardening process focused on simplifying rule management with aliases, reviewing each VLAN rule set, reducing unnecessary inter-VLAN access, restricting management interfaces to trusted administrative paths, and validating both approved and blocked traffic.
 
-### Firewall Alias Design
+Firewall aliases were created for important management systems, protected hosts, victim systems, and private network ranges. This made the firewall rules easier to read and reduced reliance on raw IP addresses in the rule base.
+
+Each VLAN rule set was reviewed with a specific security purpose. The Home, SIEM, and Victim VLANs were limited to necessary access. The Attacker VLAN was allowed to reach approved victim systems for controlled lab testing while remaining blocked from management infrastructure. The Admin VLAN was hardened around the Raspberry Pi bastion, allowing approved management access while denying unnecessary traffic.
+
+The final validation confirmed that approved administrative access worked, unauthorized Attacker VLAN access to management resources was blocked, and pfSense firewall logs captured denied traffic.
+
+## Firewall Alias Design
 
 Firewall aliases were used to make rules easier to read, manage, and document. Instead of relying only on raw IP addresses, important management systems and protected network ranges were assigned descriptive names.
 
 | Alias | Purpose |
-| --- | --- |
+|---|---|
 | `ADMIN_PI5` | Raspberry Pi bastion host used for trusted administrative access |
 | `PFSENSE_ADMIN` | pfSense admin interface |
 | `PROXMOX_HOST` | Proxmox management interface |
@@ -91,143 +71,127 @@ Firewall aliases were used to make rules easier to read, manage, and document. I
 | `MANAGED_SWITCH` | Managed switch web interface |
 | `SECURITY_ONION_MGMT` | Security Onion management interface |
 | `VICTIM_HOST` | Victim host used for lab validation |
-| `RFC1918_Private_Networks` | Private IPv4 ranges used to block unauthorized internal/lateral movement |
+| `RFC1918_Private_Networks` | Private IPv4 ranges used to block unauthorized internal and lateral movement |
 
-![pfSense Firewall Aliases](evidence/01-pfsense-firewall-aliases.png)
+## Firewall Rule Review
 
-### Firewall Rule Review
+| VLAN | Firewall Hardening Summary |
+|---|---|
+| HOME | Allows DNS and internet access while blocking access to pfSense firewall services and unauthorized private/internal networks. |
+| ATTACK | Allows Kali Linux to reach approved victim systems for lab testing while blocking access to pfSense firewall services and unauthorized internal networks. |
+| SIEM | Allows DNS and internet access while blocking unnecessary access to pfSense firewall services and unauthorized private/internal networks. |
+| VICTIM | Allows DNS and internet access while blocking access to pfSense firewall services and unauthorized private/internal networks. |
+| ADMIN | Uses the Raspberry Pi bastion as the trusted source for specific management services and includes a final block rule for unnecessary Admin VLAN traffic. |
 
-#### HOME VLAN Rules
+## Management Access Model
 
-The HOME VLAN was configured to allow DNS and internet access while blocking access to the pfSense firewall services and unauthorized private/internal networks. This prevents regular home devices from freely accessing lab infrastructure.
+The hardened firewall configuration uses the Raspberry Pi bastion as the trusted administrative access point. Instead of allowing broad access to firewall, hypervisor, SIEM, switch, or iDRAC management interfaces, administrative paths are limited to approved systems and aliases.
 
-![HOME VLAN Rules](evidence/02-home-vlan-rules.png)
+```text
+MacBook Air
+    |
+    | trusted admin workflow
+    v
+Raspberry Pi Bastion on Admin VLAN 50
+    |
+    | approved management access
+    v
+pfSense / Proxmox / Security Onion / Managed Switch / iDRAC
+```
 
-#### ATTACK VLAN Rules
+This model reduces management-plane exposure and helps prevent attacker or victim systems from becoming a path into sensitive infrastructure.
 
-The ATTACK VLAN was configured to allow Kali Linux to reach approved victim systems for lab testing while blocking access to pfSense firewall services and unauthorized internal networks. This allows controlled offensive testing without exposing management infrastructure.
+## Evidence
 
-![ATTACK VLAN Rules](evidence/03-attacker-vlan-rules.png)
-
-#### SIEM VLAN Rules
-
-The SIEM VLAN was configured to allow DNS and internet access while blocking unnecessary access to pfSense firewall services and unauthorized private/internal networks. Security Onion management access is handled through the trusted admin path rather than being broadly exposed.
-
-![SIEM VLAN Rules](evidence/04-siem-vlan-rules.png)
-
-#### VICTIM VLAN Rules
-
-The VICTIM VLAN was configured to allow DNS and internet access while blocking access to pfSense firewall services and unauthorized private/internal networks. This helps prevent victim systems from becoming a path into management infrastructure.
-
-![VICTIM VLAN Rules](evidence/05-victim-vlan-rules.png)
-
-#### ADMIN VLAN Rules
-
-The ADMIN VLAN rules were hardened around the Raspberry Pi bastion. The Pi is allowed to reach specific management services such as pfSense, Proxmox, Security Onion, the managed switch, iDRAC, and SSH to the victim host. A final block rule denies all other Admin VLAN traffic.
-
-![ADMIN VLAN Rules](evidence/06-admin-vlan-rules.png)
-
-## Validation and Evidence
-
-pfSense firewall hardening was validated through alias review, VLAN rule review, approved administrative access testing, blocked management access testing, and firewall log review.
-
-| Validation Area | Result | Evidence |
+| # | Evidence | Description |
 |---|---|---|
-| Firewall alias review | Passed - Aliases were created for management hosts, victim systems, and private network blocking | [01-pfsense-firewall-aliases.png](evidence/01-pfsense-firewall-aliases.png) |
-| HOME VLAN rule review | Passed - HOME VLAN rules allowed DNS/internet access while blocking unauthorized internal access | [02-home-vlan-rules.png](evidence/02-home-vlan-rules.png) |
-| ATTACK VLAN rule review | Passed - ATTACK VLAN rules allowed controlled victim testing while blocking management and unauthorized internal access | [03-attacker-vlan-rules.png](evidence/03-attacker-vlan-rules.png) |
-| SIEM VLAN rule review | Passed - SIEM VLAN rules restricted unnecessary internal access while preserving required connectivity | [04-siem-vlan-rules.png](evidence/04-siem-vlan-rules.png) |
-| VICTIM VLAN rule review | Passed - VICTIM VLAN rules blocked access to pfSense services and unauthorized private/internal networks | [05-victim-vlan-rules.png](evidence/05-victim-vlan-rules.png) |
-| ADMIN VLAN rule review | Passed - ADMIN VLAN rules restricted management access around the Raspberry Pi bastion and specific approved services | [06-admin-vlan-rules.png](evidence/06-admin-vlan-rules.png) |
-| Approved admin access | Passed - pfSense dashboard access succeeded through the trusted administrative path | [07-approved-admin-access.png](evidence/07-approved-admin-access.png) |
-| Blocked management access | Passed - Kali ATTACK VLAN attempts to reach protected Admin VLAN resources timed out | [08-blocked-management-access.png](evidence/08-blocked-management-access.png) |
-| Firewall log validation | Passed - pfSense logs showed denied ATTACK VLAN traffic to protected Admin VLAN destinations | [09-firewall-log-denied-traffic.png](evidence/09-firewall-log-denied-traffic.png) |
-
-## Evidence Summary
-
-| ID | Evidence | What It Demonstrates |
-|---|---|---|
-| 01 | [01-pfsense-firewall-aliases.png](evidence/01-pfsense-firewall-aliases.png) | Shows aliases for management hosts, victim systems, and private network blocking |
-| 02 | [02-home-vlan-rules.png](evidence/02-home-vlan-rules.png) | Shows HOME VLAN DNS, internal-blocking, internet, and default-block rules |
-| 03 | [03-attacker-vlan-rules.png](evidence/03-attacker-vlan-rules.png) | Shows controlled ATTACK-to-VICTIM access and blocked internal/management access |
-| 04 | [04-siem-vlan-rules.png](evidence/04-siem-vlan-rules.png) | Shows SIEM VLAN restrictions and internet access |
-| 05 | [05-victim-vlan-rules.png](evidence/05-victim-vlan-rules.png) | Shows victim network restrictions and internet access |
-| 06 | [06-admin-vlan-rules.png](evidence/06-admin-vlan-rules.png) | Shows Pi-bastion-based management access and final block rule |
-| 07 | [07-approved-admin-access.png](evidence/07-approved-admin-access.png) | Shows successful access to the pfSense dashboard through the trusted path |
-| 08 | [08-blocked-management-access.png](evidence/08-blocked-management-access.png) | Shows Kali ATTACK VLAN management access attempts timing out |
-| 09 | [09-firewall-log-denied-traffic.png](evidence/09-firewall-log-denied-traffic.png) | Shows pfSense blocking ATTACK VLAN traffic to Admin VLAN targets |
+| 01 | [pfSense Firewall Aliases](evidence/01-pfsense-firewall-aliases.png) | Shows aliases for management hosts, victim systems, and private network blocking. |
+| 02 | [HOME VLAN Rules](evidence/02-home-vlan-rules.png) | Shows HOME VLAN DNS, internal-blocking, internet, and default-block rules. |
+| 03 | [ATTACK VLAN Rules](evidence/03-attacker-vlan-rules.png) | Shows controlled ATTACK-to-VICTIM access and blocked internal/management access. |
+| 04 | [SIEM VLAN Rules](evidence/04-siem-vlan-rules.png) | Shows SIEM VLAN restrictions and internet access. |
+| 05 | [VICTIM VLAN Rules](evidence/05-victim-vlan-rules.png) | Shows victim network restrictions and internet access. |
+| 06 | [ADMIN VLAN Rules](evidence/06-admin-vlan-rules.png) | Shows Pi-bastion-based management access and final block rule. |
+| 07 | [Approved Admin Access](evidence/07-approved-admin-access.png) | Shows successful access to the pfSense dashboard through the trusted path. |
+| 08 | [Blocked Management Access](evidence/08-blocked-management-access.png) | Shows Kali ATTACK VLAN management access attempts timing out. |
+| 09 | [Firewall Log Denied Traffic](evidence/09-firewall-log-denied-traffic.png) | Shows pfSense blocking ATTACK VLAN traffic to Admin VLAN targets. |
 
 ## Key Evidence
 
-The screenshots below highlight the most important firewall hardening evidence while the table above preserves links to the full evidence set.
-
-**Firewall Alias Design**
+### Firewall Alias Design
 
 ![pfSense Firewall Aliases](evidence/01-pfsense-firewall-aliases.png)
 
-**ATTACK VLAN Rules**
+This screenshot shows the pfSense aliases used to simplify rule management and make protected hosts, management systems, victim systems, and private network ranges easier to reference.
+
+### ATTACK VLAN Rules
 
 ![ATTACK VLAN Rules](evidence/03-attacker-vlan-rules.png)
 
-**ADMIN VLAN Rules**
+This screenshot shows the ATTACK VLAN rule set allowing controlled victim lab testing while blocking unauthorized access to management and private/internal networks.
+
+### ADMIN VLAN Rules
 
 ![ADMIN VLAN Rules](evidence/06-admin-vlan-rules.png)
 
-**Blocked Management Access**
+This screenshot shows the Admin VLAN rule set built around the Raspberry Pi bastion and approved management destinations.
+
+### Blocked Management Access
 
 ![Blocked Management Access](evidence/08-blocked-management-access.png)
 
-**Firewall Denied Traffic Logs**
+This screenshot shows Kali ATTACK VLAN attempts to access protected management resources timing out, confirming that management access was not broadly exposed.
+
+### Firewall Denied Traffic Logs
 
 ![Firewall Log Denied Traffic](evidence/09-firewall-log-denied-traffic.png)
 
-## Key Findings
+This screenshot shows pfSense firewall logs capturing denied ATTACK VLAN traffic to protected Admin VLAN destinations.
 
-The firewall hardening was successful. The final rule set enforces the following behavior:
+## Validation
 
-- The HOME VLAN can reach DNS and the internet but cannot freely access lab networks.
-- The ATTACK VLAN can reach the VICTIM VLAN for controlled lab testing.
-- The ATTACK VLAN is blocked from pfSense firewall services and unauthorized private/internal networks.
-- The SIEM VLAN is restricted from unnecessary internal access.
-- The VICTIM VLAN is prevented from accessing management infrastructure.
-- The ADMIN VLAN uses the Raspberry Pi bastion as the trusted source for specific management services.
-- pfSense logs confirm that unauthorized ATTACK VLAN traffic to Admin VLAN resources is blocked.
+pfSense firewall hardening was validated through alias review, VLAN rule review, approved administrative access testing, blocked management access testing, and firewall log review.
 
-## Skills Demonstrated
+Validation confirmed the following:
 
-- pfSense firewall administration
-- Firewall alias design
-- VLAN-based network segmentation
-- Inter-VLAN access control
-- Management plane protection
-- Bastion-based administrative access
-- Firewall rule ordering
-- Traffic validation using `ping` and `nc`
-- Firewall log analysis
-- Evidence-based cybersecurity documentation
-- Defensive network architecture
+- Firewall aliases were created for management hosts, victim systems, and private network blocking.
+- HOME VLAN rules allowed DNS and internet access while blocking unauthorized internal access.
+- ATTACK VLAN rules allowed controlled victim testing while blocking management and unauthorized internal access.
+- SIEM VLAN rules restricted unnecessary internal access while preserving required connectivity.
+- VICTIM VLAN rules blocked access to pfSense services and unauthorized private/internal networks.
+- ADMIN VLAN rules restricted management access around the Raspberry Pi bastion and specific approved services.
+- pfSense dashboard access succeeded through the trusted administrative path.
+- Kali ATTACK VLAN attempts to reach protected Admin VLAN resources timed out.
+- pfSense logs showed denied ATTACK VLAN traffic to protected Admin VLAN destinations.
 
-## Lessons Learned
+## Challenges and Lessons Learned
 
 This project reinforced the importance of firewall rule order, explicit allow rules, and logged block rules. The ATTACK VLAN rule order was especially important because Kali needed controlled access to the VICTIM VLAN while still being blocked from protected internal and management networks.
 
-A key takeaway was that pfSense block rules must have logging enabled if their denied traffic needs to appear clearly in the firewall logs. After enabling logging on the ATTACK VLAN block rules, the firewall logs provided strong evidence that unauthorized management access was being denied.
+A key takeaway was that pfSense block rules must have logging enabled if denied traffic needs to appear clearly in the firewall logs. After enabling logging on the ATTACK VLAN block rules, the firewall logs provided strong evidence that unauthorized management access was being denied.
 
-The project also demonstrated why aliases are useful in firewall administration. Named aliases made the rule base easier to read and made the final documentation more professional.
+The project also demonstrated why aliases are useful in firewall administration. Named aliases made the rule base easier to read, easier to maintain, and easier to document in a professional format.
 
-## Project Status
+## Security Relevance
 
-| Area | Status |
-|---|---|
-| Firewall rules reviewed for each VLAN | Complete |
-| Firewall aliases documented | Complete |
-| Management access restricted to approved systems | Complete |
-| Unauthorized ATTACK VLAN access blocked | Complete |
-| Approved admin access validated | Complete |
-| Firewall logs captured showing denied traffic | Complete |
-| Evidence screenshots captured and linked | Complete |
-| Final results and lessons learned documented | Complete |
+This project demonstrates how firewall hardening supports real-world network security operations. VLANs alone do not provide meaningful security unless firewall rules enforce least-privilege communication between zones.
 
-## Future Enhancements
+The project also demonstrates the importance of protecting the management plane. Firewall dashboards, hypervisors, SIEM consoles, switch management interfaces, and iDRAC should not be reachable from attacker, victim, or general user networks. Restricting these services to a trusted admin path reduces lateral movement risk and protects high-value infrastructure.
 
-This hardened firewall configuration supports future projects involving controlled attack paths, SIEM detections, vulnerability scanning, incident response validation, and more advanced network monitoring.
+## Business Value
+
+This project provides business value by showing how firewall hardening can reduce exposure, limit lateral movement, protect management interfaces, and improve auditability. Clear firewall rules, named aliases, and logged block events help both technical teams and leadership understand how access is controlled.
+
+In an enterprise environment, this type of work helps teams:
+
+- Enforce least-privilege access between network zones.
+- Protect administrative interfaces from unauthorized networks.
+- Reduce lateral movement risk after endpoint compromise.
+- Simplify firewall rule management with aliases.
+- Validate blocked traffic with firewall logs.
+- Document firewall controls in a repeatable and reviewable format.
+
+## Portfolio Summary
+
+This project demonstrates pfSense firewall hardening inside a segmented cybersecurity homelab. The final rule set uses aliases, VLAN-based access control, trusted bastion access, and logged block rules to protect management infrastructure while preserving approved lab testing paths.
+
+The HOME, ATTACK, SIEM, VICTIM, and ADMIN VLANs were reviewed and hardened. Kali on the ATTACK VLAN retained controlled access to approved victim systems, while attempts to reach protected Admin VLAN resources were blocked and logged. The project adds firewall administration, segmentation validation, and management-plane protection to the broader homelab portfolio.

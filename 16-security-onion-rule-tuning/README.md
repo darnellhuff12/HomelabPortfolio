@@ -1,94 +1,183 @@
-# Project 16 - Security Onion Rule Tuning and Alert Validation
+# Project 16: Security Onion Rule Tuning and Alert Validation
+# Project 16: Security Onion Rule Tuning and Alert Validation
 
-## Objective
+## Overview
 
-This project demonstrates the process of reviewing a repeated Security Onion alert, identifying expected low-severity activity, and applying a controlled tuning change to reduce alert noise. The goal was to tune a specific known source without disabling the detection globally.
+This project documents a practical Security Onion alert tuning workflow inside the cybersecurity homelab. The goal was to review a repeated low-severity Suricata alert, confirm that the activity was expected, apply a narrow tuning change, and validate that the alert noise was reduced without removing underlying network visibility.
 
-This project builds on earlier Security Onion monitoring, reconnaissance detection, SSH brute-force detection, and adversary emulation work by focusing on alert quality and analyst decision-making.
+Security Onion generated repeated STUN/NAT traversal alerts from the Raspberry Pi on the Admin VLAN. Instead of disabling the detection globally, the tuning decision was scoped only to the known internal source IP `192.168.50.100/32`.
+
+The project reinforces practical skills related to SIEM alert review, Suricata rule context, Security Onion tuning, source-based suppression, alert validation, Hunt analysis, network telemetry review, and analyst documentation.
 
 ## Lab Environment
 
 | Component | Purpose |
 |---|---|
 | Security Onion | SIEM and network security monitoring platform used for alert review, tuning, and validation |
-| Raspberry Pi | Admin VLAN host generating expected STUN/NAT traversal traffic |
+| Raspberry Pi 5 | Admin VLAN host generating expected STUN/NAT traversal traffic |
 | pfSense | Firewall and routing layer for segmented lab traffic |
 | Netgear Managed Switch | Provides VLAN separation and mirrored traffic visibility |
 | Proxmox | Virtualization platform hosting core lab systems |
 | Admin VLAN | Management network containing the Raspberry Pi and administrative services |
 
-## Project Summary
+## Objectives
 
-Security Onion generated repeated low-severity Suricata alerts for STUN/NAT traversal traffic from the Raspberry Pi on the Admin VLAN. The alert was reviewed to confirm the source, destination, destination port, rule name, and rule UUID before making a tuning decision.
+- Review repeated low-severity Security Onion alerts.
+- Confirm the alert source, destination, destination port, rule name, rule UUID, and event module.
+- Identify whether the activity was expected or suspicious.
+- Apply a narrow source-based suppression instead of disabling the detection globally.
+- Validate that the repeated alert no longer appeared in the recent alert view.
+- Confirm that the underlying traffic remained searchable in Security Onion Hunt.
+- Document the tuning decision, scope, validation evidence, and security rationale.
 
-The selected alert was not disabled globally. Instead, a source-based suppression was applied only to the Admin VLAN Pi using `192.168.50.100/32`. This reduced repeated alert noise while preserving visibility into the underlying traffic in Security Onion Hunt.
+## Network / System Scope
 
-## Alert Reviewed
+| Item | Details |
+|---|---|
+| Alert Source | Raspberry Pi 5 on Admin VLAN |
+| Source IP | `192.168.50.100` |
+| Tuning Scope | Source-based suppression for `192.168.50.100/32` |
+| Alert Name | ET INFO Session Traversal Utilities for NAT STUN Binding Request |
+| Rule UUID | `2016149` |
+| Event Module | Suricata |
+| Severity | Low |
+| Destination Port | UDP/TCP `3478` context for STUN/NAT traversal activity |
+| Monitoring Platform | Security Onion Alerts, Detections, and Hunt |
+| Validation Method | Alert review, source/destination review, rule lookup, source-based suppression, recent-alert validation, and Hunt validation |
+
+## Implementation Summary
+
+Security Onion was generating repeated low-severity alerts for STUN/NAT traversal traffic from the Raspberry Pi on the Admin VLAN. The alert was reviewed before any tuning change was made. The review confirmed the alert name, rule UUID, event module, severity, source IP, destination context, and destination port.
+
+The source IP `192.168.50.100` was confirmed as the Raspberry Pi on the Admin VLAN. Because the source was known and the activity was expected, a narrow source-based suppression was applied only for `192.168.50.100/32`. The rule was not disabled globally.
+
+After the suppression was applied, the Security Onion Alerts page was reviewed again and the repeated STUN alert no longer appeared in the recent 15-minute alert window. Security Onion Hunt was then used to confirm that related STUN and connection records remained searchable, proving that visibility was retained even though the repeated alert noise was reduced.
+
+## Alert Tuning Workflow
+
+The completed tuning workflow followed a controlled review-and-validate process:
+
+```text
+Repeated Security Onion alert
+        |
+        | review alert name, rule UUID, source, destination, and port
+        v
+Confirm known internal source
+        |
+        | apply narrow source-based suppression
+        v
+Validate alert noise reduction
+        |
+        | confirm traffic remains visible in Hunt
+        v
+Document tuning decision and scope
+```
+
+This workflow demonstrates that alert tuning should be based on evidence, scoped narrowly, and validated after the change.
+
+## Tuning Decision
 
 | Field | Value |
 |---|---|
-| Alert Name | ET INFO Session Traversal Utilities for NAT (STUN Binding Request) |
-| Rule UUID | 2016149 |
+| Alert Name | ET INFO Session Traversal Utilities for NAT STUN Binding Request |
+| Rule UUID | `2016149` |
 | Event Module | Suricata |
 | Severity | Low |
-| Source IP | 192.168.50.100 |
+| Source IP | `192.168.50.100` |
 | Source Host | Raspberry Pi on Admin VLAN |
-| Destination Port | 3478 |
+| Destination Port | `3478` |
 | Tuning Type | Suppress |
 | Tuning Scope | Source-based suppression for `192.168.50.100/32` |
-
-## Implementation Steps
-
-1. Reviewed Security Onion Alerts and identified a repeated low-severity STUN alert.
-2. Opened the alert details to confirm the rule name, rule UUID, source IP, destination IP, and destination port.
-3. Verified that the source IP belonged to the Raspberry Pi on the Admin VLAN.
-4. Located the related Suricata detection in Security Onion Detections using rule UUID `2016149`.
-5. Added a source-based suppression for `192.168.50.100/32` instead of disabling the rule globally.
-6. Returned to the Alerts page to validate that the STUN alert no longer appeared in the recent 15-minute alert view.
-7. Used Security Onion Hunt to confirm that STUN and connection records were still visible after the tuning change.
+| Global Rule Disabled | No |
+| Visibility Preserved | Yes, traffic remained searchable in Security Onion Hunt |
 
 ## Evidence
 
-| Screenshot | Description |
-|---|---|
-| [01-security-onion-alert-baseline.png](evidence/01-security-onion-alert-baseline.png) | Baseline Alerts view showing repeated STUN Binding Request alerts before tuning |
-| [02-alert-details-before-tuning.png](evidence/02-alert-details-before-tuning.png) | Alert details showing the selected Suricata detection and rule context |
-| [03-traffic-source-review.png](evidence/03-traffic-source-review.png) | Source and destination review showing the Admin VLAN Pi, external destination, and STUN port 3478 |
-| [04-rule-tuning-change.png](evidence/04-rule-tuning-change.png) | Source-based suppression applied for `192.168.50.100/32` |
-| [05-alert-validation-after-tuning.png](evidence/05-alert-validation-after-tuning.png) | Alerts view after tuning showing the STUN alert no longer appearing in the recent 15-minute window |
-| [06-final-alert-review.png](evidence/06-final-alert-review.png) | Hunt validation showing STUN and connection records remained searchable after alert tuning |
+| # | Evidence | Description |
+|---|---|---|
+| 01 | [Security Onion Alert Baseline](evidence/01-security-onion-alert-baseline.png) | Shows repeated STUN Binding Request alerts before tuning. |
+| 02 | [Alert Details Before Tuning](evidence/02-alert-details-before-tuning.png) | Shows the selected Suricata detection and rule context before tuning. |
+| 03 | [Traffic Source Review](evidence/03-traffic-source-review.png) | Shows source and destination review identifying the Admin VLAN Raspberry Pi, external destination, and STUN port `3478`. |
+| 04 | [Rule Tuning Change](evidence/04-rule-tuning-change.png) | Shows the source-based suppression applied for `192.168.50.100/32`. |
+| 05 | [Alert Validation After Tuning](evidence/05-alert-validation-after-tuning.png) | Shows the Alerts view after tuning with the STUN alert no longer appearing in the recent 15-minute window. |
+| 06 | [Final Alert Review](evidence/06-final-alert-review.png) | Shows Hunt validation confirming STUN and connection records remained searchable after alert tuning. |
 
-## Key Screenshots
+## Key Evidence
 
 ### Baseline Alert Review
 
-![Security Onion alert baseline](evidence/01-security-onion-alert-baseline.png)
+![Security Onion Alert Baseline](evidence/01-security-onion-alert-baseline.png)
+
+This screenshot shows repeated STUN Binding Request alerts before any tuning change was applied.
+
+### Traffic Source Review
+
+![Traffic Source Review](evidence/03-traffic-source-review.png)
+
+This screenshot shows the source and destination context used to confirm that the alert was tied to the known Raspberry Pi on the Admin VLAN.
 
 ### Source-Based Suppression
 
-![Security Onion rule tuning change](evidence/04-rule-tuning-change.png)
+![Rule Tuning Change](evidence/04-rule-tuning-change.png)
+
+This screenshot shows the source-based suppression applied for `192.168.50.100/32`, limiting the tuning change to the known Admin VLAN Raspberry Pi.
 
 ### Alert Validation After Tuning
 
-![Security Onion alert validation after tuning](evidence/05-alert-validation-after-tuning.png)
+![Alert Validation After Tuning](evidence/05-alert-validation-after-tuning.png)
+
+This screenshot shows the recent Security Onion Alerts view after tuning, confirming that the repeated STUN alert no longer appeared in the recent 15-minute window.
 
 ### Hunt Validation
 
-![Security Onion Hunt validation](evidence/06-final-alert-review.png)
+![Security Onion Hunt Validation](evidence/06-final-alert-review.png)
 
-## Skills Demonstrated
+This screenshot shows that STUN and connection records remained searchable in Security Onion Hunt after the alert suppression was applied.
 
-| Skill | Description |
-|---|---|
-| SIEM Alert Review | Reviewed Security Onion alerts and selected a repeated low-severity detection for analysis |
-| Detection Tuning | Applied a narrow source-based suppression instead of disabling the rule globally |
-| Traffic Analysis | Reviewed source, destination, destination port, and event context before tuning |
-| Validation Testing | Confirmed the alert behavior changed after the suppression was applied |
-| Network Security Monitoring | Used Hunt to verify that traffic visibility remained available after alert tuning |
-| Analyst Documentation | Documented the tuning decision, scope, and validation evidence |
+## Validation
+
+Security Onion rule tuning was validated through baseline alert review, alert detail review, source and destination analysis, rule lookup, source-based suppression, recent alert review, and Hunt validation.
+
+Validation confirmed the following:
+
+- Security Onion generated repeated low-severity STUN Binding Request alerts before tuning.
+- The alert was tied to Suricata rule UUID `2016149`.
+- The source IP `192.168.50.100` was confirmed as the Raspberry Pi on the Admin VLAN.
+- The alert involved STUN/NAT traversal traffic using destination port `3478` context.
+- A source-based suppression was applied only to `192.168.50.100/32`.
+- The Suricata rule was not disabled globally.
+- The repeated STUN alert no longer appeared in the recent 15-minute alert view after tuning.
+- Security Onion Hunt still showed related STUN and connection records after the tuning change.
+
+## Challenges and Lessons Learned
+
+This project reinforced that alert tuning should be deliberate and evidence-based. A repeated alert should not be suppressed simply because it is noisy. The source, destination, rule, severity, traffic type, and environment context should be reviewed before making a tuning decision.
+
+The project also showed the importance of narrow tuning scope. Disabling the rule globally would have reduced noise but could also hide similar STUN activity from other systems. A source-based suppression limited the change to a known internal host while preserving the rule for the rest of the environment.
+
+A key lesson was that alert suppression and visibility are not the same thing. The alert was suppressed for a known source, but Security Onion Hunt still retained searchable telemetry. This distinction matters because analysts may still need to investigate historical traffic even when an alert is tuned.
+
+## Security Relevance
+
+This project demonstrates how alert tuning supports real-world SOC operations. High alert volume can reduce analyst effectiveness, but overly broad suppression can create blind spots. Effective tuning balances noise reduction with continued detection and investigation capability.
+
+The project also demonstrates why tuning decisions should be documented. Analysts, engineers, and future reviewers need to understand what was tuned, why it was tuned, what scope was used, and how the change was validated.
+
+## Business Value
+
+This project provides business value by showing how alert tuning can improve signal quality without sacrificing visibility. Reducing repeated low-value alerts helps analysts focus on higher-priority events while preserving the ability to search and investigate underlying telemetry.
+
+In an enterprise environment, this type of work helps teams:
+
+- Reduce alert fatigue and analyst workload.
+- Preserve detection coverage by avoiding overly broad suppressions.
+- Improve SOC triage quality through scoped tuning decisions.
+- Document tuning rationale for audit and knowledge transfer.
+- Validate that alert behavior changes as expected after tuning.
+- Maintain searchable telemetry for future investigations.
 
 ## Portfolio Summary
 
-This project demonstrates a practical alert tuning workflow inside a monitored homelab environment. A repeated low-severity STUN alert from the Admin VLAN Raspberry Pi was reviewed, scoped, and suppressed using a narrow source-based tuning entry.
+This project demonstrates a practical Security Onion alert tuning workflow inside a monitored homelab environment. A repeated low-severity STUN alert from the Admin VLAN Raspberry Pi was reviewed, scoped, and suppressed using a narrow source-based tuning entry.
 
-The project shows that alert tuning should be intentional and validated. Rather than disabling the detection globally, the tuning was limited to a known internal host, and Security Onion Hunt was used to confirm that the underlying STUN and connection activity remained visible after the alert was suppressed.
+Rather than disabling the detection globally, the tuning was limited to `192.168.50.100/32`, a known internal host. Security Onion Alerts confirmed that the repeated alert no longer appeared in the recent alert window, while Security Onion Hunt confirmed that the underlying STUN and connection telemetry remained searchable after tuning. This project adds alert-quality improvement, detection tuning, and analyst decision-making to the broader homelab portfolio.
