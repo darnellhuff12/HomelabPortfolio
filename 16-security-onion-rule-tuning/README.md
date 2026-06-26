@@ -1,5 +1,4 @@
 # Project 16: Security Onion Rule Tuning and Alert Validation
-# Project 16: Security Onion Rule Tuning and Alert Validation
 
 ## Overview
 
