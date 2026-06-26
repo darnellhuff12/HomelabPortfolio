@@ -199,7 +199,7 @@ Detailed VLAN firewall rule hardening and validation evidence is documented in P
 |---|---|---|
 | 01 | [Network Topology Diagram](../Diagrams/network-topology.png) | Shows the segmented homelab architecture, VLAN zones, core infrastructure, and monitoring placement. |
 | 02 | [Windows Victim Default Firewall Behavior](screenshots/windows-victim-default-firewall-filtered.png) | Shows Kali identifying the Windows VM as online with `nmap -Pn` while ping and common Windows ports are filtered by default Windows Firewall behavior. |
-| 03 | [VirtualBox Windows VM Bridged Adapter](screenshots/virtualbox-windows-vm-bridged-adapter.jpeg) | Shows the Windows victim VM using bridged networking through the wired victim VLAN adapter. |
+| 03 | [VirtualBox Windows VM Bridged Adapter](screenshots/virtualbox-windows-vm-bridged-adapter.png) | Shows the Windows victim VM using bridged networking through the wired victim VLAN adapter. |
 | 04 | [Windows Victim IP and ICMP Rule](screenshots/windows-victim-ipconfig-icmp-rule.png) | Shows the Windows VM receiving a VLAN 40 IP address and the lab ICMP firewall rule being created. |
 | 05 | [Switch Port Mirroring](screenshots/switch-port-mirroring.png) | Shows the Security Onion monitoring interface configured as the mirror/SPAN destination port. |
 | 06 | [Switch VLAN 1 Membership](screenshots/switch-vlan-membership-vlan1.png) | Shows default VLAN membership and remaining untagged/default port behavior. |
