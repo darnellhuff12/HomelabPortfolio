@@ -1,22 +1,12 @@
-# Project 4: Security Onion Visibility Baseline
+# Project 04: Security Onion Visibility Baseline
 
-## Objective
+## Overview
 
-This project establishes a baseline for network visibility inside the homelab by validating that Security Onion can observe and investigate traffic generated between the attacker and victim environments.
+This project established a baseline for network visibility inside the homelab by validating that Security Onion can observe and investigate traffic generated between the attacker and victim environments. The goal was to prove that the monitoring architecture works, that traffic from the lab VLANs reaches the Security Onion sensor, and that basic network activity can be reviewed from the Security Onion interface.
 
-The goal is not to create advanced detections yet. The goal is to prove that the monitoring architecture works, that traffic from the lab VLANs reaches the Security Onion sensor, and that basic network activity can be reviewed from the Security Onion interface.
+This project separates visibility validation from later detection engineering work. Before building advanced detections, tuning alerts, or creating incident response workflows, the lab needed a reliable baseline showing that Security Onion could receive, process, and display controlled attacker-to-victim traffic.
 
-## Business & Security Value
-
-Security tools are only useful when they have reliable visibility into the systems they are expected to monitor. In enterprise environments, poor sensor placement, missing endpoint telemetry, incorrect SPAN/mirror configuration, or firewall segmentation gaps can leave defenders blind to attacker activity.
-
-This project demonstrates the ability to:
-
-- Validate Security Onion sensor visibility
-- Confirm that attacker-to-victim traffic is observable
-- Use packet capture evidence to troubleshoot monitoring gaps
-- Document a repeatable visibility baseline before building detections
-- Separate visibility validation from later alert tuning and detection engineering work
+The project reinforces practical skills related to network security monitoring, sensor placement, switch mirroring, packet capture validation, Security Onion Hunt, Suricata event review, and evidence-based troubleshooting.
 
 ## Lab Environment
 
@@ -25,47 +15,44 @@ This project demonstrates the ability to:
 | pfSense | Firewall, VLAN routing, segmentation, and DHCP services |
 | Netgear GS108T | Managed switch used for VLANs and port mirroring |
 | Proxmox | Hypervisor hosting lab VMs |
-| Kali Linux | Attacker system used to generate test traffic |
+| Kali Linux | Attacker system used to generate controlled test traffic |
 | Victim System | Target system used to validate observed traffic |
 | Security Onion | Network security monitoring platform and investigation interface |
 | Raspberry Pi 5 | Admin jump host used for secure remote access and SSH tunneling |
 
-## Relevant VLANs
+## Objectives
 
-| VLAN | Name | Purpose |
-|---|---|---|
-| 20 | Attacker | Kali / offensive testing network |
-| 30 | SIEM | Security Onion management network |
-| 40 | Victim | Victim system network |
-| 50 | Admin | Management and jump-host access |
+- Confirm that Security Onion management access is functional.
+- Confirm that core Security Onion services are healthy.
+- Validate that Security Onion has separate management and monitoring interfaces.
+- Confirm that the managed switch mirror/SPAN configuration forwards lab traffic to Security Onion.
+- Generate controlled Kali-to-victim traffic for visibility testing.
+- Validate packet-level visibility using `tcpdump`.
+- Confirm that Security Onion Hunt displays searchable Suricata events from the observed traffic.
 
-## Scope
+## Network / System Scope
 
-This project focuses on validating Security Onion visibility across the lab environment.
+| Item | Details |
+|---|---|
+| Attacker VLAN | VLAN 20 / Kali Linux offensive testing network |
+| SIEM VLAN | VLAN 30 / Security Onion management network |
+| Victim VLAN | VLAN 40 / victim system network |
+| Admin VLAN | VLAN 50 / management and jump-host access |
+| Mirror Sources | Switch ports `g1`, `g2`, and `g4` |
+| Mirror Destination | Switch port `g3` connected to the Security Onion sniffing interface |
+| Monitoring Platform | Security Onion |
+| Test Traffic | Controlled ICMP traffic from Kali to the victim system |
+| Validation Method | Security Onion dashboard review, `so-status`, Proxmox interface review, switch mirror review, Kali traffic generation, `tcpdump`, and Security Onion Hunt |
 
-In scope:
+## Implementation Summary
 
-- Confirming Security Onion management access
-- Confirming Security Onion sensor health
-- Validating that attacker-to-victim traffic is observable
-- Capturing packet-level evidence with `tcpdump`
-- Reviewing Security Onion dashboards or hunt views for network activity
-- Documenting known limitations and troubleshooting results
+Security Onion was validated as the primary network security monitoring platform for the homelab. The platform was accessed through the approved administrative workflow, and core Security Onion service health was confirmed with `so-status`.
 
-Out of scope:
+The Security Onion VM was configured with separate management and monitoring interfaces. The management interface provided access to the Security Onion interface, while the sniffing interface received mirrored traffic from the managed switch.
 
-- Advanced detection engineering
-- Custom Sigma/YARA/Suricata rule writing
-- Full incident response workflow
-- Endpoint telemetry tuning
-- Active Directory attack simulations
-- Malware execution
+The managed switch was configured to mirror traffic from `g1`, `g2`, and `g4` to destination port `g3`. This provided visibility across the pfSense trunk/uplink, Proxmox-hosted lab systems, and the victim-side connection. Kali then generated controlled ICMP traffic from the attacker VLAN to the victim system on the victim VLAN.
 
-## Rules of Engagement
-
-All testing is performed inside an isolated homelab environment owned and controlled by the project author.
-
-Traffic generation is limited to internal lab systems, including the attacker VLAN, victim VLAN, and Security Onion monitoring environment. No testing is performed against public systems or third-party networks.
+Visibility was validated at two levels. First, `tcpdump` confirmed that mirrored traffic was reaching the Security Onion sensor interface. Second, Security Onion Hunt displayed Suricata ICMP events for the controlled Kali-to-victim traffic, confirming that the observed packets were processed into searchable security telemetry.
 
 ## Architecture Summary
 
@@ -87,150 +74,98 @@ Victim VLAN 40
 Security Onion sensor interface
         |
         v
-Security Onion dashboards / hunt interface
+Security Onion dashboards / Hunt interface
 ```
 
-## Implementation and Validation Summary
+## Visibility Validation
 
-### 1. Security Onion Access Confirmed
+Security Onion visibility was validated through a sequence of checks that moved from platform access to packet-level visibility and then to searchable event data.
 
-Security Onion was accessed through the approved management workflow and confirmed to be reachable from the administrative access path.
-
-Evidence:
-
-- [01 - Security Onion Dashboard](evidence/01-security-onion-dashboard.png)
-
-### 2. Sensor Health Confirmed
-
-Security Onion service health was validated with `so-status`. The output showed the core Security Onion containers running successfully.
-
-Evidence:
-
-- [02 - Security Onion Status Output](evidence/02-so-status-output.png)
-
-### 3. Management and Monitoring Interfaces Verified
-
-The Security Onion VM was configured with separate network interfaces for management and monitoring. The management interface was attached to the SIEM VLAN, while the sniffing interface was connected to the mirror destination path.
-
-Evidence:
-
-- [03 - Security Onion Proxmox Interfaces](evidence/03-security-onion-proxmox-interfaces.png)
-
-### 4. Switch Mirroring Validated
-
-The managed switch was configured to mirror traffic from `g1`, `g2`, and `g4` to destination port `g3`. This allowed Security Onion to observe traffic across the pfSense trunk/uplink, Proxmox-hosted lab systems, and victim-side connection.
-
-Evidence:
-
-- [04 - Switch Mirror Configuration](evidence/04-switch-mirror-configuration.png)
-
-### 5. Controlled Test Traffic Generated
-
-Kali generated controlled ICMP traffic from the attacker VLAN to the victim system on the victim VLAN. This provided safe internal traffic for Security Onion visibility validation.
-
-Evidence:
-
-- [05 - Kali Test Traffic](evidence/05-kali-test-traffic.png)
-
-### 6. Packet-Level Visibility Confirmed
-
-Security Onion confirmed packet-level visibility with `tcpdump`. The capture showed mirrored VLAN traffic from the attacker and victim networks reaching the Security Onion sensor interface.
-
-Evidence:
-
-- [06 - Security Onion tcpdump Traffic](evidence/06-security-onion-tcpdump-traffic.png)
-
-### 7. Security Onion Hunt Visibility Confirmed
-
-Security Onion Hunt displayed Suricata ICMP events for the controlled Kali-to-victim traffic. This confirmed that the observed packets were processed into searchable security telemetry.
-
-Evidence:
-
-- [07 - Security Onion Hunt Results](evidence/07-security-onion-hunt-results.png)
-
-## Evidence Checklist
-
-| ID | Evidence Item | Status |
+| Validation Area | Result | Evidence |
 |---|---|---|
-| [01](evidence/01-security-onion-dashboard.png) | Security Onion dashboard showing populated network telemetry | Complete |
-| [02](evidence/02-so-status-output.png) | Security Onion service/status output showing healthy containers | Complete |
-| [03](evidence/03-security-onion-proxmox-interfaces.png) | Security Onion VM network interface layout in Proxmox | Complete |
-| [04](evidence/04-switch-mirror-configuration.png) | Switch mirror/SPAN configuration showing `g1`, `g2`, and `g4` mirrored to `g3` | Complete |
-| [05](evidence/05-kali-test-traffic.png) | Kali attacker test traffic to victim system | Complete |
-| [06](evidence/06-security-onion-tcpdump-traffic.png) | `tcpdump` showing mirrored VLAN traffic on Security Onion | Complete |
-| [07](evidence/07-security-onion-hunt-results.png) | Security Onion Hunt results showing Suricata ICMP events | Complete |
+| Security Onion access | Security Onion dashboard was reachable through the approved management workflow | [01 - Security Onion Dashboard](evidence/01-security-onion-dashboard.png) |
+| Service health | `so-status` showed core Security Onion containers running successfully | [02 - Security Onion Status Output](evidence/02-so-status-output.png) |
+| Interface layout | Security Onion had separate management and sniffing interfaces in Proxmox | [03 - Security Onion Proxmox Interfaces](evidence/03-security-onion-proxmox-interfaces.png) |
+| Switch mirroring | Managed switch mirrored `g1`, `g2`, and `g4` to destination port `g3` | [04 - Switch Mirror Configuration](evidence/04-switch-mirror-configuration.png) |
+| Test traffic | Kali generated controlled ICMP traffic to the victim system | [05 - Kali Test Traffic](evidence/05-kali-test-traffic.png) |
+| Packet visibility | `tcpdump` showed mirrored VLAN traffic reaching Security Onion | [06 - Security Onion tcpdump Traffic](evidence/06-security-onion-tcpdump-traffic.png) |
+| Hunt visibility | Security Onion Hunt showed Suricata ICMP events for Kali-to-victim traffic | [07 - Security Onion Hunt Results](evidence/07-security-onion-hunt-results.png) |
 
-## Screenshots
+## Evidence
 
-The following evidence files are stored in the [`evidence/`](evidence/) folder:
-
-- [01 - Security Onion Dashboard](evidence/01-security-onion-dashboard.png)
-- [02 - Security Onion Status Output](evidence/02-so-status-output.png)
-- [03 - Security Onion Proxmox Interfaces](evidence/03-security-onion-proxmox-interfaces.png)
-- [04 - Switch Mirror Configuration](evidence/04-switch-mirror-configuration.png)
-- [05 - Kali Test Traffic](evidence/05-kali-test-traffic.png)
-- [06 - Security Onion tcpdump Traffic](evidence/06-security-onion-tcpdump-traffic.png)
-- [07 - Security Onion Hunt Results](evidence/07-security-onion-hunt-results.png)
+| # | Evidence | Description |
+|---|---|---|
+| 01 | [Security Onion Dashboard](evidence/01-security-onion-dashboard.png) | Shows Security Onion reachable through the approved management workflow with populated network telemetry. |
+| 02 | [Security Onion Status Output](evidence/02-so-status-output.png) | Shows Security Onion service health and running containers using `so-status`. |
+| 03 | [Security Onion Proxmox Interfaces](evidence/03-security-onion-proxmox-interfaces.png) | Shows the Security Onion VM interface layout in Proxmox, including management and monitoring interfaces. |
+| 04 | [Switch Mirror Configuration](evidence/04-switch-mirror-configuration.png) | Shows switch mirror/SPAN configuration with `g1`, `g2`, and `g4` mirrored to `g3`. |
+| 05 | [Kali Test Traffic](evidence/05-kali-test-traffic.png) | Shows Kali generating controlled test traffic toward the victim system. |
+| 06 | [Security Onion tcpdump Traffic](evidence/06-security-onion-tcpdump-traffic.png) | Shows `tcpdump` confirming mirrored VLAN traffic on the Security Onion sensor interface. |
+| 07 | [Security Onion Hunt Results](evidence/07-security-onion-hunt-results.png) | Shows Security Onion Hunt displaying Suricata ICMP events from the controlled Kali-to-victim traffic. |
 
 ## Key Evidence
 
 ### Switch Mirroring Configuration
 
-The managed switch was configured to mirror traffic from `g1`, `g2`, and `g4` to destination port `g3`, which connects to the Security Onion sniffing interface.
+![Switch Mirror Configuration](evidence/04-switch-mirror-configuration.png)
 
-![Switch mirror configuration](evidence/04-switch-mirror-configuration.png)
+This screenshot shows the managed switch mirror/SPAN configuration used to send traffic from `g1`, `g2`, and `g4` to destination port `g3`, which connects to the Security Onion sniffing interface.
 
 ### Packet-Level Validation
 
-Security Onion confirmed packet-level visibility with `tcpdump`, showing mirrored VLAN traffic from the attacker and victim networks reaching the sensor interface.
+![Security Onion tcpdump Traffic](evidence/06-security-onion-tcpdump-traffic.png)
 
-![Security Onion tcpdump validation](evidence/06-security-onion-tcpdump-traffic.png)
+This screenshot shows `tcpdump` confirming packet-level visibility on Security Onion. The capture validates that mirrored VLAN traffic from the attacker and victim networks reached the sensor interface.
 
 ### Security Onion Hunt Results
 
-Security Onion Hunt displayed Suricata ICMP events for the controlled Kali-to-victim traffic, confirming that the observed packets were processed into searchable security telemetry.
+![Security Onion Hunt Results](evidence/07-security-onion-hunt-results.png)
 
-![Security Onion Hunt results](evidence/07-security-onion-hunt-results.png)
+This screenshot shows Security Onion Hunt displaying Suricata ICMP events for the controlled Kali-to-victim traffic. This confirms that the observed packets were processed into searchable security telemetry.
 
-## Findings
+## Validation
 
-The visibility baseline was successful. Security Onion was reachable through the approved management workflow, core Security Onion containers were running, and the VM had separate interfaces for management and monitoring.
+The Security Onion visibility baseline was validated by confirming platform access, service health, interface separation, switch mirroring, controlled traffic generation, packet-level capture, and searchable event visibility.
 
-The switch mirror configuration sent traffic from `g1`, `g2`, and `g4` to destination port `g3`, where the Security Onion sniffing interface could observe mirrored traffic. Kali generated controlled ICMP traffic from the attacker VLAN to the victim system on the victim VLAN. Security Onion confirmed this traffic at two levels:
+Validation confirmed the following:
 
-1. `tcpdump` showed mirrored VLAN 20 and VLAN 40 traffic arriving on the Security Onion sensor interface.
-2. Security Onion Hunt displayed Suricata ICMP events from the attacker IP to the victim IP.
+- Security Onion was reachable through the approved management workflow.
+- Core Security Onion containers were running successfully.
+- Security Onion had separate interfaces for management and monitoring.
+- The managed switch mirrored traffic from `g1`, `g2`, and `g4` to destination port `g3`.
+- Kali generated controlled ICMP traffic from the attacker VLAN to the victim system on the victim VLAN.
+- `tcpdump` showed mirrored VLAN 20 and VLAN 40 traffic reaching the Security Onion sensor interface.
+- Security Onion Hunt displayed Suricata ICMP events from the attacker IP to the victim IP.
 
-This confirms that the lab has a working network visibility baseline and is ready for future detection-focused projects.
+## Challenges and Lessons Learned
 
-## Troubleshooting Notes
+This project reinforced that a monitoring platform must be validated before it can be trusted for detection engineering. Security Onion may be installed and reachable through the web interface, but that alone does not prove that it is receiving the right traffic.
 
-If Security Onion does not show traffic in the UI, validate visibility in this order:
+The project also showed why visibility should be tested in layers. Management access, service health, switch mirroring, sensor interface placement, packet capture, and Hunt results each answer a different part of the visibility question. A failure at any one layer could prevent defenders from seeing attacker activity.
 
-1. Confirm the attacker and victim can communicate.
-2. Confirm the correct switch ports are mirrored.
-3. Confirm the Security Onion sniffing interface is connected to the mirror destination.
-4. Confirm the Security Onion sniffing interface is not being used as the management interface.
-5. Confirm `tcpdump` sees the traffic on the sensor interface.
-6. Confirm Security Onion services are healthy.
-7. Confirm the Security Onion UI query uses the correct time range, IP address, protocol, or event type.
+The switch mirror design provided broad baseline visibility, but multiple mirrored sources can create duplicate packet observations. For this project, that was acceptable because the goal was to confirm visibility. Future detection tuning can refine mirror scope and reduce duplicate observations if needed.
 
-## Current Status
+## Security Relevance
 
-Project 4 is complete.
+This project demonstrates how network security monitoring visibility supports real-world cybersecurity operations. SIEM and NDR tools are only useful when they receive the traffic they are expected to analyze. Poor sensor placement, incorrect SPAN/mirror configuration, interface misconfiguration, or missing packet visibility can leave defenders blind to attacker activity.
 
-The Security Onion visibility baseline was successfully validated. Security Onion observed controlled Kali-to-victim traffic through packet-level `tcpdump` validation and searchable Suricata ICMP events in the Hunt interface.
+The project also demonstrates an important defensive workflow: validate that telemetry exists before building detections. By proving that Security Onion can observe and process controlled attacker-to-victim traffic, the lab establishes a trustworthy foundation for later alert validation, hunt workflows, detection engineering, and incident response projects.
 
-## Skills Demonstrated
+## Business Value
 
-- Network security monitoring validation
-- VLAN-aware lab architecture
-- Sensor placement troubleshooting
-- Packet capture analysis
-- Security Onion investigation workflow
-- Documentation of defensive visibility controls
-- Evidence-based troubleshooting
+This project provides business value by showing how visibility validation can reduce operational risk and improve confidence in security monitoring. Security teams need evidence that their monitoring tools are placed correctly, receiving the expected data, and producing searchable telemetry.
 
-## Next Steps
+In an enterprise environment, this type of work helps teams:
 
-With baseline visibility confirmed, the next phase is detection-focused work, including custom alert validation, attack simulation mapping, and MITRE ATT&CK-aligned detection engineering.
+- Confirm that monitoring tools are receiving relevant network traffic.
+- Reduce blind spots caused by incorrect sensor placement or SPAN configuration.
+- Troubleshoot visibility issues before relying on detections.
+- Support incident response by ensuring traffic can be reviewed after suspicious activity occurs.
+- Improve communication between networking, infrastructure, and security teams.
+- Document a repeatable visibility baseline for audits, handoffs, and future engineering work.
+
+## Portfolio Summary
+
+This project demonstrates the ability to validate network security monitoring visibility using Security Onion in a segmented cybersecurity homelab. The project confirmed that Security Onion was accessible, healthy, properly connected, and able to observe controlled Kali-to-victim traffic through both packet-level `tcpdump` validation and searchable Suricata events in Hunt.
+
+The project highlights hands-on experience with Security Onion, switch mirroring, VLAN-aware lab architecture, packet capture validation, sensor placement troubleshooting, and professional evidence-based documentation.

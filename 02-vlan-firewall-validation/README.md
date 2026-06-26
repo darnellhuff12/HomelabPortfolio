@@ -1,16 +1,13 @@
-# Project 2: VLAN Segmentation and Firewall Rule Validation
+# Project 02: VLAN Segmentation and Firewall Rule Validation
 
-## Objective
+## Overview
 
-This project validates the VLAN segmentation and firewall rule design used in my cybersecurity homelab. The goal was to confirm that each network segment is isolated by default, that only explicitly approved traffic is allowed between VLANs, and that allowed and blocked traffic can be validated through pfSense logs, live connectivity testing, and Security Onion visibility.
+This project validated the VLAN segmentation and firewall rule design used in the cybersecurity homelab. The goal was to confirm that each network segment is isolated by default, that only explicitly approved traffic is allowed between VLANs, and that allowed and blocked traffic can be confirmed through pfSense logs, live connectivity testing, and Security Onion visibility.
 
-Project 1 documented the overall lab architecture. Project 2 focuses on proving that the architecture enforces the intended access control model through pfSense firewall rules, managed switch VLAN configuration, Proxmox VLAN tagging, and live validation testing.
+Project 01 documented the overall lab architecture. Project 02 proves that the architecture enforces the intended access control model through pfSense firewall rules, managed switch VLAN configuration, Proxmox VLAN tagging, Admin VLAN isolation, and live validation testing.
 
-## Business and Security Value
+The project reinforces practical skills related to firewall rule design, VLAN segmentation, management-plane protection, Security Onion monitoring, packet capture validation, and evidence-based security testing.
 
-VLAN segmentation and firewall rule validation reduce lateral movement risk by separating attacker, victim, SIEM, home, and management networks. This project demonstrates practical firewall validation, management-plane protection, and evidence-based testing of both allowed and blocked traffic paths.
-
-The completed validation confirmed that Kali-to-victim traffic was allowed by policy and visible in Security Onion Hunt, Kali-to-Admin access was blocked and logged by pfSense, Admin/Bastion access from the Raspberry Pi 5 to pfSense and Proxmox was allowed, and Proxmox host management was successfully migrated to the Admin VLAN using `vmbr0.50`.
 
 ## Scope and Rules of Engagement
 
@@ -24,13 +21,11 @@ Out of scope:
 - Unauthorized scanning or access attempts
 - Exploitation outside the isolated lab environment
 
-## Lab Environment Overview
+## Lab Environment
 
 This homelab uses a segmented network design built around pfSense, a managed switch, Proxmox, Security Onion, Kali Linux, and a separate victim endpoint.
 
-### Core Components
-
-| Component | Role |
+| Component | Purpose |
 |---|---|
 | Protectli Vault | Runs pfSense and provides routing/firewalling between VLANs |
 | Netgear GS108T Managed Switch | Provides VLAN tagging, access ports, trunk ports, and port mirroring/SPAN |
@@ -321,37 +316,7 @@ Final validation confirmed that the segmentation model is functioning as intende
 - Firewall logs provide important evidence that blocked traffic was denied by policy rather than failing silently.
 - Moving Proxmox management to `vmbr0.50` improved management-plane isolation while preserving VLAN-aware VM networking.
 
----
-
-## Skills Demonstrated
-
-- Network segmentation
-- VLAN design
-- pfSense firewall rule creation
-- Managed switch VLAN configuration
-- DHCP scope documentation
-- Firewall alias design
-- Trunk and access port planning
-- Proxmox VLAN tagging
-- Proxmox management interface migration to a dedicated Admin VLAN
-- Security Onion monitoring architecture
-- Security Onion sensor interface troubleshooting
-- Suricata alert validation in Security Onion Hunt
-- Proxmox bridge troubleshooting
-- Linux bridge aging validation
-- Packet capture analysis with tcpdump
-- Connectivity testing
-- Firewall validation
-- Defensive network design documentation
-
----
 
 ## Portfolio Summary
 
 This project validates the firewall, VLAN, management-plane, and monitoring controls used in the segmented cybersecurity homelab. pfSense enforces least-privilege access between the attacker, victim, SIEM, home, and Admin/Bastion networks. Kali-to-victim traffic was confirmed as allowed for controlled testing, while Kali-to-Admin traffic was blocked and logged. Security Onion visibility was validated through Hunt alerts and direct `tcpdump` evidence from the active sensor interface. The Raspberry Pi 5 bastion model was validated for approved management access to pfSense and Proxmox, and Proxmox host management was migrated to Admin VLAN 50 using `vmbr0.50`. Together, the evidence demonstrates that the lab's segmentation and monitoring architecture is working as intended.
-
----
-
-## Resume Bullet
-
-Validated VLAN segmentation and firewall enforcement in a segmented cybersecurity homelab by testing allowed attacker-to-victim paths, blocked attacker-to-admin paths, pfSense firewall logging, Security Onion Hunt/Suricata visibility, active sensor packet capture, Raspberry Pi 5 bastion access, and Proxmox host management isolation on Admin VLAN 50.
