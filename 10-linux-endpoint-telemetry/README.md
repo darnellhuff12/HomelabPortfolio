@@ -99,7 +99,7 @@ These events are especially useful when correlated with network traffic, firewal
 | 03 | [Kali Test Activity](evidence/03-kali-test-activity.png) | Shows Kali successfully reaching the Ubuntu endpoint over ICMP. |
 | 04 | [Successful SSH Login](evidence/04-successful-ssh-login.png) | Shows a successful SSH login from Kali to the Ubuntu endpoint with user, hostname, and interface details. |
 | 05 | [Failed SSH Login](evidence/05-failed-ssh-login.png) | Shows controlled failed SSH login attempts from Kali using invalid and incorrect credentials. |
-| 06 | [Authentication Log Review](evidence/06-auth-log-review.jpeg) | Shows `/var/log/auth.log` entries for accepted SSH logins, failed SSH attempts, invalid users, and source IP `192.168.20.100`. |
+| 06 | [Authentication Log Review](evidence/06-auth-log-review.png) | Shows `/var/log/auth.log` entries for accepted SSH logins, failed SSH attempts, invalid users, and source IP `192.168.20.100`. |
 | 07 | [Endpoint Telemetry Summary](evidence/07-endpoint-telemetry-summary.png) | Provides a clean terminal summary of hostname, IP address, SSH status, failed SSH attempts, and successful SSH logins. |
 
 ## Key Evidence

@@ -99,7 +99,7 @@ This workflow demonstrates how controlled attacker behavior can be used to valid
 | 04 | [Proxmox vmbr1 Bridge Ageing Fix](evidence/04-proxmox-vmbr1-bridge-ageing-fix.png) | Shows Proxmox `vmbr1` configured with `bridge-ageing 0` so mirrored/SPAN traffic reaches Security Onion. |
 | 05 | [Security Onion Monitor Interface tcpdump](evidence/05-monitor-interface-tcpdump.png) | Shows Security Onion monitor interface `enp6s19` capturing mirrored ICMP traffic between Kali and the Windows victim. |
 | 06 | [Nmap SYN Scan](evidence/06-nmap-syn-scan.png) | Shows Kali running a TCP SYN scan against the Windows victim at `192.168.40.102`. |
-| 07 | [Security Onion SYN Scan Logs](evidence/07-security-onion-syn-scan-logs.png) | Shows Security Onion Hunt displaying Zeek connection logs from `192.168.20.100` to `192.168.40.102` across multiple destination ports. |
+| 07 | [Security Onion SYN Scan Logs](evidence/07-security-onion-syn-scan-alerts.png) | Shows Security Onion Hunt displaying Zeek connection logs from `192.168.20.100` to `192.168.40.102` across multiple destination ports. |
 
 ## Key Evidence
 

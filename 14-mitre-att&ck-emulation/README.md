@@ -110,7 +110,8 @@ This workflow validated that the existing segmentation, bastion access model, fi
 | 12 | [Caldera Agent Check-In](evidence/12-caldera-agent-check-in.png) | Shows the Caldera agent successfully checked in to the server. |
 | 13 | [Basic Operation Configured](evidence/13-basic-operation-configured.png) | Shows the safe discovery operation configuration. |
 | 14 | [Basic Operation Completed](evidence/14-basic-operation-completed.png) | Shows the discovery operation completed successfully. |
-| 15 | [Basic Operation Command Output](evidence/15-basic-operation-command-output.png) | Shows command output and facts collected from the victim. |
+| 15a | [Basic Operation Command Output](evidence/15a-basic-operation-command-output.png) | Shows command output and facts collected from the victim. |
+| 15b | [Basic Operation Command Output](evidence/15b-basic-operation-command-output.png) | Shows command output and facts collected from the victim. |
 | 16 | [Security Onion Caldera IP Hunt](evidence/16-security-onion-caldera-ip-hunt.png) | Shows Security Onion Hunt results for the Caldera server IP. |
 | 17 | [Security Onion Victim IP Hunt](evidence/17-security-onion-victim-ip-hunt.png) | Shows Security Onion Hunt results for the Ubuntu victim IP. |
 | 18 | [Security Onion Flow Evidence](evidence/18-security-onion-flow-or-pcap-evidence.png) | Shows detailed victim-to-Caldera flow evidence in Security Onion. |
@@ -143,9 +144,10 @@ This screenshot shows the safe discovery operation completed successfully agains
 
 ### Basic Operation Command Output
 
-![Basic Operation Command Output](evidence/15-basic-operation-command-output.png)
+![Basic Operation Command Output](evidence/15a-basic-operation-command-output.png)
+![Basic Operation Command Output](evidence/15b-basic-operation-command-output.png)
 
-This screenshot shows command output and host facts collected from the Ubuntu victim during the safe discovery operation.
+These screenshots shows command output and host facts collected from the Ubuntu victim during the safe discovery operations.
 
 ### Security Onion Flow Evidence
 
