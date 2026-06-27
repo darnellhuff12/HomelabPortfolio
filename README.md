@@ -30,7 +30,6 @@ The diagram below shows the current homelab architecture, including pfSense, VLA
 | Security Onion | Network security monitoring, Zeek, Suricata, Hunt, alerts, and PCAP |
 | Kali Linux | Authorized attacker workstation for controlled testing |
 | Ubuntu Linux / Windows VM | Victim endpoint platforms used for VLAN 40 testing and host baseline validation |
-| Elastic Agent / Sysmon | Planned endpoint telemetry collection for future detection and host-visibility projects |
 | Raspberry Pi 5 | Admin/Bastion device, Omada Controller, Tailscale node, and SSH tunnel jump host |
 | Tailscale | Secure remote access without direct WAN exposure |
 | GitHub | Documentation, reporting, and portfolio publishing |
@@ -90,23 +89,27 @@ The diagram below shows the current homelab architecture, including pfSense, VLA
 
 ## Documentation Standard
 
-Each completed project is written as a professional security case study rather than a step-by-step lab guide. The READMEs are standardized around the following structure:
+Each completed project is written as a professional security case study rather than a step-by-step lab guide. The READMEs are standardized so each project can be reviewed consistently while still allowing room for project-specific technical details.
 
-- Objective
-- Business and Security Value
-- Scope and Rules of Engagement
-- Lab Environment or Architecture Summary
+The standard project README structure is:
+
+- Overview
+- Lab Environment
+- Objectives
+- Network / System Scope
 - Implementation Summary
-- Validation and Evidence
-- Evidence Summary
+- Project-specific workflow, architecture, detection, remediation, or validation section
+- Evidence
 - Key Evidence
-- Key Findings
-- Lessons Learned
-- Remediation, Hardening, or Future Enhancements
-- Project Status
-- Portfolio Summary or Resume Bullet
+- Validation
+- Challenges and Lessons Learned
+- Security Relevance
+- Business Value
+- Portfolio Summary
 
 Evidence is presented in two layers: a table with clickable links to the full evidence set, followed by embedded key screenshots that highlight the most important validation results. This keeps each project complete, reviewable, and polished without reading like a tutorial.
+
+The documentation is intentionally written in a final-product format. Individual project READMEs do not include progress checklists, project status trackers, future-work placeholders, or tutorial-style completion steps.
 
 ## Rules of Engagement
 
