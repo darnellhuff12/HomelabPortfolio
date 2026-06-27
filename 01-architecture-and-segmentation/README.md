@@ -233,12 +233,6 @@ Detailed VLAN firewall rule hardening and validation evidence is documented in P
 
 ## Key Evidence
 
-### Network Topology
-
-![Segmented Homelab Network Diagram](../Diagrams/network-topology.png)
-
-This diagram shows the segmented homelab architecture, including pfSense, Proxmox, Security Onion, Kali, victim systems, the managed switch, and the Admin/Bastion access path.
-
 ### Switch Mirror/SPAN Configuration
 
 ![Switch Port Mirroring](screenshots/switch-port-mirroring.png)
